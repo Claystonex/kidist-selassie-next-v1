@@ -1,53 +1,144 @@
+// import { Button } from "@/components/ui/button";
+
 import Link from "next/link";
+import { faXTwitter, faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { LatestPost } from "@/app/_components/post";
-import { api, HydrateClient } from "@/trpc/server";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
+// export default async function Home() {
+//   return (
+//     <div className="text-red-500 flex min-h-screen items-center justify-center">
+//       <h1>Hello World</h1>
+//       <Button>Click me</Button>
+//     </div>
+//   )
+// }
 
-  void api.post.getLatest.prefetch();
+const blinkingStyle = `
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+`;
 
+
+export default function Home() {
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
+    
+    <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
 
-          <LatestPost />
+      <style>{blinkingStyle}</style>
+      {/* Social Media Icons */}
+      <div className="w-full flex justify-between px-4 mb-4 pb-16">
+        <div>
+          <p className="text-sm text-white">What to Expect from Kidist Selassie Youth International Program</p>
+          <Link 
+            href="../about" 
+            className="text-xl cursor-pointer border-b-2 border-white"
+            style={{ animation: 'blink 2s linear infinite' }}
+          >
+            *Our Mission and Goals*
+          </Link>
+          {/* <a className="text-xl cursor-pointer border-b-2 border-white"  style={{ animation: 'blink 2s linear infinite' }}>*Our Mission and Goals*</a> */}
         </div>
-      </main>
-    </HydrateClient>
+
+        <div className="flex space-y-6 flex-col">
+          
+          <a
+            href="https://facebook.com/youraccount" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faFacebook} size="2xl" />
+          </a>
+          <a 
+            href="https://instagram.com/youraccount" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faInstagram} size="2xl" />
+          </a>
+          <a 
+            href="https://tiktok.com/@youraccount" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faTiktok} size="2xl" />
+          </a>
+          <a 
+            href="https://x.com/youraccount" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faXTwitter} size="2xl" />
+          </a>
+        </div>
+      </div>
+      <h1 className="font-anton text-6xl mb-6 flex text-center">
+        Kidist Selassie Youth International Network
+      </h1>
+      
+      <p className="font-sans text-xl mb-8 max-w-2xl text-center">
+        A community of faith, online networking, and support. Join us in sharing prayers, 
+        finding mentorship, and experiencing miracles together.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
+        {/* Feature Cards */}
+        <FeatureCard 
+          title="Mentorship" 
+          description="Connect with experienced mentors in faith and technology."
+          link="/mentorship"
+        />
+        <FeatureCard 
+          title="Prayer Requests" 
+          description="Share your prayers and pray for others in our global community."
+          link="/prayer-requests"
+        />
+        <FeatureCard 
+          title="Miracles" 
+          description="Witness and share stories of God's work in our community."
+          link="/miracles"
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
+        {/* Feature Cards */}
+        <FeatureCard 
+          title="Mentorship" 
+          description="Connect with experienced mentors in faith and technology."
+          link="/mentorship"
+        />
+        <FeatureCard 
+          title="Prayer Requests" 
+          description="Share your prayers and pray for others in our global community."
+          link="/prayer-requests"
+        />
+        <FeatureCard 
+          title="Miracles" 
+          description="Witness and share stories of God's work in our community."
+          link="/miracles"
+        />
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({ title, description, link }: { 
+  title: string; 
+  description: string; 
+  link: string;
+}) {
+  return (
+    <Link href={link}>
+      <div className="bg-white/10 p-6 rounded-lg hover:bg-white/20 transition-colors">
+        <h2 className="font-anton text-2xl mb-2">{title}</h2>
+        <p className="text-gray-200">{description}</p>
+      </div>
+    </Link>
   );
 }
