@@ -1,5 +1,4 @@
-/** @type {import("eslint").Linter.Config} */
-const config = {
+/** @type {import("@typescript-eslint/utils/ts-eslint").ClassicConfig.Config} */const config = {
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": true
