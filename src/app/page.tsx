@@ -109,19 +109,19 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
         {/* Feature Cards */}
         <FeatureCard 
-          title="Mentorship" 
-          description="Connect with experienced mentors in faith and technology."
-          link="/mentorship"
+          title="Post Your Funny Audio" 
+          description="Share your short (clean) jokes and laugh with our community."
+          link="/jokes"
         />
         <FeatureCard 
-          title="Prayer Requests" 
-          description="Share your prayers and pray for others in our global community."
-          link="/prayer-requests"
+          title="Q&A" 
+          description="Ask questions and get answers from our community."
+          link="/questions"
         />
         <FeatureCard 
-          title="Miracles" 
-          description="Witness and share stories of God's work in our community."
-          link="/miracles"
+          title="Feedback/Comments" 
+          description="Share your feedback and comments about the website."
+          link="/feedback"
         />
       </div>
     </div>

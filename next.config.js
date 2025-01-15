@@ -7,7 +7,14 @@ import "./src/env.mjs";
 /** @type {import("next").NextConfig} */
 const config = {
     images: {
-        domains: ['img.clerk.com', 'images.clerk.dev'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'img.clerk.com',
+                port: '',
+                pathname: '/users/**',
+            },
+        ],
     },
     reactStrictMode: true,
 };
