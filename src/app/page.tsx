@@ -54,7 +54,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faFacebook} size="2xl" />
           </a>
           <a 
-            href="https://instagram.com/youraccount" 
+            href="https://instagram.com/selassieyouth/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
@@ -62,7 +62,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faInstagram} size="2xl" />
           </a>
           <a 
-            href="https://tiktok.com/@youraccount" 
+            href="https://tiktok.com/@selassieyouthint.network" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
@@ -124,6 +124,9 @@ export default function Home() {
           link="/feedback"
         />
       </div>
+      <div className="border-t-4 w-12 pb-4 border-[#c4142c]"></div>
+      <div className="border-t-4 w-8 border-[#c4142c]"></div>
+
     </div>
   );
 }
