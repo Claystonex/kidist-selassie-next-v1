@@ -98,7 +98,7 @@ export default function Home() {
         <FeatureCard 
           title="Prayer Requests" 
           description="Share your prayers and pray for others in our global community."
-          link="/prayer-requests"
+          link="/prayer"
         />
         <FeatureCard 
           title="Miracles" 
@@ -124,8 +124,8 @@ export default function Home() {
           link="/feedback"
         />
       </div>
-      <div className="border-t-4 w-12 pb-4 border-[#c4142c]"></div>
-      <div className="border-t-4 w-8 border-[#c4142c]"></div>
+      <div className="border-t-4 w-[80wh] pb-4 border-[#c4142c]"></div>
+      <div className="border-t-4 w-[50wh] border-[#c4142c]"></div>
 
     </div>
   );

@@ -86,7 +86,8 @@ export default async function PrayerRequestsPage() {
   return (
     // Your component JSX
     <div>
-      <h1>Prayer Requests</h1>
+      <h1 className="text-white font-anton flex text-center justify-center">Coming Soon</h1>
+      
       <div>
         {prayerList.map((prayer) => (
           <div key={prayer.id}>{prayer.title}{prayer.description}{prayer.prayer}</div>

@@ -123,9 +123,9 @@ export default async function Header() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
-          <NavLink href="/prayer-requests">Prayer Requests</NavLink>
+          <NavLink href="/prayer">Prayer Requests</NavLink>
           <NavLink href="/mentorship">Mentorship</NavLink>
-          <NavLink href="/bootcamps">Bootcamps</NavLink>
+          <NavLink href="/bootcamp">Bootcamps</NavLink>
           <NavLink href="/questions">Questions</NavLink>
           <NavLink href="/miracles">Miracles</NavLink>
         </div>
