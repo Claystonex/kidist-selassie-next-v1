@@ -18,7 +18,7 @@ const SignInPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#086c47]">
-      <div className="bg-[#ffb43c] p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="bg-[#ffb43cac] p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Sign In to Selassie Youth Int. Network</h2>
         <p className="text-center text-gray-600 mb-6">Welcome back! Please sign in to continue</p>
         
