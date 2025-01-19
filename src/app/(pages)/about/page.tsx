@@ -3,7 +3,7 @@ export default function AboutPage() {
       <div className="min-h-screen p-8">
         <h1 className="text-4xl font-anton text-[#ffb43c] mb-6">Our Mission and Goals</h1>
         
-        <div className="prose prose-lg text-white max-w-4xl">
+        <div className="prose prose-lg text-white max-w-4xl text-center justify-center">
           <p>
           We’re thrilled to welcome you to our community! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.  
 

@@ -29,21 +29,21 @@ export default function Home() {
     <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
 
       <style>{blinkingStyle}</style>
-      {/* Social Media Icons */}
-      <div className="w-full flex justify-between px-4 mb-4 pb-16">
-        <div>
+     
+      <div className="w-full flex flex-col md:flex-row md:justify-between px-4 mb-4 pb-16">
+        <div className="mb-4 md:mb-0">
           <p className="text-sm text-white">What to Expect from Kidist Selassie Youth International Program</p>
           <Link 
             href="../about" 
-            className="text-xl cursor-pointer border-b-2 border-white"
+            className="text-xl cursor-pointer border-b-2 border-white inline-block"
             style={{ animation: 'blink 2s linear infinite' }}
           >
             *Our Mission and Goals*
           </Link>
-          {/* <a className="text-xl cursor-pointer border-b-2 border-white"  style={{ animation: 'blink 2s linear infinite' }}>*Our Mission and Goals*</a> */}
         </div>
 
-        <div className="flex space-y-6 flex-col">
+        <div className="flex md:flex-col md:space-y-6 flex-row space-x-4 md:space-x-0">
+          <h1>Follow Us</h1>
           
           <a
             href="https://facebook.com/youraccount" 
