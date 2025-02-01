@@ -14,15 +14,15 @@ export default function Header() {
 
   return (
     <nav className="relative border-b bg-[#086c47]">
-      <div className="container mx-2 flex h-20 items-center justify-between px-4 font-montserrat">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4 font-montserrat max-w-7xl">
         {/* Logo */}
-        <div className="flex items-center flex-shrink">
+        <div className="flex items-center flex-shrink-0 min-w-0">
           <Image src="/assets/lion-of-judah-2.jpg" alt="Kidist Selassie Youth International Network" width={100} height={100} className='w-16 h-10 mr-4' />
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl text-white md:block hidden font-bold">
+            <span className="text-xl text-white lg:block hidden font-bold whitespace-nowrap">
               Kidist Selassie Youth International Network
             </span>
-            <span className="text-sm text-white md:hidden leading-tight">
+            <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[200px] md:max-w-[300px]">
               Kidist Selassie Youth International Network
             </span>
           </Link>
@@ -30,7 +30,7 @@ export default function Header() {
 
         {/* Hamburger Menu Button (Mobile) */}
         <button 
-          className="md:hidden z-50 text-white hover:text-[#ffb43c]"
+          className="lg:hidden z-50 text-white hover:text-[#ffb43c]"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
@@ -63,7 +63,7 @@ export default function Header() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
+        <div className="hidden lg:flex items-center space-x-4">
           <NavLink href="/prayer">Prayer Requests</NavLink>
           <NavLink href="/mentorship">Mentorship</NavLink>
           <NavLink href="/bootcamp">Bootcamps</NavLink>
@@ -72,7 +72,7 @@ export default function Header() {
         </div>
 
         {/* Auth Button */}
-        <div className="hidden md:flex items-center space-x-4 p-4">
+        <div className="hidden lg:flex items-center space-x-4 pl-4">
           {user ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
@@ -100,7 +100,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link 
       href={href} 
-      className="text-sm font-medium text-white transition-colors hover:text-[#ffb43c]"
+      className="text-sm font-montserrat text-white transition-colors hover:text-[#ffb43c]"
     >
       {children}
     </Link>
@@ -111,7 +111,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
   return (
     <Link 
       href={href} 
-      className="text-lg font-medium text-white transition-colors hover:text-[#ffb43c] w-full text-left py-2"
+      className="text-lg font-montserrat text-white transition-colors hover:text-[#ffb43c] w-full text-left py-2"
       onClick={onClick}
     >
       {children}

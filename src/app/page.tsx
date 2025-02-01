@@ -79,7 +79,7 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <h1 className="font-anton text-6xl mb-6 flex text-center">
+      <h1 className="font-montserrat font-bold text-6xl mb-6 flex text-center">
         Kidist Selassie Youth International Network
       </h1>
       
@@ -88,7 +88,7 @@ export default function Home() {
         finding mentorship, and experiencing miracles together.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
+      <div className=" font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
         {/* Feature Cards */}
         <FeatureCard 
           title="Mentorship" 
@@ -106,7 +106,7 @@ export default function Home() {
           link="/miracles"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
+      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
         {/* Feature Cards */}
         <FeatureCard 
           title="Post Your Funny Audio" 
@@ -131,17 +131,4 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ title, description, link }: { 
-  title: string; 
-  description: string; 
-  link: string;
-}) {
-  return (
-    <Link href={link}>
-      <div className="bg-white/10 p-6 rounded-lg hover:bg-white/20 transition-colors">
-        <h2 className="font-anton text-2xl mb-2">{title}</h2>
-        <p className="text-gray-200">{description}</p>
-      </div>
-    </Link>
-  );
-}
+import { FeatureCard } from './_components/FeatureCard';

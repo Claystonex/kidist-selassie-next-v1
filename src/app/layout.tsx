@@ -85,7 +85,7 @@ export default async function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${anton.variable} ${inter.variable} ${montserrat.variable}`}>
-        <body className="font-anton bg-[#086c47] min-h-screen">
+        <body className="font-montserrat bg-[#086c47] min-h-screen">
           <TRPCReactProvider>
     
             <Header />
