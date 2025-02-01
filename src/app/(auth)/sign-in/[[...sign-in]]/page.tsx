@@ -35,14 +35,14 @@ const SignInPage = () => {
           redirectUrl="/dashboard"
         />
         
-        <div className="mt-4 text-center">
+        {/* <div className="mt-4 text-center">
           <p className="text-gray-600">
             Don't have an account?{' '}
             <a href="/sign-up" className="text-green-600 hover:text-green-700">
               Sign up
             </a>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
