@@ -1,3 +1,4 @@
+import { Montserrat } from "next/font/google";
 import { type Config } from "tailwindcss";
 // import { fontFamily } from "tailwindcss/defaultTheme";
 
@@ -10,6 +11,7 @@ export default {
 		fontFamily: {
 			sans: ['var(--font-inter)'],
 			anton: ['var(--font-anton)'],
+			montserrat: ['var(--font-montserrat)']
 
 		  },
   		borderRadius: {

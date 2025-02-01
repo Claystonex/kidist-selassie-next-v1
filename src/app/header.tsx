@@ -14,15 +14,15 @@ export default function Header() {
 
   return (
     <nav className="relative border-b bg-[#086c47]">
-      <div className="container mx-2 flex h-20 items-center justify-between px-4">
+      <div className="container mx-2 flex h-20 items-center justify-between px-4 font-montserrat">
         {/* Logo */}
         <div className="flex items-center flex-shrink">
           <Image src="/assets/lion-of-judah-2.jpg" alt="Kidist Selassie Youth International Network" width={100} height={100} className='w-16 h-10 mr-4' />
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-anton text-white md:block hidden">
+            <span className="text-xl text-white md:block hidden font-bold">
               Kidist Selassie Youth International Network
             </span>
-            <span className="text-sm font-anton text-white md:hidden leading-tight">
+            <span className="text-sm text-white md:hidden leading-tight">
               Kidist Selassie Youth International Network
             </span>
           </Link>
