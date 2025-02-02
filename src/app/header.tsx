@@ -76,7 +76,7 @@ export default function Header() {
           {user ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
-            <Button variant="outline" asChild className="bg-[#ffb43c] hover:bg-[#e6a037] border-none">
+            <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none">
               <Link href="/sign-in" className="text-white">
                 Join
               </Link>
