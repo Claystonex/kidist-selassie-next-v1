@@ -1,7 +1,7 @@
 export default function AboutPage() {
     return (
       <div className="min-h-screen p-8">
-        <h1 className="text-4xl font-anton text-[#ffb43c] mb-6">Our Mission and Goals</h1>
+        <h1 className="text-4xl font-montserrat text-[#ffb43c] mb-6">Our Mission and Goals</h1>
         
         <div className="prose prose-lg text-white max-w-4xl text-center justify-center">
           <p>
