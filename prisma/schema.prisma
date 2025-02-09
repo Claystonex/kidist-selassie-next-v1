@@ -31,3 +31,14 @@ model Post {
   createdAt DateTime @default(now())
   // Add any other fields you need
 }
+
+model Prayer {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  isPrivate   Boolean  @default(false)
+  userName    String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
