@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating prayer:', error);
     return NextResponse.json(
-      { error: 'Failed to create prayer request' },
+      { error: 'Failed to create prayer request...' },
       { status: 500 }
     );
   }
