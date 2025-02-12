@@ -49,7 +49,7 @@ const PrayerPage = () => {
           isPrivate,
         }),
       });
-
+      
       if (!response.ok) throw new Error('Failed to submit prayer');
 
       // Clear form
@@ -84,7 +84,7 @@ const PrayerPage = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="mt-1 block w-full rounded-md bg-white border-transparent focus:border-yellow-500 focus:ring-0 text-white"
+                className="mt-1 block w-full rounded-md bg-white border-gray-300 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 text-gray-900"
               />
             </div>
 
@@ -98,7 +98,7 @@ const PrayerPage = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md bg-white border-transparent focus:border-yellow-500 focus:ring-0 text-white"
+                className="mt-1 block w-full rounded-md bg-white border-gray-300 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 text-gray-900"
               />
             </div>
 

@@ -22,7 +22,10 @@ model User {
     lastName  String? 
 
     emailAddress String @unique
-
+    hashedPassword String?
+    
+    votes     Vote[]
+    posts     ForumPost[]
 }
 
 model Post {
@@ -41,4 +44,75 @@ model Prayer {
   timestamp   DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Miracle {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  userName    String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SummerSuggestion {
+  id        String   @id
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model ForumPost {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  categories  Category[]
+  attachments Attachment[]
+  votes       Vote[]
+  type        PostType
+}
+
+model Category {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  icon        String
+  posts       ForumPost[]
+  createdAt   DateTime    @default(now())
+}
+
+model Attachment {
+  id        String    @id @default(cuid())
+  fileName  String
+  fileUrl   String
+  fileType  FileType
+  postId    String
+  post      ForumPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+}
+
+model Vote {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, postId])
+}
+
+enum PostType {
+  GENERAL_DISCUSSION
+  ART_EXPRESSION
+  EDUCATIONAL
+}
+
+enum FileType {
+  IMAGE
+  AUDIO
+  OTHER
 }

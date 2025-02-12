@@ -35,7 +35,8 @@ const MentorshipPage = () => {
           link="/questions"
         />
         <FeatureCard 
-          title="Feedback/Comments" 
+          title="Feedback &
+          Comments" 
           description="Share your feedback and comments about the website."
           link="/feedback"
         />

@@ -40,6 +40,12 @@ export default function Home() {
           >
             *Our Mission and Goals*
           </Link>
+          <h1 className="text-xl font-semibold">
+            Verse of the Day:
+          </h1>
+          <h1>
+            A Verse a day keeps the devil away. 
+          </h1>
         </div>
 
         <div className="flex md:flex-col md:space-y-6 flex-row space-x-4 md:space-x-0">

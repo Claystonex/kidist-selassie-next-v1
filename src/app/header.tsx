@@ -69,6 +69,7 @@ export default function Header() {
           <NavLink href="/bootcamp">Bootcamps</NavLink>
           <NavLink href="/questions">Questions</NavLink>
           <NavLink href="/miracles">Miracles</NavLink>
+          <NavLink href="/forum">Forum</NavLink>
         </div>
 
         {/* Auth Button */}
