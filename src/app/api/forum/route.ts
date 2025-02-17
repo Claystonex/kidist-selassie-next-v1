@@ -55,8 +55,25 @@ export async function POST(request: Request) {
     const title = data.get('title') as string;
     const content = data.get('content') as string;
     const type = data.get('type') as string;
-    const categoryIds = (data.get('categories') as string).split(',');
+    const categoryIds = (data.get('categories') as string).split(',').filter(Boolean);
     const files = data.getAll('files') as File[];
+
+    if (!title || !content) {
+      return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
+    }
+
+    // Validate categories exist
+    const existingCategories = await prisma.category.findMany({
+      where: {
+        id: {
+          in: categoryIds
+        }
+      }
+    });
+
+    if (existingCategories.length !== categoryIds.length) {
+      return NextResponse.json({ error: 'One or more categories are invalid' }, { status: 400 });
+    }
 
     // Create post
     const post = await prisma.forumPost.create({
@@ -68,6 +85,19 @@ export async function POST(request: Request) {
         categories: {
           connect: categoryIds.map(id => ({ id }))
         }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            imageUrl: true,
+          }
+        },
+        categories: true,
+        attachments: true,
+        votes: true,
       }
     });
 

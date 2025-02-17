@@ -73,15 +73,29 @@ export default function Forum() {
     setAttachments([...attachments, ...files]);
   };
 
+  const [error, setError] = useState<string>('');
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!newPost.title || !newPost.content) {
+      setError('Please fill in both title and content');
+      return;
+    }
     
     try {
       const formData = new FormData();
       formData.append('title', newPost.title);
       formData.append('content', newPost.content);
       formData.append('type', newPost.type);
-      formData.append('categories', newPost.categories.join(','));
+      
+      // Convert category names to IDs
+      const categoryIds = newPost.categories.map(cat => {
+        const category = categories.find(c => c.name === cat);
+        return category ? category.id : cat;
+      });
+      formData.append('categories', categoryIds.join(','));
       
       attachments.forEach(file => {
         formData.append('files', file);
@@ -93,7 +107,8 @@ export default function Forum() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create post');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create post');
       }
 
       const post = await response.json();
@@ -103,7 +118,7 @@ export default function Forum() {
       setAttachments([]);
     } catch (error) {
       console.error('Error creating post:', error);
-      // You might want to show an error message to the user here
+      setError(error instanceof Error ? error.message : 'Failed to create post');
     }
   };
 
