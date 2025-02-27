@@ -9,8 +9,7 @@ interface Post {
   id: string;
   title: string;
   content: string;
-  type: 'GENERAL_DISCUSSION' | 'ART_EXPRESSION' | 'EDUCATIONAL';
-  categories: string[];
+  type: 'GENERAL_DISCUSSION' | 'ART_EXPRESSION' | 'EDUCATIONAL' | 'DAILY_INSPIRATION' | 'HUMOR' | 'CAREER_SUPPORT';
   attachments: {
     id: string;
     fileName: string;
@@ -18,52 +17,88 @@ interface Post {
     fileType: 'IMAGE' | 'AUDIO' | 'OTHER';
   }[];
   votes: number;
-  createdAt: Date;
+  createdAt: string;
   author: {
     name: string;
-    imageUrl?: string;
+    imageUrl?: string | null;
   };
 }
 
-const categories = [
-  { id: 'general', name: 'General Discussions', icon: <FaComments /> },
-  { id: 'art', name: 'Expressions (Art)', icon: <FaMusic /> },
-  { id: 'education', name: 'Educational', icon: <FaBook /> },
-];
-
 export default function Forum() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [sortBy, setSortBy] = useState<'newest' | 'votes'>('newest');
   
-  // Load posts on initial render
+  const loadMorePosts = async () => {
+    if (!hasMore || isLoading) return;
+    
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      const response = await fetch(`/api/forum?page=${page}&sort=${sortBy}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+      
+      const data = await response.json();
+      // Transform the posts to match our interface
+      const transformedPosts = data.posts.map((post: any) => ({
+        ...post,
+        createdAt: post.createdAt || new Date().toISOString(), // Provide default if null
+        author: {
+          name: post.author?.name || 'Anonymous',
+          imageUrl: post.author?.imageUrl || null
+        },
+        attachments: Array.isArray(post.attachments) ? post.attachments : []
+      }));
+      setPosts(prev => [...prev, ...transformedPosts]);
+      setHasMore(data.hasMore);
+      setPage(prev => prev + 1);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setError('Failed to load posts. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial load
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch('/api/forum');
-        if (!response.ok) {
-          throw new Error('Failed to fetch posts');
-        }
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-        // You might want to show an error message to the user here
+    const initialLoad = async () => {
+      setPosts([]);
+      setPage(1);
+      setHasMore(true);
+      await loadMorePosts();
+    };
+    initialLoad();
+  }, [sortBy]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 1000) {
+        loadMorePosts();
       }
     };
 
-    fetchPosts();
-  }, []);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [page, hasMore, isLoading]);
+  const [selectedType, setSelectedType] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPost, setNewPost] = useState<{
     title: string;
     content: string;
     type: string;
-    categories: string[];
   }>({
     title: '',
     content: '',
     type: 'GENERAL_DISCUSSION',
-    categories: [],
   });
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,8 +108,6 @@ export default function Forum() {
     setAttachments([...attachments, ...files]);
   };
 
-  const [error, setError] = useState<string>('');
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -85,45 +118,66 @@ export default function Forum() {
     }
     
     try {
+      setIsLoading(true);
+      console.log('Form submission started');
+      console.log('Current post data:', newPost);
+      
       const formData = new FormData();
       formData.append('title', newPost.title);
       formData.append('content', newPost.content);
       formData.append('type', newPost.type);
       
-      // Convert category names to IDs
-      const categoryIds = newPost.categories.map(cat => {
-        const category = categories.find(c => c.name === cat);
-        return category ? category.id : cat;
-      });
-      formData.append('categories', categoryIds.join(','));
-      
       attachments.forEach(file => {
         formData.append('files', file);
       });
-
+      
+      console.log('Making API request...');
       const response = await fetch('/api/forum', {
         method: 'POST',
         body: formData,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create post');
+      
+      console.log('Response status:', response.status);
+      
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('Response data:', responseData);
+      } catch (e) {
+        console.error('JSON parse error:', e);
+        responseData = { error: 'Invalid response format' };
       }
-
-      const post = await response.json();
-      setPosts(prevPosts => [post, ...prevPosts]);
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to create post');
+      }
+      
+      // Reset form and close modal first
       setIsModalOpen(false);
-      setNewPost({ title: '', content: '', type: 'GENERAL_DISCUSSION', categories: [] });
-      setAttachments([]);
+      setNewPost({ title: '', content: '', type: 'GENERAL_DISCUSSION' });
+      setAttachments([])
+      
+      // Show success message
+      setSuccess('Your post has been created successfully!');
+      setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
+      
+      // Add the new post to the beginning of the list
+      setPosts(prevPosts => [responseData, ...prevPosts]);
+      
+      console.log('Post created successfully');
     } catch (error) {
       console.error('Error creating post:', error);
       setError(error instanceof Error ? error.message : 'Failed to create post');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleVote = async (postId: string) => {
     try {
+      setIsLoading(true);
+      console.log('Voting for post:', postId);
+      
       const response = await fetch('/api/forum/vote', {
         method: 'POST',
         headers: {
@@ -132,31 +186,46 @@ export default function Forum() {
         body: JSON.stringify({ postId }),
       });
 
+      const data = await response.json();
+      console.log('Vote response:', data);
+
       if (!response.ok) {
-        throw new Error('Failed to vote');
+        throw new Error(data.error || 'Failed to vote');
       }
 
-      const { voteCount } = await response.json();
       setPosts(prevPosts =>
         prevPosts.map(post =>
-          post.id === postId ? { ...post, votes: voteCount } : post
+          post.id === postId ? { ...post, votes: data.voteCount } : post
         )
       );
     } catch (error) {
       console.error('Error voting:', error);
-      // You might want to show an error message to the user here
+      setError(error instanceof Error ? error.message : 'Failed to vote');
+      setTimeout(() => setError(''), 5000); // Clear error after 5 seconds
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const filterPosts = (post: Post) => {
-    if (selectedCategory === 'all') return true;
-    return post.categories.includes(selectedCategory);
+    if (selectedType === 'all') return true;
+    return post.type === selectedType;
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Forum</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold">Forum</h1>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'newest' | 'votes')}
+            className="px-3 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="newest">Newest First</option>
+            <option value="votes">Most Voted</option>
+          </select>
+        </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -167,20 +236,42 @@ export default function Forum() {
 
       <div className="mb-8">
         <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
           className="w-full md:w-64 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">All Categories</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
+          <option value="GENERAL_DISCUSSION">General Discussion</option>
+          <option value="ART_EXPRESSION">Art & Expression</option>
+          <option value="EDUCATIONAL">Educational</option>
+          <option value="DAILY_INSPIRATION">Daily Inspiration</option>
+          <option value="HUMOR">Humor</option>
+          <option value="CAREER_SUPPORT">Career Support</option>
         </select>
       </div>
 
       <div className="space-y-6">
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-red-50 text-red-600 rounded-lg"
+          >
+            {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-green-50 text-green-600 rounded-lg"
+          >
+            {success}
+          </motion.div>
+        )}
+        
         <AnimatePresence>
           {posts.filter(filterPosts).map((post) => (
             <motion.div
@@ -193,16 +284,9 @@ export default function Forum() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
-                  <div className="flex gap-2 mb-2">
-                    {post.categories.map((category) => (
-                      <span
-                        key={category}
-                        className="px-2 py-1 bg-gray-100 text-sm rounded-full"
-                      >
-                        {category}
-                      </span>
-                    ))}
-                  </div>
+                    <span className="px-2 py-1 bg-gray-100 text-sm rounded-full">
+                    {post.type.replace('_', ' ')}
+                  </span>
                 </div>
                 <button
                   onClick={() => handleVote(post.id)}
@@ -215,7 +299,7 @@ export default function Forum() {
 
               <p className="mb-4">{post.content}</p>
 
-              {post.attachments.length > 0 && (
+              {post.attachments && post.attachments.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   {post.attachments.map((attachment) => (
                     <div key={attachment.id}>
@@ -253,6 +337,24 @@ export default function Forum() {
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        )}
+
+        {!isLoading && !hasMore && posts.length > 0 && (
+          <div className="text-center py-4 text-gray-500">
+            No more posts to load
+          </div>
+        )}
+
+        {!isLoading && posts.length === 0 && (
+          <div className="text-center py-4 text-gray-500">
+            No posts found. Be the first to create one!
+          </div>
+        )}
       </div>
 
       <Dialog
@@ -283,47 +385,21 @@ export default function Forum() {
                 />
 
                 <div>
-                  <label className="block mb-2">Type</label>
+                  <label className="block mb-2">Category</label>
                   <select
                     value={newPost.type}
-                    onChange={(e) => setNewPost({ ...newPost, type: e.target.value as 'GENERAL_DISCUSSION' | 'ART_EXPRESSION' | 'EDUCATIONAL' | 'DAILY INSPIRATION' | 'HUMOR' | 'CAREER SUPPORT' })}
+                    onChange={(e) => setNewPost({ ...newPost, type: e.target.value as Post['type'] })}
                     className="w-full p-2 border rounded-lg"
                   >
                     <option value="GENERAL_DISCUSSION">General Discussion</option>
-                    <option value="ART_EXPRESSION">Art Expression</option>
+                    <option value="ART_EXPRESSION">Art & Expression</option>
                     <option value="EDUCATIONAL">Educational</option>
-                    <option value="DAILY INSPIRATION">Daily Inspiration</option>
+                    <option value="DAILY_INSPIRATION">Daily Inspiration</option>
                     <option value="HUMOR">Humor</option>
                     <option value="CAREER_SUPPORT">Career Support</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="block mb-2">Categories</label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => {
-                          setNewPost(prev => ({
-                            ...prev,
-                            categories: prev.categories.includes(category.id)
-                              ? prev.categories.filter(id => id !== category.id)
-                              : [...prev.categories, category.id]
-                          }));
-                        }}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${newPost.categories.includes(category.id)
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                          } hover:bg-blue-50 transition-colors`}
-                      >
-                        {category.icon}
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 <div>
                   <label className="block mb-2">Attachments</label>

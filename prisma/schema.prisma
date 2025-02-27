@@ -70,19 +70,12 @@ model ForumPost {
   author      User         @relation(fields: [authorId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  categories  Category[]
+  type        PostType
   attachments Attachment[]
   votes       Vote[]
-  type        PostType
 }
 
-model Category {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  icon        String
-  posts       ForumPost[]
-  createdAt   DateTime    @default(now())
-}
+
 
 model Attachment {
   id        String    @id @default(cuid())
@@ -105,14 +98,33 @@ model Vote {
   @@unique([userId, postId])
 }
 
+
 enum PostType {
   GENERAL_DISCUSSION
   ART_EXPRESSION
   EDUCATIONAL
+  DAILY_INSPIRATION
+  HUMOR
+  CAREER_SUPPORT
 }
 
 enum FileType {
   IMAGE
   AUDIO
   OTHER
+}
+
+model Donation {
+  id            String   @id @default(cuid())
+  amount        Float
+  currency      String   @default("USD")
+  status        String   // pending, completed, failed
+  paymentId     String   @unique  // Square payment ID
+  donorName     String?
+  donorEmail    String?
+  message       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String?  // Optional link to user if they're logged in
+  user          User?    @relation(fields: [userId], references: [id])
 }
