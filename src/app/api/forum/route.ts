@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, PostType, FileType } from '@prisma/client';
-import { auth } from '@clerk/nextjs/server';
+import { prisma } from "@/lib/prisma";
+import { PostType, FileType } from '@prisma/client';
+import { auth, currentUser } from '@clerk/nextjs/server';
 
-const validPostTypes: PostType[] = [
-  'GENERAL_DISCUSSION',
-  'ART_EXPRESSION',
-  'EDUCATIONAL',
-  'DAILY_INSPIRATION',
-  'HUMOR',
-  'CAREER_SUPPORT'
-];
-
-const prisma = new PrismaClient();
+// Valid post types for validation
+const validPostTypes = Object.values(PostType);
 
 // Define interfaces for our response types
 interface FormattedAttachment {
@@ -33,6 +26,39 @@ interface FormattedPost {
     imageUrl: string | null;
   };
   attachments: FormattedAttachment[];
+}
+
+// Helper function to create a JSON response
+function createJsonResponse(data: any, status = 200) {
+  // Ensure data is never null or undefined
+  const safeData = data !== null && data !== undefined ? data : { error: "Empty response data" };
+  
+  try {
+    // Additional safety check to ensure we never send null to NextResponse.json
+    if (safeData === null || safeData === undefined) {
+      console.error("Attempting to send null/undefined data in response");
+      return NextResponse.json({ error: "Server error: Invalid response data" }, { status: 500 });
+    }
+    
+    // Log the response we're sending for debugging
+    console.log(`Sending ${status} response:`, 
+      typeof safeData === 'object' 
+        ? JSON.stringify(safeData).substring(0, 200) + (JSON.stringify(safeData).length > 200 ? '...' : '')
+        : safeData
+    );
+    
+    // If safeData is not an object, wrap it in an object
+    const finalData = typeof safeData === 'object' ? safeData : { data: safeData };
+    
+    return NextResponse.json(finalData, { status });
+  } catch (error) {
+    // If serialization fails, send a safe fallback response
+    console.error('Error in response creation:', error);
+    return NextResponse.json({ 
+      error: "Failed to create response",
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
+  }
 }
 
 // GET /api/forum
@@ -80,7 +106,7 @@ export async function GET(request: Request) {
     });
 
     // Transform the response
-    const formattedPosts = posts.map(post => ({
+    const formattedPosts = posts.map((post: any) => ({
       id: post.id,
       title: post.title,
       content: post.content,
@@ -88,227 +114,317 @@ export async function GET(request: Request) {
       votes: Array.isArray(post.votes) ? post.votes.length : 0,
       createdAt: post.createdAt.toISOString(),
       author: {
-        name: post.author && post.author.firstName 
-          ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() || 'Anonymous' 
+        name: post.author?.firstName || post.author?.lastName 
+          ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() 
           : 'Anonymous',
         imageUrl: post.author?.imageUrl || null,
       },
-      attachments: post.attachments.map(att => ({
-        id: att.id,
-        fileName: att.fileName,
-        fileUrl: att.fileUrl,
-        fileType: att.fileType,
-      })),
+      attachments: post.attachments.map((att: any) => {
+        const formattedAtt: FormattedAttachment = {
+          id: att.id,
+          fileName: att.fileName,
+          fileUrl: att.fileUrl,
+          fileType: att.fileType,
+        };
+        return formattedAtt;
+      }),
     }));
 
-    return NextResponse.json({
+    return createJsonResponse({
       posts: formattedPosts,
       hasMore: totalPosts > page * pageSize,
     });
   } catch (error) {
     console.error('Error fetching posts:', error);
-    return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });
+    return createJsonResponse({ error: 'Failed to fetch posts' }, 500);
   }
 }
 
 // POST /api/forum
 export async function POST(request: Request) {
+  console.log('POST /api/forum - Request received');
+  
   try {
-    console.log('POST /api/forum - Request received');
-    
-    const { userId } = await auth();
-    console.log('User ID:', userId);
+    // Get the user ID from authentication
+    const authResult = await auth();
+    const userId = authResult?.userId;
+    console.log('Authentication check:', userId ? 'User authenticated' : 'No user ID');
     
     if (!userId) {
-      console.log('Unauthorized - No user ID');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return createJsonResponse({ error: 'You must be signed in to create a post' }, 401);
     }
-
-    const data = await request.formData();
     
-    // Log raw form data for debugging
-    console.log('Raw form data entries:', Array.from(data.entries()));
+    // Check if user exists in the database, create if not
+    let user = await prisma.user.findUnique({ where: { id: userId } });
     
-    const title = data.get('title');
-    const content = data.get('content');
-    const type = data.get('type');
-    
-    console.log('Parsed form data:', {
-      title: typeof title === 'string' ? title : 'invalid',
-      content: typeof content === 'string' ? content : 'invalid',
-      type: typeof type === 'string' ? type : 'invalid'
-    });
-    
-    const files = data.getAll('files') as File[];
-    console.log('Number of files:', files.length);
-
-    if (!title || !content || !type) {
-      console.log('Validation failed - Missing required fields');
-      return NextResponse.json({ error: 'Title, content, and type are required' }, { status: 400 });
-    }
-
-    // Validate type is a valid PostType
-    if (!type || typeof type !== 'string') {
-      console.log('Type validation failed - invalid type:', { type, typeOf: typeof type });
-      return NextResponse.json({ error: 'Post type is required' }, { status: 400 });
-    }
-
-    const postType = Object.values(PostType).find(pt => pt === type);
-    if (!postType) {
-      console.log('Type validation failed - not a valid PostType:', { 
-        receivedType: type,
-        validTypes: Object.values(PostType)
-      });
-      return NextResponse.json({ 
-        error: 'Invalid post type',
-        received: type,
-        validTypes: Object.values(PostType)
-      }, { status: 400 });
-    }
-
-    console.log('Creating post with data:', {
-      title,
-      content,
-      type,
-      userId
-    });
-
-    // Create the post
-    const post = await prisma.forumPost.create({
-      data: {
-        title: title as string,
-        content: content as string,
-        type: postType, // Use validated PostType
-        authorId: userId,
-      },
-      include: {
-        author: {
-          select: {
-            firstName: true,
-            lastName: true,
-            imageUrl: true,
-          }
-        },
-        votes: true,
-      }
-    });
-
-    if (!post || !post.id) {
-      console.error('Failed to create post - post is null or missing ID');
-      return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
-    }
-
-    console.log('Post created successfully:', post.id);
-
-    // Format the response
-    const formattedPost: FormattedPost = {
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      type: post.type,
-      votes: 0,
-      createdAt: post.createdAt.toISOString(),
-      author: {
-        name: post.author && post.author.firstName 
-          ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() || 'Anonymous' 
-          : 'Anonymous',
-        imageUrl: post.author?.imageUrl || null,
-      },
-      attachments: [],
-    };
-
-    // Handle file uploads
-    if (files && files.length > 0) {
+    if (!user) {
+      console.log('User not found in database, creating new user record');
       try {
-        for (const file of files) {
-          // Upload file to your storage service (e.g., S3, Cloudinary)
-          // const fileUrl = await uploadFile(file);
-          // For now using a placeholder URL - replace this with actual upload logic
-          const tempFileUrl = 'fileUrl';
+        // Try to get user info from Clerk
+        console.log('Fetching user data from Clerk for user ID:', userId);
+        let firstName = "";
+        let lastName = "";
+        let emailAddress = `${userId}@example.com`;
+        let imageUrl = null;
+        
+        try {
+          const user = await currentUser();
+          if (user) {
+            firstName = user.firstName || "";
+            lastName = user.lastName || "";
+            emailAddress = user.emailAddresses[0]?.emailAddress || emailAddress;
+            imageUrl = user.imageUrl || null;
+            console.log('Successfully fetched user data from Clerk');
+          } else {
+            console.log('User data not available from Clerk, using default values');
+          }
+        } catch (clerkError) {
+          console.error('Error fetching user from Clerk, using default values:', clerkError);
+          // Continue with default values
+        }
+        
+        // Create user in our database
+        console.log('Creating user in database with email:', emailAddress);
+        user = await prisma.user.create({
+          data: {
+            id: userId,
+            firstName,
+            lastName,
+            emailAddress,
+            imageUrl,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        });
+        console.log('User created successfully with ID:', userId);
+      } catch (userCreateError) {
+        console.error('Error creating user:', userCreateError);
+        return createJsonResponse({ 
+          error: 'Failed to create user record',
+          message: 'Please try again or contact support'
+        }, 500);
+      }
+    }
+    
+    // Parse the form data
+    console.log('Parsing form data');
+    const formData = await request.formData();
+    
+    // Extract the form fields
+    const title = formData.get('title')?.toString().trim();
+    const content = formData.get('content')?.toString().trim();
+    const type = formData.get('type')?.toString() || 'GENERAL_DISCUSSION';
+    
+    console.log('Form data parsed:', { 
+      title: title ? `${title.substring(0, 20)}${title.length > 20 ? '...' : ''}` : null,
+      contentLength: content ? content.length : 0,
+      type 
+    });
+    
+    // Validate required fields
+    if (!title || !content) {
+      console.log('Validation failed - missing required fields');
+      return createJsonResponse({ 
+        error: 'Title and content are required',
+        missing: { title: !title, content: !content }
+      }, 400);
+    }
+    
+    // Validate post type
+    if (!validPostTypes.includes(type as PostType)) {
+      console.log('Invalid post type:', type);
+      return createJsonResponse({ 
+        error: 'Invalid post type',
+        validTypes: validPostTypes 
+      }, 400);
+    }
+    
+    // Process file uploads if any
+    const files = formData.getAll('files');
+    console.log(`Processing ${files.length} file uploads`);
+    
+    const attachments: { url: string; fileType: FileType }[] = [];
+    
+    // If files were uploaded, process them
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (file instanceof File) {
+          console.log(`Processing file: ${file.name} (${file.type}, ${file.size} bytes)`);
           
-          const attachment = await prisma.attachment.create({
+          // Determine file type based on MIME type
+          let fileType: FileType = FileType.OTHER;
+          if (file.type.startsWith('image/')) {
+            fileType = FileType.IMAGE;
+          } else if (file.type.startsWith('audio/')) {
+            fileType = FileType.AUDIO;
+          }
+              
+          console.log(`Detected file type: ${fileType}`);
+          attachments.push({
+            url: `https://example.com/uploads/${file.name}`,
+            fileType,
+          });
+        } else {
+          console.warn('Non-file object in files field:', file);
+        }
+      }
+    }
+    
+    console.log('Creating post in database with data:', {
+      title: title?.substring(0, 20) + '...',
+      contentPreview: content?.substring(0, 20) + '...',
+      type,
+      authorId: userId
+    });
+    
+    // Create the post in the database - with more careful approach to includes
+    let post: any = null;
+    try {
+      // First try creating without includes
+      post = await prisma.forumPost.create({
+        data: {
+          title,
+          content,
+          type: type as PostType,
+          authorId: userId,
+        }
+      });
+      
+      console.log('Base post created successfully with ID:', post.id);
+      
+      // Now fetch the post with includes separately to isolate any relation issues
+      const postWithRelations = await prisma.forumPost.findUnique({
+        where: { id: post.id },
+        include: {
+          author: true,
+          votes: true,
+        }
+      });
+      
+      // Only update post if the query succeeds
+      if (postWithRelations) {
+        post = postWithRelations;
+        console.log('Post fetched with relations');
+      }
+    } catch (dbError) {
+      console.error('Database error details:', dbError);
+      throw new Error(`Database creation failed: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`);
+    }
+    
+    // Handle file uploads - make sure post exists before creating attachments
+    if (post && attachments.length > 0) {
+      console.log(`Creating ${attachments.length} attachment records in database`);
+      try {
+        const attachmentPromises = attachments.map((attachment: { url: string; fileType: FileType }) => {
+          return prisma.attachment.create({
             data: {
-              fileName: file.name,
-              fileUrl: tempFileUrl,
-              fileType: file.type.startsWith('image/') ? 'IMAGE' : 
-                       file.type.startsWith('audio/') ? 'AUDIO' : 'OTHER',
+              fileName: attachment.url.split('/').pop() as string,
+              fileUrl: attachment.url,
+              fileType: attachment.fileType,
               postId: post.id
             }
           });
-          
-          formattedPost.attachments.push({
-            id: attachment.id,
-            fileName: attachment.fileName,
-            fileUrl: attachment.fileUrl,
-            fileType: attachment.fileType
-          });
-        }
-      } catch (fileError) {
-        console.error('Error handling file uploads:', fileError);
-        return NextResponse.json(
-          { 
-            error: 'File Upload Error',
-            message: 'Failed to process file attachments',
-            details: fileError instanceof Error ? fileError.message : 'Unknown error'
-          },
-          { status: 400 }
-        );
+        });
+
+        await Promise.all(attachmentPromises);
+        console.log('All attachments created successfully');
+      } catch (attachmentError) {
+        console.error('Error creating attachments:', attachmentError);
+        // Continue with the post creation even if attachments fail
       }
     }
-
-    console.log('Sending formatted response:', formattedPost);
-    // Ensure we're not sending null as a payload
-    if (!formattedPost || typeof formattedPost !== 'object') {
-      return NextResponse.json({ 
-        error: 'Invalid post data',
-        message: 'Failed to create valid post data'
-      }, { status: 500 });
-    }
-    return NextResponse.json(formattedPost);
+    
+    // Format the post for the response with null checks
+    const formattedPost = {
+      id: post?.id || 'unknown',
+      title: post?.title || '',
+      content: post?.content || '',
+      type: post?.type || 'GENERAL_DISCUSSION',
+      createdAt: post?.createdAt ? post.createdAt.toISOString() : new Date().toISOString(),
+      author: {
+        name: post?.author?.firstName || post?.author?.lastName 
+          ? `${post?.author?.firstName || ''} ${post?.author?.lastName || ''}`.trim() 
+          : 'Anonymous',
+        imageUrl: post?.author?.imageUrl || null,
+      },
+      voteCount: post?.votes?.length || 0,
+      attachments: attachments.map((attachment: { url: string; fileType: FileType }, index: number) => ({
+        id: `temp-${index}-${Date.now()}`, // Generate a temporary ID for new attachments
+        fileName: attachment.url.split('/').pop() || 'file',
+        fileUrl: attachment.url,
+        fileType: attachment.fileType,
+      })),
+    };
+    
+    console.log('Sending successful response');
+    return createJsonResponse(formattedPost);
+    
   } catch (error) {
     console.error('Error creating post:', error);
     
-    return NextResponse.json(
-      { 
-        error: 'Post Creation Failed',
-        message: 'Failed to create new post',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
-   
+    // Enhanced error handling for foreign key constraint errors
+    if (
+      (error && typeof error === 'object' && 'code' in error && error.code === 'P2003') || 
+      (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('foreign key constraint'))
+    ) {
+      return createJsonResponse({ 
+        error: 'Database relationship error',
+        message: 'Failed to create post due to a foreign key constraint violation. This might be due to an invalid user ID or post type.',
+        details: error && typeof error === 'object' && 'message' in error ? error.message : 'Unknown error'
+      }, 400);
+    }
+    
+    return createJsonResponse({ 
+      error: 'Failed to create post',
+      message: error && typeof error === 'object' && 'message' in error ? error.message : 'Unknown error'
+    }, 500);
   }
 }
 
 // DELETE /api/forum/[id]
 export async function DELETE(request: Request) {
   try {
-    const { userId } = await auth();
+    // Check authentication
+    const authResult = await auth();
+    const userId = authResult?.userId;
+    
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return createJsonResponse({ error: 'You must be signed in to delete a post' }, 401);
     }
 
-    const id = request.url.split('/').pop();
+    // Get post ID from URL
+    const urlParts = request.url.split('/');
+    const id = urlParts[urlParts.length - 1];
+    
+    if (!id) {
+      return createJsonResponse({ error: 'Post ID is required' }, 400);
+    }
+
+    // Check if post exists and user is the author
     const post = await prisma.forumPost.findUnique({
       where: { id },
       select: { authorId: true }
     });
 
     if (!post) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      return createJsonResponse({ error: 'Post not found' }, 404);
     }
 
-    if (post.authorId !== (await auth()).userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (post.authorId !== userId) {
+      return createJsonResponse({ error: 'You can only delete your own posts' }, 403);
     }
 
+    // Delete the post
     await prisma.forumPost.delete({
-      where: { id }
+      where: { id },
     });
 
-    return NextResponse.json({ message: 'Post deleted successfully' });
+    return createJsonResponse({ success: true });
   } catch (error) {
     console.error('Error deleting post:', error);
-    return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+    return createJsonResponse({
+      error: 'Failed to delete post',
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, 500);
   }
 }

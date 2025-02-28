@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/backend": "^1.24.3",
     "@clerk/nextjs": "^6.9.7",
     "@eslint/config-array": "^0.19.1",
     "@eslint/object-schema": "^2.1.5",

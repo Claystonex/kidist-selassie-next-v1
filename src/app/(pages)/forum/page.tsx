@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaMusic, FaImage, FaBook, FaComments, FaArrowUp, FaTrash } from 'react-icons/fa';
 import { Dialog } from '@headlessui/react';
+import { useUser } from '@clerk/nextjs';
 
 interface Post {
   id: string;
@@ -24,14 +25,30 @@ interface Post {
   };
 }
 
+interface NewPost {
+  title: string;
+  content: string;
+  type: string;
+}
+
 export default function Forum() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newPost, setNewPost] = useState<NewPost>({ title: '', content: '', type: 'GENERAL_DISCUSSION' });
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [formSubmitting, setFormSubmitting] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [sortBy, setSortBy] = useState<'newest' | 'votes'>('newest');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  
+  // Get user information from Clerk
+  const { isLoaded: isUserLoaded, isSignedIn, user: clerkUser } = useUser();
+  const userId = clerkUser?.id;
   
   const loadMorePosts = async () => {
     if (!hasMore || isLoading) return;
@@ -89,18 +106,7 @@ export default function Forum() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [page, hasMore, isLoading]);
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPost, setNewPost] = useState<{
-    title: string;
-    content: string;
-    type: string;
-  }>({
-    title: '',
-    content: '',
-    type: 'GENERAL_DISCUSSION',
-  });
-  const [attachments, setAttachments] = useState<File[]>([]);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,66 +116,140 @@ export default function Forum() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    console.log('Form submission started');
     
-    if (!newPost.title || !newPost.content) {
+    // Validate inputs
+    setError('');
+    if (!newPost.title?.trim() || !newPost.content?.trim()) {
+      console.log('Form validation failed - missing title or content');
       setError('Please fill in both title and content');
       return;
     }
-    
+
+    // Check if user is signed in
+    if (!isSignedIn) {
+      console.log('Form submission rejected - user not signed in');
+      setError('You must be signed in to create a post');
+      return;
+    }
+
     try {
+      // Set loading state
+      console.log('Setting loading state and preparing submission');
       setIsLoading(true);
-      console.log('Form submission started');
-      console.log('Current post data:', newPost);
+      setFormSubmitting(true);
       
+      // Prepare form data
       const formData = new FormData();
       formData.append('title', newPost.title);
       formData.append('content', newPost.content);
-      formData.append('type', newPost.type);
+      formData.append('type', newPost.type || 'GENERAL_DISCUSSION');
       
-      attachments.forEach(file => {
-        formData.append('files', file);
-      });
+      // Add attachments if any
+      if (attachments.length > 0) {
+        console.log(`Adding ${attachments.length} attachment(s) to form data`);
+        attachments.forEach((file, index) => {
+          console.log(`Attachment ${index+1}:`, file.name, file.type, file.size);
+          formData.append('files', file);
+        });
+      }
       
-      console.log('Making API request...');
+      // Log form data for debugging
+      console.log('Form data prepared with the following entries:');
+      for (const pair of formData.entries()) {
+        if (pair[0] === 'files') {
+          console.log('- files:', (pair[1] as File).name);
+        } else {
+          console.log(`- ${pair[0]}:`, pair[1]);
+        }
+      }
+      
+      // Send the request
+      console.log('Sending POST request to /api/forum');
       const response = await fetch('/api/forum', {
         method: 'POST',
         body: formData,
       });
       
+      console.log('Response received:', response.status, response.statusText);
+      
+      // Get the response text first to safely handle empty responses
+      const responseText = await response.text();
       console.log('Response status:', response.status);
+      console.log('Raw response text:', responseText);
       
-      let responseData;
-      try {
-        responseData = await response.json();
-        console.log('Response data:', responseData);
-      } catch (e) {
-        console.error('JSON parse error:', e);
-        responseData = { error: 'Invalid response format' };
+      // Parse the JSON response only if there's content
+      let data: Record<string, any> = {};
+      if (responseText && responseText.trim() !== '') {
+        try {
+          data = JSON.parse(responseText) as Record<string, any>;
+          console.log('Parsed response data:', data);
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          throw new Error('Invalid response format from server');
+        }
+      } else {
+        console.warn('Empty response received from server');
+        throw new Error('The server returned an empty response');
       }
       
+      // Handle error response
       if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to create post');
+        const errorMessage = data && typeof data === 'object' && 'error' in data 
+          ? String(data.error)
+          : 'Failed to create post';
+        console.error('Request failed with status', response.status, errorMessage);
+        throw new Error(errorMessage);
       }
       
-      // Reset form and close modal first
+      // Success! Reset form and close modal
+      console.log('Post created successfully, resetting form');
       setIsModalOpen(false);
       setNewPost({ title: '', content: '', type: 'GENERAL_DISCUSSION' });
-      setAttachments([])
+      setAttachments([]);
       
       // Show success message
       setSuccess('Your post has been created successfully!');
-      setTimeout(() => setSuccess(''), 5000); // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(''), 5000);
       
-      // Add the new post to the beginning of the list
-      setPosts(prevPosts => [responseData, ...prevPosts]);
+      // Update posts list with the new post if we have valid data
+      if (data && typeof data === 'object' && 'id' in data) {
+        console.log('Adding new post to the posts list:', data.id);
+        
+        // Convert the API response to match our Post type
+        const newPost: Post = {
+          id: String(data.id),
+          title: String(data.title || ''),
+          content: String(data.content || ''),
+          type: (data.type || 'GENERAL_DISCUSSION') as Post['type'],
+          attachments: Array.isArray(data.attachments) 
+            ? data.attachments.map((att: any) => ({
+                id: String(att.id || ''),
+                fileName: String(att.fileName || ''),
+                fileUrl: String(att.fileUrl || ''),
+                fileType: (att.fileType || 'OTHER') as 'IMAGE' | 'AUDIO' | 'OTHER',
+              }))
+            : [],
+          votes: Number(data.voteCount || 0),
+          createdAt: String(data.createdAt || new Date().toISOString()),
+          author: {
+            name: data.author?.name || 'Anonymous',
+            imageUrl: data.author?.imageUrl || null,
+          },
+        };
+        
+        setPosts(prevPosts => [newPost, ...prevPosts]);
+      } else {
+        console.warn('Could not add post to list - invalid data format');
+      }
       
-      console.log('Post created successfully');
     } catch (error) {
       console.error('Error creating post:', error);
       setError(error instanceof Error ? error.message : 'Failed to create post');
     } finally {
+      console.log('Resetting loading state');
       setIsLoading(false);
+      setFormSubmitting(false);
     }
   };
 
@@ -211,6 +291,30 @@ export default function Forum() {
     if (selectedType === 'all') return true;
     return post.type === selectedType;
   };
+
+  // Show loading state when checking authentication
+  if (!isUserLoaded) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold">Loading...</h1>
+      </div>
+    );
+  }
+
+  // Redirect to sign-in if not authenticated
+  if (!isSignedIn) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold">You must be logged in to view the forum.</h1>
+        <button 
+          onClick={() => window.location.href = '/sign-in'} 
+          className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Sign In
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -369,20 +473,40 @@ export default function Forum() {
               <h3 className="text-lg font-medium mb-4">Create New Post</h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={newPost.title}
-                  onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                  className="w-full p-2 border rounded-lg"
-                />
+                <div className="space-y-2 mb-4">
+                  {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                      <strong className="font-bold">Error: </strong>
+                      <span className="block sm:inline">{error}</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    placeholder="Title"
+                    value={newPost.title}
+                    onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                </div>
 
-                <textarea
-                  placeholder="Content"
-                  value={newPost.content}
-                  onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                  className="w-full p-2 border rounded-lg h-32"
-                />
+                <div>
+                  <label htmlFor="content" className="block text-sm font-medium">
+                    Content
+                  </label>
+                  <textarea
+                    id="content"
+                    placeholder="Content"
+                    value={newPost.content}
+                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+                    className="w-full p-2 border rounded-lg h-32"
+                  />
+                </div>
 
                 <div>
                   <label className="block mb-2">Category</label>
@@ -399,7 +523,6 @@ export default function Forum() {
                     <option value="CAREER_SUPPORT">Career Support</option>
                   </select>
                 </div>
-
 
                 <div>
                   <label className="block mb-2">Attachments</label>
@@ -450,9 +573,10 @@ export default function Forum() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    disabled={formSubmitting}
+                    className={`px-4 py-2 ${formSubmitting ? 'bg-blue-300' : 'bg-blue-600'} text-white rounded-lg hover:bg-blue-700 transition-colors`}
                   >
-                    Create Post
+                    {formSubmitting ? 'Submitting...' : 'Create Post'}
                   </button>
                 </div>
               </form>
