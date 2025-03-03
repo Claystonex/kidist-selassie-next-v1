@@ -26,6 +26,7 @@ model User {
     
     votes     Vote[]
     posts     ForumPost[]
+    donations Donation[]
 }
 
 model Post {
@@ -115,16 +116,21 @@ enum FileType {
 }
 
 model Donation {
-  id            String   @id @default(cuid())
-  amount        Float
-  currency      String   @default("USD")
-  status        String   // pending, completed, failed
-  paymentId     String   @unique  // Square payment ID
-  donorName     String?
-  donorEmail    String?
-  message       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String?  // Optional link to user if they're logged in
-  user          User?    @relation(fields: [userId], references: [id])
+  id              String   @id @default(cuid())
+  amount          Float
+  currency        String   @default("USD")
+  status          String   // pending, completed, failed
+  paymentId       String   @unique  // Square or PayPal payment ID
+  paymentType     String   // square, paypal
+  isRecurring     Boolean  @default(false)
+  recurringPeriod String?  // monthly, quarterly, yearly
+  subscriptionId  String?  // For recurring donations
+  donorName       String?
+  donorEmail      String?
+  message         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  userId          String?  // Optional link to user if they're logged in
+  user            User?    @relation(fields: [userId], references: [id])
+  receiptSent     Boolean  @default(false)
 }

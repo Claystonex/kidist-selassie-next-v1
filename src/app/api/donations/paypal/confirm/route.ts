@@ -3,8 +3,6 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
-
-
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
   try {
@@ -92,8 +90,53 @@ async function sendReceiptEmail(donation: any) {
 }
 
 export async function POST(request: Request) {
-  return NextResponse.json(
-    { error: 'This endpoint is deprecated. Please use /api/donations/paypal/confirm instead' },
-    { status: 308 }
-  );
+  try {
+    const { userId } = auth();
+    const { orderID, amount, currency, donorName, donorEmail, message, paymentType, isRecurring, recurringPeriod } = await request.json();
+
+    // Validate input
+    if (!orderID || !amount || amount <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid payment details' },
+        { status: 400 }
+      );
+    }
+
+    // Store donation in database
+    const donation = await prisma.donation.create({
+      data: {
+        amount,
+        currency,
+        status: 'completed',
+        paymentId: orderID,
+        paymentType,
+        isRecurring: isRecurring || false,
+        recurringPeriod,
+        donorName,
+        donorEmail,
+        message,
+        userId,
+        receiptSent: false
+      },
+    });
+
+    // Send receipt email
+    const emailSent = await sendReceiptEmail(donation);
+
+    return NextResponse.json({
+      success: true,
+      donation: {
+        id: donation.id,
+        amount: donation.amount,
+        status: donation.status,
+        receiptSent: emailSent
+      },
+    });
+  } catch (error) {
+    console.error('PayPal donation processing error:', error);
+    return NextResponse.json(
+      { error: 'Failed to process PayPal donation' },
+      { status: 500 }
+    );
+  }
 }

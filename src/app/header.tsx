@@ -48,6 +48,8 @@ export default function Header() {
             <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}>Bootcamps</MobileNavLink>
             <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}>Questions</MobileNavLink>
             <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}>Miracles</MobileNavLink>
+            <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}>Forum</MobileNavLink>
+            <MobileNavLink href="/donate" onClick={() => setIsMenuOpen(false)}>Donate</MobileNavLink>
             <div className="pt-4">
               {user ? (
                 <UserButton afterSignOutUrl="/" />
@@ -70,6 +72,7 @@ export default function Header() {
           <NavLink href="/questions">Questions</NavLink>
           <NavLink href="/miracles">Miracles</NavLink>
           <NavLink href="/forum">Forum</NavLink>
+          <NavLink href="/donate">Donate</NavLink>
         </div>
 
         {/* Auth Button */}

@@ -1,0 +1,8 @@
+// If the custom declaration file doesn't fix the issue, you can use this alternative approach
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+// @ts-ignore
+import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';

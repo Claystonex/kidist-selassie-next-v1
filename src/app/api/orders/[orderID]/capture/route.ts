@@ -3,8 +3,6 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
-
-
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
   try {
@@ -91,9 +89,100 @@ async function sendReceiptEmail(donation: any) {
   }
 }
 
-export async function POST(request: Request) {
-  return NextResponse.json(
-    { error: 'This endpoint is deprecated. Please use /api/donations/paypal/confirm instead' },
-    { status: 308 }
-  );
+export async function POST(
+  request: Request,
+  { params }: { params: { orderID: string } }
+) {
+  try {
+    const { userId } = auth();
+    const { orderID } = params;
+    const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json();
+
+    if (!orderID) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Find the pending donation in the database
+    const pendingDonation = await prisma.donation.findFirst({
+      where: {
+        paymentId: orderID,
+        status: 'pending'
+      }
+    });
+
+    if (!pendingDonation) {
+      return NextResponse.json(
+        { error: 'Order not found or already processed' },
+        { status: 404 }
+      );
+    }
+
+    // Update donation with additional details and mark as completed
+    const donation = await prisma.donation.update({
+      where: { id: pendingDonation.id },
+      data: {
+        status: 'completed',
+        donorName: donorName || pendingDonation.donorName,
+        donorEmail: donorEmail || pendingDonation.donorEmail,
+        message: message || pendingDonation.message,
+        isRecurring: isRecurring !== undefined ? isRecurring : pendingDonation.isRecurring,
+        recurringPeriod: recurringPeriod || pendingDonation.recurringPeriod,
+        receiptSent: false
+      }
+    });
+
+    // Send receipt email if email is provided
+    let emailSent = false;
+    if (donation.donorEmail) {
+      emailSent = await sendReceiptEmail(donation);
+    }
+
+    // In a real implementation, we would verify the payment with PayPal's API
+    // For demo purposes, we'll mock the response
+    
+    // Mock PayPal capture response
+    const mockCaptureResponse = {
+      id: orderID,
+      status: 'COMPLETED',
+      purchase_units: [
+        {
+          reference_id: 'default',
+          amount: {
+            currency_code: 'USD',
+            value: donation.amount.toString()
+          },
+          payee: {
+            email_address: process.env.PAYPAL_MERCHANT_EMAIL || 'merchant@example.com'
+          },
+          payments: {
+            captures: [
+              {
+                id: `CAPTURE-${Date.now()}`,
+                status: 'COMPLETED',
+                amount: {
+                  currency_code: 'USD',
+                  value: donation.amount.toString()
+                },
+                final_capture: true,
+                disbursement_mode: 'INSTANT',
+                create_time: new Date().toISOString(),
+                update_time: new Date().toISOString()
+              }
+            ]
+          }
+        }
+      ]
+    };
+
+    return NextResponse.json(mockCaptureResponse);
+  } catch (error) {
+    console.error('Failed to capture order:', error);
+    return NextResponse.json(
+      { error: 'Failed to capture order' },
+      { status: 500 }
+    );
+  }
 }
