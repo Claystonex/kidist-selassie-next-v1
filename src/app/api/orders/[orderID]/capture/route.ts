@@ -94,7 +94,8 @@ export async function POST(
   { params }: { params: { orderID: string } }
 ) {
   try {
-    const { userId } = auth();
+    const authData = await auth();
+    const userId = authData?.userId;
     const { orderID } = params;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json();
 

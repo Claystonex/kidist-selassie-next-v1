@@ -3,8 +3,30 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
+// Define types for donation data
+type RecurringPeriod = 'monthly' | 'quarterly' | 'yearly';
+
+interface DonationData {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  paymentId?: string;
+  subscriptionId: string | null;
+  paymentType: string;
+  isRecurring: boolean;
+  recurringPeriod: RecurringPeriod | string | null;
+  donorName: string | null;
+  donorEmail: string | null;
+  message?: string | null;
+  userId?: string | null;
+  receiptSent: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 // Function to send receipt email for subscription
-async function sendSubscriptionEmail(donation: any) {
+async function sendSubscriptionEmail(donation: DonationData) {
   try {
     // Configure nodemailer with your email service
     const transporter = nodemailer.createTransport({
@@ -25,18 +47,18 @@ async function sendSubscriptionEmail(donation: any) {
       'monthly': 'Monthly',
       'quarterly': 'Quarterly (every 3 months)',
       'yearly': 'Yearly'
-    }[donation.recurringPeriod] || donation.recurringPeriod;
+    }[donation.recurringPeriod as RecurringPeriod] || 'Regular';
     
     // Prepare email content
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'donations@yourorganization.com',
-      to: donation.donorEmail,
+      to: donation.donorEmail || 'recipient@example.com',
       subject: 'Thank You for Your Recurring Donation',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Recurring Donation Confirmation</h1>
           
-          <p>Dear ${donation.donorName || 'Donor'},</p>
+          <p>Dear ${donation.donorName || 'Generous Donor'},</p>
           
           <p>Thank you for setting up a recurring donation of <strong>$${formattedAmount} ${donation.currency}</strong>. 
           Your ongoing support will help us make a sustainable impact.</p>
@@ -98,7 +120,8 @@ async function sendSubscriptionEmail(donation: any) {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = auth();
+    const authData = await auth();
+    const userId = authData?.userId;
     const { 
       subscriptionID, 
       amount, 

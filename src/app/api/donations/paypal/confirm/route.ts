@@ -91,7 +91,8 @@ async function sendReceiptEmail(donation: any) {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = auth();
+    const authData = await auth();
+    const userId = authData?.userId;
     const { orderID, amount, currency, donorName, donorEmail, message, paymentType, isRecurring, recurringPeriod } = await request.json();
 
     // Validate input
