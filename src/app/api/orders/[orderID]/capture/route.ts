@@ -91,12 +91,12 @@ async function sendReceiptEmail(donation: any) {
 
 export async function POST(
   request: Request,
-  { params }: { params: { orderID: string } }
+  context: { params: { orderID: string } }
 ) {
   try {
     const authData = await auth();
     const userId = authData?.userId;
-    const orderId = params.orderID;
+    const orderId = context.params.orderID;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json();
 
     if (!orderId) {
