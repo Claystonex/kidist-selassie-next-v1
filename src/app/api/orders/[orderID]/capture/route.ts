@@ -96,10 +96,10 @@ export async function POST(
   try {
     const authData = await auth();
     const userId = authData?.userId;
-    const { orderID } = params;
+    const orderId = params.orderID;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json();
 
-    if (!orderID) {
+    if (!orderId) {
       return NextResponse.json(
         { error: 'Order ID is required' },
         { status: 400 }
@@ -109,7 +109,7 @@ export async function POST(
     // Find the pending donation in the database
     const pendingDonation = await prisma.donation.findFirst({
       where: {
-        paymentId: orderID,
+        paymentId: orderId,
         status: 'pending'
       }
     });
@@ -146,7 +146,7 @@ export async function POST(
     
     // Mock PayPal capture response
     const mockCaptureResponse = {
-      id: orderID,
+      id: orderId,
       status: 'COMPLETED',
       purchase_units: [
         {
