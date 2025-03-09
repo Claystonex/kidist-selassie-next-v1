@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
@@ -90,16 +90,16 @@ async function sendReceiptEmail(donation: any) {
 }
 
 export async function POST(
-  request: Request,
-  context: { params: { orderID: string } }
+  request: NextRequest,
+  { params }: { params: { orderID: string } }
 ) {
   try {
     const authData = await auth();
     const userId = authData?.userId;
-    const orderId = context.params.orderID;
+    const { orderID } = params;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json();
 
-    if (!orderId) {
+    if (!orderID) {
       return NextResponse.json(
         { error: 'Order ID is required' },
         { status: 400 }
@@ -109,7 +109,7 @@ export async function POST(
     // Find the pending donation in the database
     const pendingDonation = await prisma.donation.findFirst({
       where: {
-        paymentId: orderId,
+        paymentId: orderID,
         status: 'pending'
       }
     });
@@ -146,7 +146,7 @@ export async function POST(
     
     // Mock PayPal capture response
     const mockCaptureResponse = {
-      id: orderId,
+      id: orderID,
       status: 'COMPLETED',
       purchase_units: [
         {
