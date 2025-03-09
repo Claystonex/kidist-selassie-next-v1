@@ -92,7 +92,7 @@ async function sendReceiptEmail(donation: any) {
 export async function POST(
   request: NextRequest,
   context: { params: { orderID: string } }
-) {
+): Promise<Response> {
   try {
     const authData = await auth();
     const userId = authData?.userId;
