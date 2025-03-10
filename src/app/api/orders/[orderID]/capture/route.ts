@@ -3,6 +3,13 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
+// Define proper context type for route handlers
+interface RequestContext {
+  params: {
+    orderID: string;
+  };
+}
+
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
   try {
@@ -91,12 +98,12 @@ async function sendReceiptEmail(donation: any) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orderID: string } }
+  context: RequestContext
 ): Promise<Response> {
   try {
     const authData = await auth();
-    // Remove unused userId variable
-    const { orderID } = params;
+    // Get orderID from the context params
+    const { orderID } = context.params;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json(); 
 
     if (!orderID) {
