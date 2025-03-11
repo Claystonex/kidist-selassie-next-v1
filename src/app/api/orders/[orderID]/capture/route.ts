@@ -3,12 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
-// Define proper context type for route handlers
-interface RequestContext {
-  params: {
-    orderID: string;
-  };
-}
+// Next.js App Router provides the params directly in the second argument
 
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
@@ -98,12 +93,12 @@ async function sendReceiptEmail(donation: any) {
 
 export async function POST(
   request: NextRequest,
-  context: RequestContext
+  { params }: { params: { orderID: string } }
 ): Promise<Response> {
   try {
     const authData = await auth();
-    // Get orderID from the context params
-    const { orderID } = context.params;
+    // Get orderID from the params
+    const { orderID } = params;
     const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json(); 
 
     if (!orderID) {
