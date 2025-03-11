@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
@@ -89,12 +89,16 @@ async function sendReceiptEmail(donation: any) {
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { orderID: string } }) {
+export async function POST(request: Request) {
   try {
     const authData = await auth();
-    // Get orderID from the params
-    const { orderID } = params;
-    const { donorName, donorEmail, message, isRecurring, recurringPeriod } = await request.json(); 
+    // Get orderID from the URL path
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const orderID = pathParts[pathParts.length - 2]; // Extract orderID from URL path
+    
+    const requestData = await request.json();
+    const { donorName, donorEmail, message, isRecurring, recurringPeriod } = requestData;
 
     if (!orderID) {
       return NextResponse.json(
