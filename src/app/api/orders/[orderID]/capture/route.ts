@@ -3,8 +3,6 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 
-// Next.js App Router provides the params directly in the second argument
-
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
   try {
@@ -91,10 +89,7 @@ async function sendReceiptEmail(donation: any) {
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { orderID: string } }
-): Promise<Response> {
+export async function POST(request: NextRequest, { params }: { params: { orderID: string } }) {
   try {
     const authData = await auth();
     // Get orderID from the params
