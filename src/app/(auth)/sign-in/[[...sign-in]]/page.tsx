@@ -32,7 +32,7 @@ const SignInPage = () => {
               socialButtonsBlockButton: 'bg-white text-black border border-gray-300 hover:bg-gray-50'
             }
           }}
-          redirectUrl="/dashboard"
+          redirectUrl="/"
         />
         
         {/* <div className="mt-4 text-center">

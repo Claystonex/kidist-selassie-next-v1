@@ -9,10 +9,10 @@ const SignUpPage = () => {
   const router = useRouter();
   const { isSignedIn } = useUser();
 
-  // Redirect to dashboard if already signed in
+  // Redirect to home page if already signed in
   React.useEffect(() => {
     if (isSignedIn) {
-      router.push('/dashboard');
+      router.push('/');
     }
   }, [isSignedIn, router]);
 
@@ -32,7 +32,7 @@ const SignUpPage = () => {
               socialButtonsBlockButton: 'bg-white text-black border border-gray-300 hover:bg-gray-50'
             }
           }}
-          redirectUrl="/dashboard"
+          redirectUrl="/"
         />
         
         {/* <div className="mt-4 text-center">

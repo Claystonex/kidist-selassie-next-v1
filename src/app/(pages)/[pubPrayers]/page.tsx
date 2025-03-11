@@ -71,29 +71,18 @@
 //   );
 // }
 
-// import { auth } from "@clerk/nextjs/server"; // Change this line
-// // or
+import { prayerList } from "./prayerList";
 
-
-// // import { Button } from "@/components/ui/button";
-// import { prayerList } from "./prayerList";
-
-// export default async function PrayerRequestsPage() {
-//   const { userId } = await auth(); // If using auth
-//   // or
- 
-
-//   return (
-//     // Your component JSX
-//     <div>
-//       <h1 className="text-white font-anton flex text-center justify-center">Coming Soon</h1>
+export default function PrayerRequestsPage() {
+  return (
+    <div>
+      <h1 className="text-white font-anton flex text-center justify-center">Coming Soon</h1>
       
-//       <div>
-//         {prayerList.map((prayer) => (
-//           <div key={prayer.id}>{prayer.title}{prayer.description}{prayer.prayer}</div>
-//         ))}
-//       </div>
-//     </div>
-    
-//   );
-// }
+      <div>
+        {prayerList.map((prayer) => (
+          <div key={prayer.id}>{prayer.title}{prayer.description}{prayer.prayer}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
