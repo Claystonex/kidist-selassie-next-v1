@@ -6,6 +6,30 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 // Valid post types for validation
 const validPostTypes = Object.values(PostType);
 
+// List of profanity words to filter out
+const PROFANITY_LIST = [
+  'fuck', 'shit', 'ass', 'bitch', 'damn', 'cunt', 'dick', 'bastard',
+  'asshole', 'motherfucker', 'bullshit', 'crap', 'piss', 'whore', 'slut', 'darn', 'heck', 'goddamn', 'hell', 'pussy', 'f*ck', 'sh*t', '*ss', 'b*tch', 'd*ck', 'b*stard', 'a*shole', 'm*therfucker', 'b*llshit', 'c*ap', 'p*ss', 'wh*re', 'sl*t', 'd*rn', 'h*ll', 'p*ssy'
+];
+
+// Function to check for profanity in text
+function containsProfanity(text: string | undefined): boolean {
+  if (!text) return false;
+  
+  const lowerText = text.toLowerCase();
+  console.log('API checking text for profanity');
+  
+  for (const word of PROFANITY_LIST) {
+    const regex = new RegExp('\\b' + word + '\\b', 'i');
+    if (regex.test(lowerText)) {
+      console.log(`API profanity filter: profanity found in text`);
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 // Define interfaces for our response types
 interface FormattedAttachment {
   id: string;
@@ -118,6 +142,7 @@ export async function GET(request: Request) {
           ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() 
           : 'Anonymous',
         imageUrl: post.author?.imageUrl || null,
+        id: post.author?.id || null, // Add the author ID for ownership checks
       },
       attachments: post.attachments.map((att: any) => {
         const formattedAtt: FormattedAttachment = {
@@ -227,6 +252,14 @@ export async function POST(request: Request) {
       return createJsonResponse({ 
         error: 'Title and content are required',
         missing: { title: !title, content: !content }
+      }, 400);
+    }
+    
+    // Check for profanity in title and content
+    if (containsProfanity(title) || containsProfanity(content)) {
+      console.log('POST request rejected due to profanity');
+      return createJsonResponse({ 
+        error: 'Your post contains language that is not allowed in this forum'
       }, 400);
     }
     

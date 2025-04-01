@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Switch } from '@headlessui/react';
+import TranslatableText from '@/app/_components/TranslatableText';
 
 interface PrayerRequest {
   id: string;
@@ -72,11 +73,11 @@ const PrayerPage = () => {
       <div className="max-w-3xl mx-auto">
         {/* Prayer Request Form */}
         <div className="bg-[#086c47] rounded-lg shadow-xl p-6 mb-8">
-          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Submit a Prayer Request</h2>
+          <h2 className="text-2xl font-bold text-yellow-400 mb-6"><TranslatableText>Submit a Prayer Request</TranslatableText></h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-300">
-                Prayer Title
+                <TranslatableText>Prayer Title</TranslatableText>
               </label>
               <input
                 type="text"
@@ -90,7 +91,7 @@ const PrayerPage = () => {
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-300">
-                Prayer Description
+                <TranslatableText>Prayer Description</TranslatableText>
               </label>
               <textarea
                 id="description"
@@ -115,19 +116,19 @@ const PrayerPage = () => {
                       className={`${isPrivate ? 'bg-yellow-400' : 'bg-[#c4142c]'}
                         relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
                     >
-                      <span className="sr-only">Private Prayer</span>
+                      <span className="sr-only"><TranslatableText>Private Prayer</TranslatableText></span>
                       <span
                         className={`${isPrivate ? 'translate-x-6' : 'translate-x-1'}
                           inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
-                    <span className={`text-sm ${isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}>Private Prayer</span>
+                    <span className={`text-sm ${isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}><TranslatableText>Private Prayer</TranslatableText></span>
                   </div>
                 </div>
 
                 {showPrivateTooltip && (
                   <div className="absolute bottom-full left-0 mb-2 w-64 bg-gray-700 text-white text-sm rounded-lg p-2 shadow-lg">
-                    Private prayers will only be visible to our prayer team and won't be displayed publicly on the website.
+                    <TranslatableText>Private prayers will only be visible to our prayer team and won't be displayed publicly on the website.</TranslatableText>
                   </div>
                 )}
               </div>
@@ -144,13 +145,13 @@ const PrayerPage = () => {
                       className={`${!isPrivate ? 'bg-yellow-400' : 'bg-[#c4142c]'}
                         relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
                     >
-                      <span className="sr-only">Public Prayer</span>
+                      <span className="sr-only"><TranslatableText>Public Prayer</TranslatableText></span>
                       <span
                         className={`${!isPrivate ? 'translate-x-6' : 'translate-x-1'}
                           inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
-                    <span className={`text-sm ${!isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}>Public Prayer</span>
+                    <span className={`text-sm ${!isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}><TranslatableText>Public Prayer</TranslatableText></span>
                   </div>
                 </div>
               </div>
@@ -160,21 +161,21 @@ const PrayerPage = () => {
               type="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
             >
-              Submit Prayer Request
+              <TranslatableText>Submit Prayer Request</TranslatableText>
             </button>
           </form>
         </div>
 
         {/* Public Prayer Requests Display */}
         <div className="bg-[#086c47] border border-[#c4142c] rounded-lg shadow-xl p-6">
-          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Public Prayer Requests</h2>
+          <h2 className="text-2xl font-bold text-yellow-400 mb-6"><TranslatableText>Public Prayer Requests</TranslatableText></h2>
           <div className="space-y-6">
             {prayerRequests.map((prayer) => (
               <div key={prayer.id} className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white">{prayer.title}</h3>
-                <p className="text-gray-300 mt-2">{prayer.description}</p>
+                <h3 className="text-lg font-semibold text-white"><TranslatableText>{prayer.title}</TranslatableText></h3>
+                <p className="text-gray-300 mt-2"><TranslatableText>{prayer.description}</TranslatableText></p>
                 <div className="mt-2 text-sm text-gray-400">
-                  Requested by {prayer.userName} on {new Date(prayer.timestamp).toLocaleDateString()}
+                  <TranslatableText>Requested by</TranslatableText> {prayer.userName} <TranslatableText>on</TranslatableText> {new Date(prayer.timestamp).toLocaleDateString()}
                 </div>
               </div>
             ))}

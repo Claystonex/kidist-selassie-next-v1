@@ -54,6 +54,9 @@ import '@fortawesome/fontawesome-svg-core/styles.css'
 
 config.autoAddCss = false // Tell Font Awesome to skip adding CSS automatically since it's being imported above
 import Header from "./header";
+import { TranslationProvider } from './_contexts/TranslationContext';
+import SiteTranslator from './_components/SiteTranslator';
+import AutoTranslate from './_components/AutoTranslate';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -87,11 +90,17 @@ export default async function RootLayout({
       <html lang="en" className={`${anton.variable} ${inter.variable} ${montserrat.variable}`}>
         <body className="font-montserrat bg-[#086c47] min-h-screen">
           <TRPCReactProvider>
-    
-            <Header />
-            <main className="container mx-auto px-4 py-8">
-              {children}
-            </main>
+            {/* Wrap the entire app with TranslationProvider */}
+            <TranslationProvider>
+              <SiteTranslator>
+                <AutoTranslate>
+                  <Header />
+                  <main className="container mx-auto px-4 py-8">
+                    {children}
+                  </main>
+                </AutoTranslate>
+              </SiteTranslator>
+            </TranslationProvider>
           </TRPCReactProvider>
         </body>
       </html>

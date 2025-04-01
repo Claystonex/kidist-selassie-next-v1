@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
+// @ts-ignore - Ignore TypeScript errors for PayPal SDK import
+import paypal from '@paypal/paypal-server-sdk';
+import { getPayPalClient } from '@/app/_utils/paypalClient';
 
 // Function to send receipt email
 async function sendReceiptEmail(donation: any) {
@@ -142,44 +145,26 @@ export async function POST(request: Request) {
       emailSent = await sendReceiptEmail(donation);
     }
 
-    // In a real implementation, we would verify the payment with PayPal's API
-    // For demo purposes, we'll mock the response
-    
-    // Mock PayPal capture response
-    const mockCaptureResponse = {
-      id: orderID,
-      status: 'COMPLETED',
-      purchase_units: [
-        {
-          reference_id: 'default',
-          amount: {
-            currency_code: 'USD',
-            value: donation.amount.toString()
-          },
-          payee: {
-            email_address: process.env.PAYPAL_MERCHANT_EMAIL || 'merchant@example.com'
-          },
-          payments: {
-            captures: [
-              {
-                id: `CAPTURE-${Date.now()}`,
-                status: 'COMPLETED',
-                amount: {
-                  currency_code: 'USD',
-                  value: donation.amount.toString()
-                },
-                final_capture: true,
-                disbursement_mode: 'INSTANT',
-                create_time: new Date().toISOString(),
-                update_time: new Date().toISOString()
-              }
-            ]
-          }
-        }
-      ]
-    };
-
-    return NextResponse.json(mockCaptureResponse);
+    try {
+      // Set up the PayPal client
+      const paypalClient = getPayPalClient();
+      
+      // Create capture request
+      const paypalSdk = paypal as any;
+      const request = new paypalSdk.orders.OrdersCaptureRequest(orderID);
+      request.requestBody({});
+      
+      // Execute the capture request
+      const captureResponse = await paypalClient.execute(request);
+      
+      return NextResponse.json(captureResponse.result);
+    } catch (error) {
+      console.error('Failed to capture PayPal payment:', error);
+      return NextResponse.json(
+        { error: 'Failed to capture PayPal payment', details: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error('Failed to capture order:', error);
     return NextResponse.json(
