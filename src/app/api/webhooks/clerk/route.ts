@@ -7,7 +7,7 @@ import { sendWelcomeEmail } from '@/app/_utils/emailUtils';
 // This is the Clerk webhook handler for user-related events
 export async function POST(req: Request) {
   // Get the headers
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svix_id = headerPayload.get('svix-id');
   const svix_timestamp = headerPayload.get('svix-timestamp');
   const svix_signature = headerPayload.get('svix-signature');
@@ -47,19 +47,24 @@ export async function POST(req: Request) {
     
     // Make sure we have at least one email address
     if (email_addresses && email_addresses.length > 0) {
-      const primaryEmail = email_addresses[0].email_address;
+      const primaryEmail = email_addresses[0]?.email_address;
       const userName = [first_name, last_name].filter(Boolean).join(' ') || 'Member';
       
-      try {
-        // Send welcome email asynchronously
-        // Note: we're not awaiting this to prevent blocking the webhook response
-        sendWelcomeEmail(primaryEmail, userName).catch(error => {
-          console.error('Error sending welcome email:', error);
-        });
-        
-        console.log(`Welcome email triggered for user ${id} (${primaryEmail})`);
-      } catch (error) {
-        console.error('Error processing new user webhook:', error);
+      // Only proceed if we have a valid email
+      if (primaryEmail) {
+        try {
+          // Send welcome email asynchronously
+          // Note: we're not awaiting this to prevent blocking the webhook response
+          sendWelcomeEmail(primaryEmail, userName).catch(error => {
+            console.error('Error sending welcome email:', error);
+          });
+          
+          console.log(`Welcome email triggered for user ${id} (${primaryEmail})`);
+        } catch (error) {
+          console.error('Error processing new user webhook:', error);
+        }
+      } else {
+        console.log(`User ${id} created but has no valid email address for welcome email`);
       }
     }
   }
