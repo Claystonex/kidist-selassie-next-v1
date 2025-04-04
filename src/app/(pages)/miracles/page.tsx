@@ -105,6 +105,21 @@ const MiraclesPage = () => {
           </form>
         </div>
 
+        {/* Featured Miracle Video */}
+        <div className="bg-[#086c47] rounded-lg shadow-xl p-6 mb-8">
+          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Featured Miracle Testimony</h2>
+          <div className="aspect-w-16 aspect-h-9">
+            <iframe
+              src="https://www.youtube.com/embed/Hb66U9bdN3c"
+              title="Miracle Testimony"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full rounded-lg shadow-lg"
+              style={{ aspectRatio: '16/9', maxHeight: '450px' }}
+            ></iframe>
+          </div>
+        </div>
+
         {/* Miracles Display */}
         <div className="bg-[#086c47] border border-[#c4142c] rounded-lg shadow-xl p-6">
           <h2 className="text-2xl font-bold text-yellow-400 mb-6">Miracle Testimonies</h2>

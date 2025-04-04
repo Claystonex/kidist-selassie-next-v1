@@ -6,6 +6,15 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 // Valid post types for validation
 const validPostTypes = Object.values(PostType);
 
+// Admin emails that are allowed to upload media
+const ADMIN_EMAILS = ['selassieyouthtrinity@gmail.com'];
+
+// Function to check if user is an admin
+const isAdminUser = (email?: string): boolean => {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+};
+
 // List of profanity words to filter out
 const PROFANITY_LIST = [
   'fuck', 'shit', 'ass', 'bitch', 'damn', 'cunt', 'dick', 'bastard',
@@ -272,9 +281,20 @@ export async function POST(request: Request) {
       }, 400);
     }
     
-    // Process file uploads if any
+    // Process file uploads if any - but only for admin users
     const files = formData.getAll('files');
-    console.log(`Processing ${files.length} file uploads`);
+    const userEmail = (await currentUser())?.emailAddresses?.[0]?.emailAddress || '';
+    const isAdmin = isAdminUser(userEmail);
+    
+    console.log(`Processing ${files.length} file uploads. User email: ${userEmail}, Is admin: ${isAdmin}`);
+    
+    // Reject file uploads from non-admin users
+    if (files.length > 0 && !isAdmin) {
+      console.log('File upload rejected - user is not an admin');
+      return createJsonResponse({
+        error: 'You do not have permission to upload files. Only administrators can upload media.'
+      }, 403);
+    }
     
     const attachments: { url: string; fileType: FileType }[] = [];
     

@@ -2,6 +2,7 @@ import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { sendWelcomeEmail } from '@/app/_utils/emailUtils';
 
 // This is the Clerk webhook handler for user-related events
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
   
   if (eventType === 'user.created') {
     // A new user was created
-    const { id, email_addresses, first_name, last_name } = evt.data;
+    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
     
     // Make sure we have at least one email address
     if (email_addresses && email_addresses.length > 0) {
@@ -53,6 +54,28 @@ export async function POST(req: Request) {
       // Only proceed if we have a valid email
       if (primaryEmail) {
         try {
+          // Create user in our database
+          console.log(`Creating user record in database for ${id} (${primaryEmail})`);
+          await prisma.user.create({
+            data: {
+              id: id,
+              firstName: first_name || '',
+              lastName: last_name || '',
+              emailAddress: primaryEmail,
+              imageUrl: image_url || null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          }).then(() => {
+            console.log(`User ${id} successfully added to database`);
+          }).catch((error) => {
+            if (error.code === 'P2002') {
+              console.log(`User ${id} already exists in database, skipping creation`);
+            } else {
+              console.error(`Error creating user ${id} in database:`, error);
+            }
+          });
+          
           // Send welcome email asynchronously
           // Note: we're not awaiting this to prevent blocking the webhook response
           sendWelcomeEmail(primaryEmail, userName).catch(error => {

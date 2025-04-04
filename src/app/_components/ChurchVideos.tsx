@@ -13,11 +13,15 @@ type Video = {
   embedUrl: string;
   duration: number;
   createdAt: string;
+  category: string;
 };
 
 export default function ChurchVideos() {
   const [videos, setVideos] = useState<Video[]>([]);
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [categories, setCategories] = useState<string[]>(['All']);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -30,6 +34,15 @@ export default function ChurchVideos() {
         if (res.ok) {
           const data = await res.json();
           setVideos(data);
+          
+          // Extract unique categories from videos
+          const videoCategories = data.map((video: Video) => video.category || 'Uncategorized');
+          const uniqueCategories = ['All', ...Array.from(new Set<string>(videoCategories))];
+          setCategories(uniqueCategories);
+          
+          // Set filtered videos to all videos initially
+          setFilteredVideos(data);
+          
           if (data.length > 0) {
             setSelectedVideo(data[0]); // Select the first video by default
           }
@@ -45,6 +58,26 @@ export default function ChurchVideos() {
 
     fetchVideos();
   }, []);
+  
+  // Filter videos when category changes
+  useEffect(() => {
+    if (selectedCategory === 'All') {
+      setFilteredVideos(videos);
+    } else {
+      const filtered = videos.filter(video => video.category === selectedCategory);
+      setFilteredVideos(filtered);
+      
+      // Update selected video if it's not in the current filter
+      if (filtered.length > 0 && selectedVideo && !filtered.some(v => v.id === selectedVideo.id)) {
+        // Using a definite video (filtered[0]) rather than possibly undefined
+        const firstFilteredVideo = filtered[0];
+        setSelectedVideo(firstFilteredVideo);
+      } else if (filtered.length === 0) {
+        // No videos in this category
+        setSelectedVideo(null);
+      }
+    }
+  }, [selectedCategory, videos]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -70,6 +103,21 @@ export default function ChurchVideos() {
     <div className={styles.container}>
       <h2 className={styles.title}>Church Videos</h2>
       
+      <div className={styles.categoryFilter}>
+        <span className={styles.filterLabel}>Filter by Category:</span>
+        <div className={styles.categoryButtons}>
+          {categories.map(category => (
+            <button 
+              key={category}
+              className={`${styles.categoryButton} ${selectedCategory === category ? styles.active : ''}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+      
       <div className={styles.videoGrid}>
         <div className={styles.mainVideo}>
           {selectedVideo && (
@@ -90,7 +138,7 @@ export default function ChurchVideos() {
         
         <div className={styles.videoList}>
           <h3 className={styles.listTitle}>More Videos</h3>
-          {videos.map((video) => (
+          {filteredVideos.map((video) => (
             <div 
               key={video.id} 
               className={`${styles.videoItem} ${selectedVideo?.id === video.id ? styles.selected : ''}`}

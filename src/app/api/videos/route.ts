@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json();
-    const { title, description, vimeoUrl, password } = body;
+    const { title, description, vimeoUrl, category, password } = body;
     
     // Validate password
     if (password !== process.env.VERSE_PASSWORD) {
@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       thumbnailUrl: vimeoDetails.pictures.sizes[3].link, // Medium size thumbnail
       embedUrl: vimeoDetails.embed.html,
       duration: vimeoDetails.duration,
+      category: category || 'Uncategorized',
       createdAt: new Date().toISOString()
     };
     

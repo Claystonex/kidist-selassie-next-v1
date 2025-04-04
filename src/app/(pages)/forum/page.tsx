@@ -35,6 +35,15 @@ interface NewPost {
   type: string;
 }
 
+// Admin emails that are allowed to upload media
+const ADMIN_EMAILS = ['selassieyouthtrinity@gmail.com'];
+
+// Function to check if user is an admin
+const isAdminUser = (email?: string): boolean => {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+};
+
 // List of curse words to filter out
 const PROFANITY_LIST = [
   'fuck', 'shit', 'ass', 'bitch', 'damn', 'cunt', 'dick', 'bastard',
@@ -92,6 +101,10 @@ export default function Forum() {
   const { isLoaded: isUserLoaded, isSignedIn, user: clerkUser } = useUser();
   // Ensure userId is a string or null, not undefined
   const userId = clerkUser?.id || null;
+  
+  // Check if user is an admin
+  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || '';
+  const isAdmin = isAdminUser(userEmail);
   
   // Log user ID on load for debugging
   useEffect(() => {
@@ -749,44 +762,46 @@ export default function Forum() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block mb-2"><TranslatableText>Attachments</TranslatableText></label>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*,audio/*"
-                    multiple
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-                  >
-                    <TranslatableText>Upload Files</TranslatableText>
-                  </button>
-                  {attachments.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {attachments.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span>{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newAttachments = [...attachments];
-                              newAttachments.splice(index, 1);
-                              setAttachments(newAttachments);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {isAdmin && (
+                  <div>
+                    <label className="block mb-2"><TranslatableText>Attachments</TranslatableText> <span className="text-xs text-blue-600 ml-1">(Admin Only)</span></label>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/*,audio/*"
+                      multiple
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    >
+                      <TranslatableText>Upload Files</TranslatableText>
+                    </button>
+                    {attachments.length > 0 && (
+                      <div className="mt-2 space-y-2">
+                        {attachments.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between">
+                            <span>{file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newAttachments = [...attachments];
+                                newAttachments.splice(index, 1);
+                                setAttachments(newAttachments);
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-4">
                   <button

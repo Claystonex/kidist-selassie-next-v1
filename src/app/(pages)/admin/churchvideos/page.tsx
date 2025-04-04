@@ -13,6 +13,7 @@ type Video = {
   embedUrl: string;
   duration: number;
   createdAt: string;
+  category: string;
 };
 
 export default function VideoAdmin() {
@@ -20,6 +21,7 @@ export default function VideoAdmin() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [vimeoUrl, setVimeoUrl] = useState('');
+  const [category, setCategory] = useState('Sermons');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -75,6 +77,7 @@ export default function VideoAdmin() {
           title, 
           description, 
           vimeoUrl, 
+          category,
           password 
         }),
       });
@@ -84,6 +87,7 @@ export default function VideoAdmin() {
         setTitle('');
         setDescription('');
         setVimeoUrl('');
+        setCategory('Sermons');
         fetchVideos();
       } else {
         const data = await response.json();
@@ -232,6 +236,22 @@ export default function VideoAdmin() {
         </div>
         
         <div className={styles.formGroup}>
+          <label htmlFor="category">Video Category:</label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          >
+            <option value="Sermons">Sermons</option>
+            <option value="Bible Studies">Bible Studies</option>
+            <option value="Holidays">Holidays</option>
+            <option value="Youth Ministry">Youth Ministry</option>
+            <option value="Special Events">Special Events</option>
+          </select>
+        </div>
+        
+        <div className={styles.formGroup}>
           <label htmlFor="password">Admin Password:</label>
           <input
             type="password"
@@ -265,6 +285,9 @@ export default function VideoAdmin() {
                 {video.description && <p>{video.description}</p>}
                 <p className={styles.videoMeta}>
                   <span>Duration: {formatDuration(video.duration)}</span>
+                  <span className={styles.category}>
+                    Category: {video.category || 'Uncategorized'}
+                  </span>
                   <span className={styles.date}>
                     Added on: {new Date(video.createdAt).toLocaleDateString()}
                   </span>
