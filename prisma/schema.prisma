@@ -20,6 +20,9 @@ model User {
     imageUrl  String?
     firstName String?
     lastName  String? 
+    nickname  String?
+    phoneNumber String?
+    onboardingCompleted Boolean @default(false)
 
     emailAddress String @unique
     hashedPassword String?
