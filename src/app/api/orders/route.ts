@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-// @ts-ignore - Ignore TypeScript errors for PayPal SDK import
-import paypal from '@paypal/paypal-server-sdk';
+// Using named imports to fix build error
+import * as paypal from '@paypal/paypal-server-sdk';
 import { getPayPalClient } from '@/app/_utils/paypalClient';
 
 export async function POST(req: NextRequest) {

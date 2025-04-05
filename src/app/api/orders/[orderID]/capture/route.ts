@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
-// @ts-ignore - Ignore TypeScript errors for PayPal SDK import
-import paypal from '@paypal/paypal-server-sdk';
+// Using named imports to fix build error
+import * as paypal from '@paypal/paypal-server-sdk';
 import { getPayPalClient } from '@/app/_utils/paypalClient';
 
 // Function to send receipt email

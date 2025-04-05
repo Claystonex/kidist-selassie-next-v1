@@ -1,6 +1,5 @@
-// Import PayPal SDK with workaround for TypeScript type issues
-// @ts-ignore - Ignore TypeScript errors for PayPal SDK import
-import paypal from '@paypal/paypal-server-sdk';
+// Import PayPal SDK with named imports to fix build error
+import * as paypal from '@paypal/paypal-server-sdk';
 
 /**
  * Creates and returns PayPal HTTP client
