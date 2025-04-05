@@ -38,8 +38,9 @@ function createJsonResponse(data: any, status = 200) {
 // DELETE /api/forum/[postId]
 export async function DELETE(
   request: Request,
-  { params }: { params: { postId: string } }
+  context: { params: { postId: string } }
 ) {
+  const { params } = context;
   try {
     // Check authentication
     const authResult = await auth();
