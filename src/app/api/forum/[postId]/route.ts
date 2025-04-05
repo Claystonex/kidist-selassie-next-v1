@@ -36,11 +36,12 @@ function createJsonResponse(data: any, status = 200) {
 }
 
 // DELETE /api/forum/[postId]
-export async function DELETE(
-  request: Request,
-  context: { params: { postId: string } }
-) {
-  const { params } = context;
+export async function DELETE(request: Request) {
+  // Get the postId from the URL using path segments
+  const url = new URL(request.url);
+  const pathSegments = url.pathname.split('/');
+  const postId = pathSegments[pathSegments.length - 1];
+  
   try {
     // Check authentication
     const authResult = await auth();
@@ -50,7 +51,7 @@ export async function DELETE(
       return createJsonResponse({ error: 'You must be signed in to delete a post' }, 401);
     }
 
-    const postId = params.postId;
+    // postId is already extracted from the URL above
     
     if (!postId) {
       return createJsonResponse({ error: 'Post ID is required' }, 400);
