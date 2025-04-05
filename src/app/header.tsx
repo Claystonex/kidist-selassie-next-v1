@@ -236,8 +236,8 @@ export default function Header() {
             <UserButton afterSignOutUrl="/" />
           ) : (
             <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none">
-              <Link href="/sign-in" className="text-white">
-                <TranslatableText>Join</TranslatableText>
+              <Link href="/sign-in" className="text-red-600 ">
+                <TranslatableText className='text-2xl font-bold'>Join</TranslatableText>
               </Link>
             </Button>
           )}

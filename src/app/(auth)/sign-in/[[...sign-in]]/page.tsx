@@ -11,16 +11,14 @@ const GrandOpeningBanner = dynamic(
   () => import('@/app/_components/GrandOpeningBanner'),
   { ssr: false }
 );
+const GrandOpeningTwoBanner = dynamic(
+  () => import('@/app/_components/GrandOpeningTwoBanner'),
+  { ssr: false }
+);
 
 const SignInPage = () => {
   const router = useRouter();
   const { isSignedIn } = useUser();
-  const [showBanner, setShowBanner] = useState(true);
-
-  // Handle closing the banner
-  const handleCloseBanner = () => {
-    setShowBanner(false);
-  };
 
   // Redirect to dashboard if already signed in
   React.useEffect(() => {
@@ -30,35 +28,79 @@ const SignInPage = () => {
   }, [isSignedIn, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#086c47]">
-      {/* Grand Opening Banner */}
-      {showBanner && <GrandOpeningBanner onClose={handleCloseBanner} />}
+    <div className="min-h-screen flex flex-col items-center bg-[#086c47]">
+      {/* Banner at the top (non-sticky) */}
+      <div className="w-full mb-16">
+        <GrandOpeningBanner />
+      </div>
       
-      <div className="bg-[#edcf08] p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign In to Kidist Selassie Youth International Network</h2>
-        <p className="text-center text-gray-600 mb-6">Welcome back! Please sign in to continue</p>
+      {/* Sign-in content with about an inch of spacing from the banner */}
+      <div className="mt-10 w-full max-w-md flex flex-col items-center mb-8">
+        <div className="bg-[#edcf08] p-8 rounded-lg shadow-md w-full">
+          <h2 className="text-2xl font-bold text-center">Sign In to Kidist Selassie Youth International Network</h2>
+          <p className="text-center text-gray-600 mb-6">Welcome back! Please sign in to continue</p>
         
-        <SignIn 
-          appearance={{
-            elements: {
-              formButtonPrimary: 'bg-[#086c47] hover:bg-[#064d32]',
-              card: 'bg-transparent shadow-none',
-              headerTitle: 'hidden',
-              headerSubtitle: 'hidden',
-              socialButtonsBlockButton: 'bg-white text-black border border-gray-300 hover:bg-gray-50'
+          <style jsx global>{`
+            /* Completely remove all Clerk development mode elements */
+            .cl-development-mode-badge,
+            .cl-development-mode-container,
+            .cl-footer,
+            .cl-footerAction,
+            .cl-footerText,
+            .cl-internal-f59g3p,
+            div[data-localization-key="userProfile.developmentMode"],
+            a[href="https://dashboard.clerk.com"] {
+              display: none !important;
+              visibility: hidden !important;
+              height: 0 !important;
+              width: 0 !important;
+              opacity: 0 !important;
+              overflow: hidden !important;
+              position: absolute !important;
+              pointer-events: none !important;
+              margin: 0 !important;
+              padding: 0 !important;
             }
-          }}
-          redirectUrl="/"
-        />
-        
-        {/* <div className="mt-4 text-center">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <a href="/sign-up" className="text-green-600 hover:text-green-700">
-              Sign up
-            </a>
-          </p>
-        </div> */}
+            
+            /* Force remove any bottom element */
+            .cl-card::after {
+              display: none !important;
+            }
+          `}</style>
+          
+          <div className="clerk-wrapper" style={{ position: 'relative' }}>
+            <SignIn 
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-[#086c47] hover:bg-[#064d32]',
+                  card: 'bg-transparent shadow-none',
+                  headerTitle: 'hidden',
+                  headerSubtitle: 'hidden',
+                  socialButtonsBlockButton: 'bg-white text-black border border-gray-300 hover:bg-gray-50',
+                  footerAction: 'hidden',
+                  footer: 'hidden',
+                  rootBox: 'relative',
+                }
+              }}
+              redirectUrl="/"
+            />
+            
+            {/* Yellow placeholder for the space where development mode text was */}
+            <div style={{
+              height: '30px',
+              width: '100%',
+              backgroundColor: '#edcf08', /* Same yellow as the sign-in form background */
+              borderRadius: '0 0 8px 8px',
+              marginTop: '-5px' /* Overlap slightly to avoid any gap */
+            }}></div>
+          </div>
+
+          
+          
+        </div>
+      </div>
+      <div className="w-full">
+        <GrandOpeningTwoBanner />
       </div>
     </div>
   );
