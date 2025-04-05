@@ -1,13 +1,26 @@
 "use client"
 
 import { SignIn } from "@clerk/nextjs";
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from "@clerk/nextjs";
+import dynamic from 'next/dynamic';
+
+// Dynamically import the banner to avoid SSR issues with animations
+const GrandOpeningBanner = dynamic(
+  () => import('@/app/_components/GrandOpeningBanner'),
+  { ssr: false }
+);
 
 const SignInPage = () => {
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const [showBanner, setShowBanner] = useState(true);
+
+  // Handle closing the banner
+  const handleCloseBanner = () => {
+    setShowBanner(false);
+  };
 
   // Redirect to dashboard if already signed in
   React.useEffect(() => {
@@ -18,6 +31,9 @@ const SignInPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#086c47]">
+      {/* Grand Opening Banner */}
+      {showBanner && <GrandOpeningBanner onClose={handleCloseBanner} />}
+      
       <div className="bg-[#edcf08] p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Sign In to Kidist Selassie Youth International Network</h2>
         <p className="text-center text-gray-600 mb-6">Welcome back! Please sign in to continue</p>
