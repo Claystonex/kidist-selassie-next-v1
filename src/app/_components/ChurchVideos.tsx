@@ -68,11 +68,13 @@ export default function ChurchVideos() {
       setFilteredVideos(filtered);
       
       // Update selected video if it's not in the current filter
-      if (filtered.length > 0 && selectedVideo && !filtered.some(v => v.id === selectedVideo.id)) {
-        // Using a definite video (filtered[0]) rather than possibly undefined
-        const firstFilteredVideo = filtered[0];
-        setSelectedVideo(firstFilteredVideo);
-      } else if (filtered.length === 0) {
+      if (filtered.length > 0) {
+        if (selectedVideo && !filtered.some(v => v.id === selectedVideo.id)) {
+          // Using a definite video (filtered[0]) and ensuring it's not undefined
+          const firstFilteredVideo = filtered[0];
+          setSelectedVideo(firstFilteredVideo || null);
+        }
+      } else {
         // No videos in this category
         setSelectedVideo(null);
       }
