@@ -19,68 +19,81 @@ export default function Header() {
   const [mobileInteractOpen, setMobileInteractOpen] = useState(false);
   const { language, setLanguage } = useTranslation();
   const { user } = useUser();
+  
+  // Close mobile menu when window gets resized to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMenuOpen]);
 
   return (
     <nav className="relative border-b bg-[#086c47]">
-      <div className="container mx-auto flex h-20 items-center justify-between px-2 md:px-4 font-montserrat max-w-7xl">
+      <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-7xl">
         {/* Logo */}
-        <div className="flex items-center flex-shrink-0 min-w-0">
-          <Image src="/assets/lion-of-judah-2.jpg" alt="Kidist Selassie Youth International Network" width={100} height={100} className='w-16 h-10 mr-4' />
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl text-white lg:block hidden font-bold whitespace-nowrap">
+        <div className="flex items-center flex-shrink-0">
+          <Image src="/assets/lion-of-judah-2.jpg" alt="Kidist Selassie Youth International Network" width={100} height={100} className='w-16 h-10 mr-3 md:mr-4' />
+          <Link href="/" className="flex items-center">
+            <span className="text-xl text-white lg:block hidden font-bold whitespace-nowrap mr-8">
               <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
             </span>
-            <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[200px] md:max-w-[300px]">
-              <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
+            <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[120px] sm:max-w-[200px] md:max-w-[250px]">
+              <TranslatableText>Kidist Selassie</TranslatableText>
             </span>
           </Link>
         </div>
 
         {/* Hamburger Menu Button (Mobile) */}
         <button 
-          className="lg:hidden z-50 text-white hover:text-[#ffb43c]"
+          className="lg:hidden z-50 text-white hover:text-[#ffb43c] ml-auto text-2xl"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
         </button>
 
-        {/* Mobile Menu */}
-        <div className={`
-          md:hidden fixed top-0 right-0 h-full w-64 bg-[#086c47] shadow-lg transform transition-transform duration-300 ease-in-out
-          ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}
-          flex flex-col items-start pt-20 px-6 z-40
-        `}> 
-          <div className="flex flex-col space-y-6 w-full">
-            {/* Mobile Services Dropdown */}
+        {/* Mobile Menu - Fullscreen Overlay */}
+        {isMenuOpen && (
+          <div className="fixed inset-0 bg-[#086c47] z-40 flex flex-col items-center justify-center">
+            <div className="absolute top-6 right-6">
+              <button
+                className="text-white hover:text-[#ffb43c] text-3xl"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <FontAwesomeIcon icon={faTimes} className="h-8 w-8" />
+              </button>
+            </div>
+            <div className="flex flex-col items-center justify-center space-y-6 w-full px-4 text-center">
+            {/* Mobile Services Item */}
             <div className="w-full">
-              <div className="text-lg font-montserrat text-white flex items-center justify-between w-full py-2 cursor-pointer hover:text-[#ffb43c]" 
+              <div className="text-2xl font-montserrat text-white flex items-center justify-center w-full py-3 cursor-pointer hover:text-[#ffb43c]" 
                    onClick={() => setMobileServicesOpen(!mobileServicesOpen)}>
-                <span><TranslatableText>Services</TranslatableText></span>
-                <FontAwesomeIcon icon={faChevronDown} className={`h-4 w-4 transition-transform duration-200 ${mobileServicesOpen ? 'rotate-180' : ''}`} />
+                <span className="mr-2"><TranslatableText>Services</TranslatableText></span>
+                <FontAwesomeIcon icon={faChevronDown} className={`h-5 w-5 transition-transform duration-200 ${mobileServicesOpen ? 'rotate-180' : ''}`} />
               </div>
-              {mobileServicesOpen && (
-                <div className="pl-4 flex flex-col space-y-2 py-2">
-                  <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
-                </div>
-              )}
+              <div className={`flex flex-col items-center space-y-4 overflow-hidden transition-all duration-300 ${mobileServicesOpen ? 'max-h-96 py-4' : 'max-h-0'}`}>
+                <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
+                <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
+                <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
+              </div>
             </div>
             
             {/* Mobile Interact Dropdown */}
             <div className="w-full">
-              <div className="text-lg font-montserrat text-white flex items-center justify-between w-full py-2 cursor-pointer hover:text-[#ffb43c]" 
+              <div className="text-2xl font-montserrat text-white flex items-center justify-center w-full py-3 cursor-pointer hover:text-[#ffb43c]" 
                    onClick={() => setMobileInteractOpen(!mobileInteractOpen)}>
-                <span><TranslatableText>Interact</TranslatableText></span>
-                <FontAwesomeIcon icon={faChevronDown} className={`h-4 w-4 transition-transform duration-200 ${mobileInteractOpen ? 'rotate-180' : ''}`} />
+                <span className="mr-2"><TranslatableText>Interact</TranslatableText></span>
+                <FontAwesomeIcon icon={faChevronDown} className={`h-5 w-5 transition-transform duration-200 ${mobileInteractOpen ? 'rotate-180' : ''}`} />
               </div>
-              {mobileInteractOpen && (
-                <div className="pl-4 flex flex-col space-y-2 py-2">
-                  <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
-                </div>
-              )}
+              <div className={`flex flex-col items-center space-y-4 overflow-hidden transition-all duration-300 ${mobileInteractOpen ? 'max-h-96 py-4' : 'max-h-0'}`}>
+                <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
+                <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
+                <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
+              </div>
             </div>
             
             <MobileNavLink href="/gallery" onClick={() => setIsMenuOpen(false)}><TranslatableText>Gallery</TranslatableText></MobileNavLink>
@@ -98,12 +111,12 @@ export default function Header() {
             </a>
             <MobileNavLink href="/teachings" onClick={() => setIsMenuOpen(false)}><TranslatableText>Teachings</TranslatableText></MobileNavLink>
             <MobileNavLink href="/donate" onClick={() => setIsMenuOpen(false)}><TranslatableText>Donate</TranslatableText></MobileNavLink>
-            <div className="pt-4">
+            <div className="pt-8">
               {user ? (
                 <UserButton afterSignOutUrl="/" />
               ) : (
-                <Button variant="outline" asChild className="w-full bg-[#ffb43c] hover:bg-[#e6a037]">
-                  <Link href="/sign-in" className="text-white">
+                <Button variant="outline" asChild className="w-full max-w-sm bg-[#edcf08] hover:bg-[#e6a037] py-6">
+                  <Link href="/sign-in" className="text-xl text-red-600 font-bold">
                     <TranslatableText>Join</TranslatableText>
                   </Link>
                 </Button>
@@ -111,9 +124,12 @@ export default function Header() {
             </div>
           </div>
         </div>
+      )}
+        {/* Flex spacer for desktop only */}
+        <div className="hidden lg:block flex-grow"></div>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-4">
+        <div className="hidden lg:flex items-center justify-end space-x-8 lg:space-x-10 flex-grow">
           {/* Services Dropdown */}
           <div className="relative group">
             <div 
@@ -235,7 +251,7 @@ export default function Header() {
           {user ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
-            <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none">
+            <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none px-6 w-32">
               <Link href="/sign-in" className="text-red-600 ">
                 <TranslatableText className='text-2xl font-bold'>Join</TranslatableText>
               </Link>
@@ -281,7 +297,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
   return (
     <Link 
       href={href} 
-      className="text-lg font-montserrat text-white transition-colors hover:text-[#ffb43c] w-full text-left py-2"
+      className="text-2xl font-montserrat text-white transition-transform hover:text-[#ffb43c] py-4 block text-center focus:outline-none focus:text-[#ffb43c] active:scale-95"
       onClick={onClick}
     >
       {children}
