@@ -68,57 +68,35 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
     
     try {
-      // Update user data in Clerk
+      // Simple approach: Update user data in Clerk 
       if (user) {
-        // Update first and last name in Clerk
-        await user.update({
-          firstName,
-          lastName,
-        });
-        
-        // Add phone number if not already present
-        if (!user.phoneNumbers || user.phoneNumbers.length === 0) {
-          // Note: This might require additional verification depending on your Clerk settings
-          try {
-            await user.createPhoneNumber({ phoneNumber });
-          } catch (phoneError) {
-            console.error('Error adding phone number:', phoneError);
-            setError('Failed to add phone number. Please try again.');
-            setIsSubmitting(false);
-            return;
-          }
-        }
-        
-        // Save additional data via Clerk's metadata API
         try {
+          console.log('Updating user data with:', { firstName, lastName, phoneNumber, nickname });
+          
+          // Store ALL data in metadata since firstName/lastName direct updates have issues
           await user.update({
             unsafeMetadata: {
               ...user.unsafeMetadata,
+              firstName,
+              lastName,
+              displayName: `${firstName} ${lastName}`.trim(),
+              phoneNumber,
               nickname: nickname || undefined,
               onboardingComplete: true,
-              onboardingTimestamp: new Date().toISOString(),
+              lastUpdated: new Date().toISOString(),
             },
           });
-        } catch (metadataError) {
-          console.error('Error updating user metadata:', metadataError);
-        }
-        
-        // Save data to our backend
-        const response = await fetch('/api/user/onboarding', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            firstName,
-            lastName,
-            nickname,
-            phoneNumber,
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to save user data');
+          
+          // Set a simple cookie to mark onboarding as complete
+          document.cookie = 'onboarding_complete=true; path=/; max-age=31536000';
+          
+          console.log('Successfully updated user profile');
+        } catch (error) {
+          console.error('Error updating profile:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          setError(`Update failed: ${errorMessage}`);
+          setIsSubmitting(false);
+          return;
         }
         
         // Set onboarding as complete

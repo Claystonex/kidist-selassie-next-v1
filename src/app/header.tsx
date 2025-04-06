@@ -48,75 +48,122 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Hamburger Menu Button (Mobile) */}
-        <button 
-          className="lg:hidden z-50 text-white hover:text-[#ffb43c] ml-auto text-2xl"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="h-6 w-6" />
-        </button>
+        {/* Hamburger Menu Button (Mobile) - Only visible when menu is closed */}
+        {!isMenuOpen && (
+          <button 
+            className="lg:hidden z-50 text-white hover:text-[#edcf08] ml-auto text-2xl transition-colors duration-300"
+            onClick={() => setIsMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+          </button>
+        )}
 
         {/* Mobile Menu - Fullscreen Overlay */}
         {isMenuOpen && (
-          <div className="fixed inset-0 bg-[#086c47] z-40 flex flex-col items-center justify-center">
+          <div className="fixed inset-0 bg-gradient-to-b from-[#086c47] to-[#064d32] z-40 flex flex-col items-center justify-start pt-24 overflow-y-auto">
+            {/* Close button with a more elegant design */}
             <div className="absolute top-6 right-6">
               <button
-                className="text-white hover:text-[#ffb43c] text-3xl"
+                className="text-white hover:text-[#edcf08] text-3xl transition-all duration-300 transform hover:rotate-90"
                 onClick={() => setIsMenuOpen(false)}
+                aria-label="Close menu"
               >
-                <FontAwesomeIcon icon={faTimes} className="h-8 w-8" />
+                <FontAwesomeIcon icon={faTimes} className="h-8 w-8 drop-shadow-lg" />
               </button>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-6 w-full px-4 text-center">
-            {/* Mobile Services Item */}
+            
+            {/* Mobile menu logo at top */}
+            <div className="mb-10">
+              <Image src="/assets/lion-of-judah-2.jpg" alt="Kidist Selassie" width={80} height={50} className='w-20 h-12 mb-4 mx-auto' />
+              <h2 className="text-[#edcf08] text-xl font-bold mb-1"><TranslatableText>Kidist Selassie</TranslatableText></h2>
+              <div className="h-1 w-16 bg-[#edcf08] mx-auto rounded-full mb-2"></div>
+            </div>
+            
+            <div className="flex flex-col items-center justify-center space-y-5 w-full max-w-md px-6 text-center">
+            {/* Mobile Services Item - enhanced styling */}
             <div className="w-full">
-              <div className="text-2xl font-montserrat text-white flex items-center justify-center w-full py-3 cursor-pointer hover:text-[#ffb43c]" 
-                   onClick={() => setMobileServicesOpen(!mobileServicesOpen)}>
-                <span className="mr-2"><TranslatableText>Services</TranslatableText></span>
-                <FontAwesomeIcon icon={faChevronDown} className={`h-5 w-5 transition-transform duration-200 ${mobileServicesOpen ? 'rotate-180' : ''}`} />
+              <div 
+                className="text-xl font-montserrat text-white flex items-center justify-center w-full py-4 cursor-pointer hover:text-[#edcf08] transition-colors duration-300 border-b border-[#0a8055] relative" 
+                onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+              >
+                <span className="mr-3 font-semibold tracking-wide"><TranslatableText>Services</TranslatableText></span>
+                <FontAwesomeIcon 
+                  icon={faChevronDown} 
+                  className={`h-4 w-4 transition-transform duration-300 ${mobileServicesOpen ? 'rotate-180 text-[#edcf08]' : ''}`} 
+                />
               </div>
-              <div className={`flex flex-col items-center space-y-4 overflow-hidden transition-all duration-300 ${mobileServicesOpen ? 'max-h-96 py-4' : 'max-h-0'}`}>
-                <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
-                <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
-                <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
+              <div 
+                className={`flex flex-col items-center overflow-hidden transition-all duration-500 ease-in-out bg-[#065539] rounded-b-lg ${mobileServicesOpen ? 'max-h-96 py-4 mb-4 shadow-inner' : 'max-h-0'}`}
+              >
+                <div className="w-full max-w-xs space-y-3">
+                  <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
+                  <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
+                  <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
+                </div>
               </div>
             </div>
             
-            {/* Mobile Interact Dropdown */}
+            {/* Mobile Interact Dropdown - enhanced styling */}
             <div className="w-full">
-              <div className="text-2xl font-montserrat text-white flex items-center justify-center w-full py-3 cursor-pointer hover:text-[#ffb43c]" 
-                   onClick={() => setMobileInteractOpen(!mobileInteractOpen)}>
-                <span className="mr-2"><TranslatableText>Interact</TranslatableText></span>
-                <FontAwesomeIcon icon={faChevronDown} className={`h-5 w-5 transition-transform duration-200 ${mobileInteractOpen ? 'rotate-180' : ''}`} />
+              <div 
+                className="text-xl font-montserrat text-white flex items-center justify-center w-full py-4 cursor-pointer hover:text-[#edcf08] transition-colors duration-300 border-b border-[#0a8055] relative" 
+                onClick={() => setMobileInteractOpen(!mobileInteractOpen)}
+              >
+                <span className="mr-3 font-semibold tracking-wide"><TranslatableText>Interact</TranslatableText></span>
+                <FontAwesomeIcon 
+                  icon={faChevronDown} 
+                  className={`h-4 w-4 transition-transform duration-300 ${mobileInteractOpen ? 'rotate-180 text-[#edcf08]' : ''}`} 
+                />
               </div>
-              <div className={`flex flex-col items-center space-y-4 overflow-hidden transition-all duration-300 ${mobileInteractOpen ? 'max-h-96 py-4' : 'max-h-0'}`}>
-                <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
-                <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
-                <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
+              <div 
+                className={`flex flex-col items-center overflow-hidden transition-all duration-500 ease-in-out bg-[#065539] rounded-b-lg ${mobileInteractOpen ? 'max-h-96 py-4 mb-4 shadow-inner' : 'max-h-0'}`}
+              >
+                <div className="w-full max-w-xs space-y-3">
+                  <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
+                  <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
+                  <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
+                </div>
               </div>
             </div>
             
-            <MobileNavLink href="/gallery" onClick={() => setIsMenuOpen(false)}><TranslatableText>Gallery</TranslatableText></MobileNavLink>
-            <a 
-              href="https://v0-bible-chapter-tracker.vercel.app/" 
-              onClick={() => setIsMenuOpen(false)}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-white hover:text-[#ffb43c] text-lg py-2 block w-full transition-colors"
-            >
-              <div className="flex items-center">
-                <span><TranslatableText>Bible Tracker</TranslatableText></span>
-                <FontAwesomeIcon icon={faBook} className="ml-2 h-4 w-4 animate-pulse" />
-              </div>
-            </a>
-            <MobileNavLink href="/teachings" onClick={() => setIsMenuOpen(false)}><TranslatableText>Teachings</TranslatableText></MobileNavLink>
-            <MobileNavLink href="/donate" onClick={() => setIsMenuOpen(false)}><TranslatableText>Donate</TranslatableText></MobileNavLink>
-            <div className="pt-8">
+            {/* Regular menu items with improved styling */}
+            <div className="w-full border-b border-[#0a8055]">
+              <MobileNavLink href="/gallery" onClick={() => setIsMenuOpen(false)}><TranslatableText>Gallery</TranslatableText></MobileNavLink>
+            </div>
+            
+            <div className="w-full border-b border-[#0a8055]">
+              <a 
+                href="https://v0-bible-chapter-tracker.vercel.app/" 
+                onClick={() => setIsMenuOpen(false)}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white hover:text-[#edcf08] text-lg py-4 flex justify-center items-center w-full transition-colors font-semibold tracking-wide"
+              >
+                <div className="flex items-center">
+                  <span><TranslatableText>Bible Tracker</TranslatableText></span>
+                  <FontAwesomeIcon icon={faBook} className="ml-3 h-4 w-4 animate-pulse text-[#edcf08]" />
+                </div>
+              </a>
+            </div>
+            
+            <div className="w-full border-b border-[#0a8055]">
+              <MobileNavLink href="/teachings" onClick={() => setIsMenuOpen(false)}><TranslatableText>Teachings</TranslatableText></MobileNavLink>
+            </div>
+            
+            <div className="w-full border-b border-[#0a8055]">
+              <MobileNavLink href="/donate" onClick={() => setIsMenuOpen(false)}><TranslatableText>Donate</TranslatableText></MobileNavLink>
+            </div>
+            {/* User profile or sign-in button with improved styling */}
+            <div className="pt-10 pb-6 w-full max-w-xs">
               {user ? (
-                <UserButton afterSignOutUrl="/" />
+                <div className="flex flex-col items-center">
+                  <p className="text-white mb-2 text-sm"><TranslatableText>Your Account</TranslatableText></p>
+                  <UserButton afterSignOutUrl="/" />
+                </div>
               ) : (
-                <Button variant="outline" asChild className="w-full max-w-sm bg-[#edcf08] hover:bg-[#e6a037] py-6">
-                  <Link href="/sign-in" className="text-xl text-red-600 font-bold">
+                <Button variant="outline" asChild className="w-full bg-[#edcf08] hover:bg-[#ffba00] transition-colors duration-300 py-6 shadow-lg rounded-lg">
+                  <Link href="/sign-up" className="text-xl text-[#086c47] font-bold tracking-wide">
                     <TranslatableText>Join</TranslatableText>
                   </Link>
                 </Button>
@@ -252,7 +299,7 @@ export default function Header() {
             <UserButton afterSignOutUrl="/" />
           ) : (
             <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none px-6 w-32">
-              <Link href="/sign-in" className="text-red-600 ">
+              <Link href="/sign-up" className="text-red-600 ">
                 <TranslatableText className='text-2xl font-bold'>Join</TranslatableText>
               </Link>
             </Button>
@@ -297,7 +344,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
   return (
     <Link 
       href={href} 
-      className="text-2xl font-montserrat text-white transition-transform hover:text-[#ffb43c] py-4 block text-center focus:outline-none focus:text-[#ffb43c] active:scale-95"
+      className="text-lg font-montserrat text-white hover:text-[#edcf08] py-4 flex justify-center items-center w-full transition-colors duration-300 font-semibold tracking-wide focus:outline-none focus:text-[#edcf08] active:scale-95"
       onClick={onClick}
     >
       {children}

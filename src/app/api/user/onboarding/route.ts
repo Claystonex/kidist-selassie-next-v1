@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    // Get the user ID from auth
-    const authResult = await auth();
-    const userId = authResult.userId;
+    // Use currentUser instead of auth for more reliable access in API routes
+    const clerkUser = await currentUser();
+    const userId = clerkUser?.id;
     
+    // Return early if no user ID (not authenticated)
     if (!userId) {
+      console.error('Onboarding API: Unauthorized - No user ID from auth');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
@@ -22,27 +24,27 @@ export async function POST(request: Request) {
     }
     
     // Find user in database
-    let user = await prisma.user.findUnique({ where: { id: userId } });
+    let dbUser = await prisma.user.findUnique({ where: { id: userId } });
     
     // Update or create user data
     const userData = {
       firstName,
       lastName,
-      emailAddress: user?.emailAddress || `${userId}@example.com`, // Fallback email
+      emailAddress: clerkUser?.emailAddresses?.[0]?.emailAddress || `${userId}@example.com`, // Fallback email
       phoneNumber, 
       onboardingCompleted: true,
       updatedAt: new Date(),
     };
     
-    if (user) {
+    if (dbUser) {
       // Update existing user
-      user = await prisma.user.update({
+      dbUser = await prisma.user.update({
         where: { id: userId },
         data: userData,
       });
     } else {
       // Create new user if not exists (should be rare due to webhook)
-      user = await prisma.user.create({
+      dbUser = await prisma.user.create({
         data: {
           id: userId,
           ...userData,
@@ -56,9 +58,9 @@ export async function POST(request: Request) {
       success: true,
       message: 'Onboarding complete',
       user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        id: dbUser.id,
+        firstName: dbUser.firstName,
+        lastName: dbUser.lastName,
       },
     });
     
@@ -73,9 +75,13 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error('Error in onboarding API:', error);
+    
+    // Include detailed error information for debugging
     return NextResponse.json({ 
       error: 'Failed to save user data',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      type: error instanceof Error ? error.name : 'Unknown',
+      stack: process.env.NODE_ENV !== 'production' && error instanceof Error ? error.stack : undefined
     }, { status: 500 });
   }
 }

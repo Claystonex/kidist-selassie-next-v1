@@ -87,12 +87,21 @@ const SignInPage = () => {
             
             {/* Yellow placeholder for the space where development mode text was */}
             <div style={{
-              height: '30px',
-              width: '100%',
               backgroundColor: '#edcf08', /* Same yellow as the sign-in form background */
               borderRadius: '0 0 8px 8px',
-              marginTop: '-5px' /* Overlap slightly to avoid any gap */
-            }}></div>
+              marginTop: '-5px', /* Overlap slightly to avoid any gap */
+              padding: '10px 0 15px'
+            }}>
+              {/* Sign up link */}
+              <div className="text-center">
+                <p className="text-gray-700">
+                  Don't have an account?{' '}
+                  <a href="/sign-up" className="text-[#086c47] hover:text-[#064d32] font-semibold transition-colors duration-300">
+                    Sign up
+                  </a>
+                </p>
+              </div>
+            </div>
           </div>
 
           
