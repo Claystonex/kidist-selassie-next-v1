@@ -35,7 +35,7 @@ const SignUpPage = () => {
       </div>
       
       {/* Sign up form */}
-      <div className="mt-10 w-full max-w-md flex flex-col items-center mb-8">
+      <div className="mt-6 w-full max-w-md flex flex-col items-center mb-2">
         <div className="bg-[#edcf08] p-8 rounded-lg shadow-md w-full">
           <h2 className="text-2xl font-bold text-center">Sign Up for Kidist Selassie Youth International Network</h2>
           <p className="text-center text-gray-600 mb-6">Join our community today!</p>
@@ -74,7 +74,7 @@ const SignUpPage = () => {
                 elements: {
                   formButtonPrimary: 'bg-[#086c47] hover:bg-[#064d32] w-full py-3',
                   card: 'bg-transparent shadow-none',
-                  headerTitle: 'hidden',
+                  headerTitle: 'shadow-none',
                   headerSubtitle: 'hidden',
                   socialButtonsBlockButton: 'bg-white text-black border border-gray-300 hover:bg-gray-50',
                   footerAction: 'hidden',

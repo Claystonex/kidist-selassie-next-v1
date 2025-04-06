@@ -51,7 +51,7 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure the middleware matcher with a simpler pattern
+// Configure the middleware matcher to exclude static assets
 export const config = {
-  matcher: ['/((?!_next|static|favicon.ico).*)'],
+  matcher: ['/((?!_next|static|assets|favicon.ico).*)'],
 };
