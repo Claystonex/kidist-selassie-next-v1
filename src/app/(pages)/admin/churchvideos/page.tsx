@@ -198,6 +198,14 @@ export default function VideoAdmin() {
     <div className={styles.container}>
       <h1 className={styles.title}>Church Videos Admin</h1>
       
+      <div className={styles.adminNav}>
+        <a href="/admin/churchvideos" className={styles.active}>Videos Admin</a>
+        <a href="/admin/users">User Management</a>
+        <a href="/admin/verses">Verses Admin</a>
+        <a href="/admin/gallery">Gallery Admin</a>
+        <a href="/admin/email">Email Admin</a>
+      </div>
+      
       {message && <div className={styles.success}>{message}</div>}
       {error && <div className={styles.error}>{error}</div>}
       

@@ -9,6 +9,7 @@ const publicRoutes = [
   '/_next',
   '/favicon.ico',
   '/static',
+  '/admin', // Admin routes use their own password protection
 ];
 
 // Define routes that don't need onboarding check

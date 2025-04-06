@@ -98,7 +98,7 @@ const SignUpPage = () => {
       </div>
       
       {/* Bottom banner */}
-      <div className="w-full mt-auto">
+      <div className="w-full">
         <GrandOpeningTwoBanner />
       </div>
     </div>

@@ -5,7 +5,7 @@ export default function AboutPage() {
         
         <div className="prose prose-lg text-white max-w-4xl text-center justify-center">
           <p>
-          We’re thrilled to welcome you to our community! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.  
+          We’re joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.  
 
 Our program brings together Ethiopian and Eritrean Orthodox Tewahedo youth from around the globe to connect, strengthen, and encourage one another through the love of Christ. Together, we aim to cultivate agape love, foster unwavering faith, and build a holistic, global community that uplifts and empowers. Through meaningful relationships and international networks, we are committed to supporting your spiritual journey and personal growth.  
 
@@ -17,7 +17,7 @@ Emotional support and mentorship are at the core of our mission, helping to empo
 
 We understand that life can bring challenges, but here, you will find a supportive community that reminds you that you are never alone. Together, we will help you stay strong in your faith and remain on the holy path to fulfilling your God-given purpose. With courage, love, and the guidance of a Godly community, your journey toward a brighter and more meaningful future is just beginning.  
 
-Welcome to Kidist Selassie Youth International — we are blessed to have you with us!  
+Welcome to Kidist Selassie Youth International Network — we are blessed to have you with us!  
 
           </p>
         </div>
