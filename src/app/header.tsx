@@ -37,14 +37,11 @@ export default function Header() {
       <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-7xl">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0">
-          <Image 
+          {/* Using standard img tag instead of Next.js Image for better reliability */}
+          <img 
             src="/assets/lion-of-judah-2.jpg" 
             alt="Kidist Selassie Youth International Network" 
-            width={100} 
-            height={100} 
-            className='w-16 h-10 mr-3 md:mr-4' 
-            priority 
-            unoptimized
+            className='w-16 h-10 mr-3 md:mr-4 object-contain' 
           />
           <Link href="/" className="flex items-center">
             <span className="text-xl text-white lg:block hidden font-bold whitespace-nowrap mr-8">
