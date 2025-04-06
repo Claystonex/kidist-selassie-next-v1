@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const GALLERY_FILE = path.join(process.cwd(), 'data', 'gallery.json');
+// Change file location to public directory, which is accessible by all serverless functions
+const GALLERY_FILE = path.join(process.cwd(), 'public', 'data', 'gallery.json');
 
-// Ensure the data directory exists
+// Ensure the data directory exists in public folder
 const ensureDataDir = () => {
-  const dir = path.join(process.cwd(), 'data');
+  const dir = path.join(process.cwd(), 'public', 'data');
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+    fs.mkdirSync(dir, { recursive: true }); // Using recursive to create nested directories if needed
   }
   if (!fs.existsSync(GALLERY_FILE)) {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify([]));

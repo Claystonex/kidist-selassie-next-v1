@@ -36,6 +36,8 @@ export default function GalleryDisplay() {
   const fetchGalleryItems = async () => {
     try {
       setLoading(true);
+      
+      // Try fetching from the API first (for backward compatibility)
       const res = await fetch('/api/gallery');
       
       if (res.ok) {
@@ -46,7 +48,18 @@ export default function GalleryDisplay() {
           setSelectedItem(data[0]);
         }
       } else {
-        setError('Failed to load gallery items');
+        // If API fails, try getting data directly from the public JSON file
+        const publicRes = await fetch('/data/gallery.json');
+        if (publicRes.ok) {
+          const data = await publicRes.json();
+          setAllItems(data);
+          setFilteredItems(data);
+          if (data.length > 0 && !selectedItem) {
+            setSelectedItem(data[0]);
+          }
+        } else {
+          setError('Failed to load gallery items');
+        }
       }
     } catch (err) {
       setError('Error connecting to server');

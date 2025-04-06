@@ -15,8 +15,12 @@ const config = {
                 pathname: '/users/**',
             },
         ],
+        unoptimized: true, // Disable image optimization for better reliability
+        domains: ['kidistselassieyouth.com'], // Add your domain to allowed list
     },
     reactStrictMode: true,
+    // Set asset prefixes based on environment
+    assetPrefix: process.env.NODE_ENV === 'production' ? 'https://kidistselassieyouth.com' : undefined,
 };
 
 export default config;
