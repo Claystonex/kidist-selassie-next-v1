@@ -88,19 +88,20 @@ export default function Home() {
       </div>
 
       {/* Mission Statement Box */}
-      <div className="bg-white/10 p-6 rounded-lg mb-8 max-w-5xl w-full mx-auto hover:bg-white/20 transition-colors">
+      <div className="bg-white/10 p-6 rounded-lg mb-8 max-w-5xl w-full mx-auto hover:bg-white/20 transition-colors flex-row">
         <h2 className="font-montserrat font-bold text-2xl mb-2 text-center">
           <TranslatableText>Our Mission and Goals</TranslatableText>
         </h2>
-        <p className="text-gray-200 text-sm mb-2 text-center">
-          <TranslatableText>
-            We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network.
-          </TranslatableText>
-        </p>
-        <div className="flex justify-center">
+        <div className="text-center">
+          <span className="text-gray-200 text-sm">
+            <TranslatableText>
+              We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network.
+            </TranslatableText>
+          </span>
+          {" "}
           <Link 
             href="../about" 
-            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center text-sm"
+            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center text-sm ml-1"
             style={{ animation: 'blink 1.5s linear infinite' }}
           >
             <TranslatableText>Read More</TranslatableText>

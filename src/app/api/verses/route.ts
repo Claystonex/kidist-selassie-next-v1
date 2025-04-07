@@ -46,17 +46,40 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, scripture, password } = body;
     
-    // Simple password check (replace with your own password)
+    console.log('Received verse submission:', { title, hasPassword: !!password });
+    
+    // Check if environment variable exists
+    if (!process.env.VERSE_PASSWORD) {
+      console.error('VERSE_PASSWORD environment variable is not set');
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+    
+    // Simple password check with better error handling
     if (password !== process.env.VERSE_PASSWORD) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('Password verification failed');
+      return NextResponse.json({ error: 'Unauthorized - Incorrect password' }, { status: 401 });
     }
     
     if (!title || !scripture) {
       return NextResponse.json({ error: 'Title and scripture are required' }, { status: 400 });
     }
     
-    const versesData = fs.readFileSync(VERSES_FILE, 'utf8');
-    const verses = JSON.parse(versesData);
+    // Read the verses file with error handling
+    let verses = [];
+    try {
+      const versesData = fs.readFileSync(VERSES_FILE, 'utf8');
+      verses = JSON.parse(versesData);
+      
+      // Ensure verses is an array
+      if (!Array.isArray(verses)) {
+        console.error('verses.json does not contain an array');
+        verses = [];
+      }
+    } catch (readError) {
+      console.error('Error reading verses file:', readError);
+      // Initialize with empty array if file can't be read
+      verses = [];
+    }
 
     const newVerse = {
       id: Date.now().toString(),
@@ -66,11 +89,18 @@ export async function POST(request: NextRequest) {
     };
     
     verses.push(newVerse);
-    fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2));
     
-    return NextResponse.json(newVerse, { status: 201 });
+    try {
+      fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2));
+      console.log('Verse added successfully:', newVerse.id);
+      return NextResponse.json(newVerse, { status: 201 });
+    } catch (writeError) {
+      console.error('Error writing to verses file:', writeError);
+      return NextResponse.json({ error: 'Failed to save verse' }, { status: 500 });
+    }
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to add verse' }, { status: 500 });
+    console.error('Verse API error:', error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }
 

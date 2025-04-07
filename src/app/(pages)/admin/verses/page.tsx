@@ -41,6 +41,10 @@ export default function VerseAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous messages
+    setMessage('');
+    setError('');
+    
     if (!title || !scripture || !password) {
       setError('Please fill in all fields');
       return;
@@ -48,6 +52,8 @@ export default function VerseAdmin() {
     
     try {
       setLoading(true);
+      console.log('Submitting verse:', { title, hasPassword: !!password });
+      
       const response = await fetch('/api/verses', {
         method: 'POST',
         headers: {
@@ -56,17 +62,20 @@ export default function VerseAdmin() {
         body: JSON.stringify({ title, scripture, password }),
       });
       
+      const data = await response.json();
+      
       if (response.ok) {
         setMessage('Verse added successfully!');
         setTitle('');
         setScripture('');
         fetchVerses();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to add verse');
+        console.error('Error response:', response.status, data);
+        setError(data.error || `Failed to add verse (Status: ${response.status})`);
       }
     } catch (err) {
-      setError('Error connecting to server');
+      console.error('Submission error:', err);
+      setError('Error connecting to server. Please check your network connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -109,6 +118,10 @@ export default function VerseAdmin() {
   const handleAuthentication = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous messages
+    setMessage('');
+    setError('');
+    
     if (!authPassword) {
       setError('Please enter the admin password');
       return;
@@ -116,6 +129,8 @@ export default function VerseAdmin() {
     
     try {
       setLoading(true);
+      console.log('Attempting authentication...');
+      
       // We'll use the same password check as the API
       const response = await fetch('/api/verses/verify', {
         method: 'POST',
@@ -125,16 +140,25 @@ export default function VerseAdmin() {
         body: JSON.stringify({ password: authPassword }),
       });
       
+      const data = await response.json();
+      
       if (response.ok) {
+        console.log('Authentication successful');
         setIsAuthenticated(true);
         setPassword(authPassword); // Set the main password field to reuse for other operations
         setError(''); // Clear any errors
       } else {
-        const data = await response.json();
-        setError(data.error || 'Incorrect password');
+        console.error('Authentication failed:', response.status, data);
+        setError(data.error || `Authentication failed (Status: ${response.status})`);
+        
+        // Show hint if it seems to be a special character issue
+        if (authPassword.includes('%')) {
+          setError((prev) => prev + '. Note: Special characters like % may cause issues.');
+        }
       }
     } catch (err) {
-      setError('Error connecting to server');
+      console.error('Authentication error:', err);
+      setError('Error connecting to server. Please check your network connection and try again.');
     } finally {
       setLoading(false);
     }
