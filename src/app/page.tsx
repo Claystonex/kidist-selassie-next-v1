@@ -77,8 +77,8 @@ export default function Home() {
       
       {/* Verse of the Day Section */}
       <div className="w-full max-w-5xl px-4 mb-8 text-center">
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">
+        <div className="mb-4 flex flex-row justify-left">
+          <h2 className="text-xl font-semibold mr-3">
             <TranslatableText>Verse of the Day:</TranslatableText>
           </h2>
           <p className="text-xl">
@@ -109,6 +109,15 @@ export default function Home() {
             </svg>
           </Link>
         </div>
+      </div>
+
+      {/* Tagline Box */}
+      <div className="bg-white/10 p-4 rounded-lg mb-8 max-w-5xl w-full mx-auto text-center border border-[#ffb43c]/30">
+        <p className="text-white text-2xl font-medium whitespace-nowrap">
+          <TranslatableText>
+            Christ-centered and Youth-Focused International Network to Grow Love and Faith.
+          </TranslatableText>
+        </p>
       </div>
 
       <div className=" font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
