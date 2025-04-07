@@ -34,22 +34,25 @@ export default function Header() {
 
   return (
     <nav className="relative border-b bg-[#086c47]">
-      <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-7xl">
+      <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-full lg:max-w-7xl">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0">
           {/* Simple img tag with importance attribute for better loading */}
           <img 
             src="/assets/lion-of-judah-2.jpg" 
             alt="Kidist Selassie Youth International Network" 
-            className='w-16 h-10 mr-3 md:mr-4 object-contain' 
+            className='w-14 h-9 mr-1 object-contain' 
             fetchPriority="high"
             loading="eager"
           />
           <Link href="/" className="flex items-center">
-            <span className="text-xl text-white lg:block hidden font-bold whitespace-nowrap mr-8">
+            <span className="text-base text-white xl:block hidden font-bold whitespace-nowrap mr-2">
               <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
             </span>
-            <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[120px] sm:max-w-[200px] md:max-w-[250px]">
+            <span className="text-base text-white hidden lg:block xl:hidden font-bold whitespace-nowrap mr-2">
+              <TranslatableText>Kidist Selassie</TranslatableText>
+            </span>
+            <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[100px] sm:max-w-[150px]">
               <TranslatableText>Kidist Selassie</TranslatableText>
             </span>
           </Link>
@@ -183,7 +186,7 @@ export default function Header() {
         <div className="hidden lg:block flex-grow"></div>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center justify-end space-x-8 lg:space-x-10 flex-grow">
+        <div className="hidden lg:flex items-center justify-end space-x-4 xl:space-x-6 flex-grow">
           {/* Services Dropdown */}
           <div className="relative group">
             <div 
@@ -253,12 +256,24 @@ export default function Header() {
               setServicesOpen(false);
               setInteractOpen(false);
             }}
+            className="whitespace-nowrap"
           >
             <NavLink href="/gallery"><TranslatableText>Gallery</TranslatableText></NavLink>
           </div>
+
+          {/* Added Forum link to main navigation as requested */}
+          <div 
+            onMouseOver={() => {
+              setServicesOpen(false);
+              setInteractOpen(false);
+            }}
+            className="whitespace-nowrap"
+          >
+            <NavLink href="/forum"><TranslatableText>Forum</TranslatableText></NavLink>
+          </div>
           
           <div 
-            className="group"
+            className="group whitespace-nowrap"
             onMouseOver={() => {
               setServicesOpen(false);
               setInteractOpen(false);
@@ -268,10 +283,10 @@ export default function Header() {
               href="https://v0-bible-chapter-tracker.vercel.app/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm font-montserrat text-white hover:text-[#ffb43c] transition-colors px-3 py-2 rounded-md"
+              className="text-sm font-montserrat text-white hover:text-[#ffb43c] transition-colors px-2 py-2 rounded-md"
             >
-              <span className="flex items-center space-x-0.5">
-                <span><TranslatableText>Bible Tracker</TranslatableText></span>
+              <span className="flex items-center">
+                <span className="mr-1"><TranslatableText>Bible Tracker</TranslatableText></span>
                 <FontAwesomeIcon 
                   icon={faBook} 
                   className="h-3 w-3 transform group-hover:scale-125 transition-transform duration-300 group-hover:text-[#ffb43c]"
@@ -285,6 +300,7 @@ export default function Header() {
               setServicesOpen(false);
               setInteractOpen(false);
             }}
+            className="whitespace-nowrap"
           >
             <NavLink href="/teachings"><TranslatableText>Teachings</TranslatableText></NavLink>
           </div>
@@ -293,21 +309,24 @@ export default function Header() {
               setServicesOpen(false);
               setInteractOpen(false);
             }}
+            className="whitespace-nowrap"
           >
             <NavLink href="/donate"><TranslatableText>Donate</TranslatableText></NavLink>
           </div>
         </div>
 
         {/* Auth Button and Language Toggle */}
-        <div className="hidden lg:flex items-center space-x-3 ml-2">
-          <LanguageToggle />
+        <div className="hidden lg:flex items-center ml-2">
+          <div className="mr-4">
+            <LanguageToggle />
+          </div>
           
           {user ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
-            <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none px-6 w-32">
-              <Link href="/sign-up" className="text-red-600 ">
-                <TranslatableText className='text-2xl font-bold'>Join</TranslatableText>
+            <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none text-center flex items-center justify-center min-w-[80px] h-10">
+              <Link href="/sign-up" className="text-[#086c47] px-4">
+                <TranslatableText className='text-lg font-bold'>Join</TranslatableText>
               </Link>
             </Button>
           )}
@@ -329,7 +348,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link 
       href={href} 
-      className="text-sm font-montserrat text-white transition-colors hover:text-[#ffb43c]"
+      className="text-sm lg:text-xs xl:text-sm font-montserrat text-white transition-colors hover:text-[#ffb43c] px-1 xl:px-2"
     >
       {children}
     </Link>
@@ -340,7 +359,7 @@ function DropdownNavLink({ href, children }: { href: string; children: React.Rea
   return (
     <Link 
       href={href} 
-      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-[#086c47]"
+      className="block px-3 py-2 text-xs lg:text-sm text-gray-800 hover:bg-gray-100 hover:text-[#086c47] whitespace-nowrap"
     >
       {children}
     </Link>

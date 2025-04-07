@@ -31,18 +31,32 @@ export default function Home() {
 
       <style>{blinkingStyle}</style>
      
-      <div className="w-full flex flex-col md:flex-row md:justify-between px-4 mb-4 pb-16">
-        <div className="mb-4 md:mb-0">
-          <p className="text-sm text-white">
-            <TranslatableText>What to Expect from Kidist Selassie Youth International Program</TranslatableText>
-          </p>
+      {/* Mission Statement Box */}
+      <div className="font-montserrat bg-[#064d32] rounded-lg shadow-xl p-6 mb-8 max-w-5xl w-full mx-auto text-center">
+        <h2 className="text-2xl font-bold text-[#ffb43c] mb-3">
+          <TranslatableText>Our Mission and Goals</TranslatableText>
+        </h2>
+        <p className="text-white mb-4">
+          <TranslatableText>
+            We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.
+          </TranslatableText>
+        </p>
+        <div className="flex justify-center">
           <Link 
             href="../about" 
-            className="text-xl cursor-pointer border-b-2 border-white inline-block"
-            style={{ animation: 'blink 2s linear infinite' }}
+            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center"
+            style={{ animation: 'blink 1.5s linear infinite' }}
           >
-            <TranslatableText>*Our Mission and Goals*</TranslatableText>
+            <TranslatableText>Read More</TranslatableText>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </Link>
+        </div>
+      </div>
+
+      <div className="w-full flex flex-col md:flex-row md:justify-between px-4 mb-4 ">
+        <div className="mb-4 md:mb-0">
           <h1 className="text-xl font-semibold">
             <TranslatableText>Verse of the Day:</TranslatableText>
           </h1>
@@ -53,12 +67,12 @@ export default function Home() {
 
         <div className="flex md:flex-col md:space-y-6 flex-row space-x-4 md:space-x-0">
           <h1><TranslatableText>Follow Us</TranslatableText></h1>
-          
-          <a
-            href="https://facebook.com/youraccount" 
-            target="_blank" 
+          <a 
+            href="../about" 
+            // target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
+            // className="text-xl cursor-pointer inline-block text-white hover:text-yellow-400 transition-colors"
           >
             <FontAwesomeIcon icon={faFacebook} size="2xl" />
           </a>
@@ -88,16 +102,18 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <h1 className="font-montserrat font-bold text-6xl mb-6 flex text-center">
-        <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
-      </h1>
-      
-      <p className="font-sans text-xl mb-8 max-w-2xl text-center">
-        <TranslatableText>
-          A community of faith, online networking, and support. Join us in sharing prayers, 
-          finding mentorship, and experiencing miracles together.
-        </TranslatableText>
-      </p>
+      <div className="w-full max-w-5xl">
+        <h1 className="font-montserrat font-bold text-6xl mb-6">
+          <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
+        </h1>
+        
+        <p className="font-sans text-xl mb-8 max-w-2xl text-left">
+          <TranslatableText>
+            A community of faith, online networking, and support. Join us in sharing prayers, 
+            finding mentorship, and experiencing miracles together.
+          </TranslatableText>
+        </p>
+      </div>
 
       <div className=" font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
         {/* Feature Cards */}
