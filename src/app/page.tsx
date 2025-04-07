@@ -26,53 +26,25 @@ const blinkingStyle = `
 
 export default function Home() {
   return (
-    
     <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
-
       <style>{blinkingStyle}</style>
-     
-      {/* Mission Statement Box */}
-      <div className="font-montserrat bg-[#064d32] rounded-lg shadow-xl p-6 mb-8 max-w-5xl w-full mx-auto text-center">
-        <h2 className="text-2xl font-bold text-[#ffb43c] mb-3">
-          <TranslatableText>Our Mission and Goals</TranslatableText>
-        </h2>
-        <p className="text-white mb-4">
-          <TranslatableText>
-            We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.
-          </TranslatableText>
-        </p>
-        <div className="flex justify-center">
-          <Link 
-            href="../about" 
-            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center"
-            style={{ animation: 'blink 1.5s linear infinite' }}
-          >
-            <TranslatableText>Read More</TranslatableText>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
-        </div>
+      
+      {/* Main Title Section */}
+      <div className="w-full text-center mb-6">
+        <h1 className="font-montserrat font-bold text-6xl inline-block whitespace-nowrap">
+          <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
+        </h1>
       </div>
-
-      <div className="w-full flex flex-col md:flex-row md:justify-between px-4 mb-4 ">
-        <div className="mb-4 md:mb-0">
-          <h1 className="text-xl font-semibold">
-            <TranslatableText>Verse of the Day:</TranslatableText>
-          </h1>
-          <h1>
-            <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
-          </h1>
-        </div>
-
-        <div className="flex md:flex-col md:space-y-6 flex-row space-x-4 md:space-x-0">
-          <h1><TranslatableText>Follow Us</TranslatableText></h1>
+      
+      {/* Social Media Section */}
+      <div className="absolute top-48 right-24">
+        <div className="flex flex-col space-y-4 items-center">
+          <h2 className="text-lg"><TranslatableText>Follow Us</TranslatableText></h2>
           <a 
-            href="../about" 
-            // target="_blank" 
+            href="https://facebook.com/selassieyouth" 
+            target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
-            // className="text-xl cursor-pointer inline-block text-white hover:text-yellow-400 transition-colors"
           >
             <FontAwesomeIcon icon={faFacebook} size="2xl" />
           </a>
@@ -93,7 +65,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faTiktok} size="2xl" />
           </a>
           <a 
-            href="https://x.com/youraccount" 
+            href="https://x.com/selassieyouth" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
@@ -102,17 +74,41 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <div className="w-full max-w-5xl">
-        <h1 className="font-montserrat font-bold text-6xl mb-6">
-          <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
-        </h1>
-        
-        <p className="font-sans text-xl mb-8 max-w-2xl text-left">
+      
+      {/* Verse of the Day Section */}
+      <div className="w-full max-w-5xl px-4 mb-8 text-center">
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">
+            <TranslatableText>Verse of the Day:</TranslatableText>
+          </h2>
+          <p className="text-xl">
+            <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
+          </p>
+        </div>
+      </div>
+
+      {/* Mission Statement Box */}
+      <div className="bg-white/10 p-6 rounded-lg mb-8 max-w-5xl w-full mx-auto hover:bg-white/20 transition-colors">
+        <h2 className="font-montserrat font-bold text-2xl mb-2 text-center">
+          <TranslatableText>Our Mission and Goals</TranslatableText>
+        </h2>
+        <p className="text-gray-200 text-sm mb-2 text-center">
           <TranslatableText>
-            A community of faith, online networking, and support. Join us in sharing prayers, 
-            finding mentorship, and experiencing miracles together.
+            We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network.
           </TranslatableText>
         </p>
+        <div className="flex justify-center">
+          <Link 
+            href="../about" 
+            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center text-sm"
+            style={{ animation: 'blink 1.5s linear infinite' }}
+          >
+            <TranslatableText>Read More</TranslatableText>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       <div className=" font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
