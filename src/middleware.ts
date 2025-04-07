@@ -48,6 +48,22 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(onboardingUrl);
   }
   
+  // If we're trying to access a page that doesn't exist, redirect to home
+  // This prevents accidental redirects to pages like prayer or other non-existent pages
+  if (pathname !== '/' && !request.nextUrl.pathname.startsWith('/api') && request.method === 'GET') {
+    try {
+      // Check if this is the redirect after signing in
+      const authEvent = request.nextUrl.searchParams.get('__clerk_auth_event');
+      if (authEvent) {
+        // This is an auth redirect, ensure it goes to home
+        const homeUrl = new URL('/', request.url);
+        return NextResponse.redirect(homeUrl);
+      }
+    } catch (error) {
+      console.error('Error in middleware redirect check:', error);
+    }
+  }
+  
   return NextResponse.next();
 }
 
