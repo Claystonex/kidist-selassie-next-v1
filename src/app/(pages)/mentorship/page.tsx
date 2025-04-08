@@ -29,11 +29,7 @@ const MentorshipPage = () => {
           description="Share your short (clean) jokes and laugh with our community."
           link="/jokes"
         />
-        <FeatureCard 
-          title="Q&A" 
-          description="Ask questions and get answers from our community."
-          link="/questions"
-        />
+        
         <FeatureCard 
           title="Feedback &
           Comments" 

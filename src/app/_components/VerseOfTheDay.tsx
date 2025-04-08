@@ -20,15 +20,33 @@ export default function VerseOfTheDay() {
     const fetchVerse = async () => {
       try {
         setLoading(true);
+        console.log('Fetching verse from API...');
         const res = await fetch('/api/verses');
         
+        console.log('API response status:', res.status);
+        
         if (res.ok) {
-          const data = await res.json();
-          setVerse(data);
+          try {
+            const data = await res.json();
+            console.log('Verse data received:', data);
+            setVerse(data);
+          } catch (jsonError) {
+            console.error('Error parsing verse JSON:', jsonError);
+            setError('Error parsing verse data');
+          }
         } else {
-          setError('Failed to load today\'s verse');
+          console.error('Failed to load verse, status:', res.status);
+          setError(`Failed to load today's verse (${res.status})`);
+          // Try to get the error message
+          try {
+            const errorData = await res.text();
+            console.error('Error response:', errorData);
+          } catch (e) {
+            console.error('Could not read error response');
+          }
         }
       } catch (err) {
+        console.error('Error fetching verse:', err);
         setError('Error connecting to server');
       } finally {
         setLoading(false);
@@ -52,17 +70,17 @@ export default function VerseOfTheDay() {
     return () => clearTimeout(midnightTimer);
   }, []);
 
-  if (loading) return <div className={styles.verseContainer || 'verseContainer'}>Loading today's verse...</div>;
+  if (loading) return <div className="text-yellow-400 py-4">Loading today's verse...</div>;
   
-  if (error) return <div className={styles.verseContainer || 'verseContainer'}>{error}</div>;
+  if (error) return <div className="text-red-400 py-4">{error}</div>;
   
-  if (!verse) return <div className={styles.verseContainer || 'verseContainer'}>No verse available for today.</div>;
+  if (!verse) return <div className="text-white py-4">No verse available for today.</div>;
 
   return (
-    <div className={styles.verseContainer || 'verseContainer'}>
-      <h2 className={styles.verseTitle || 'verseTitle'}>Verse of the Day</h2>
-      <h3 className={styles.verseReference || 'verseReference'}>{verse.title}</h3>
-      <p className={styles.verseText || 'verseText'}>{verse.scripture}</p>
+    <div className="text-white">
+      <h3 className="text-xl font-bold text-yellow-400 mb-2">{verse.title}</h3>
+      <p className="text-lg italic mb-2">"{verse.scripture}"</p>
+      <p className="text-sm text-gray-300">Added on {new Date(verse.createdAt).toLocaleDateString()}</p>
     </div>
   );
 }

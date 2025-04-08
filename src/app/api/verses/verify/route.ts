@@ -3,7 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // First check if the request can be parsed as JSON
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('Failed to parse request body as JSON:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const { password } = body;
     
     console.log('Received password verification request');
@@ -13,14 +21,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password is required' }, { status: 400 });
     }
     
-    // Check if environment variable exists
-    if (!process.env.VERSE_PASSWORD) {
-      console.error('VERSE_PASSWORD environment variable is not set');
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
+    // Use hardcoded password for now
+    const expectedPassword = 'Youth100';
     
-    // Check if the password matches the one in the environment variable
-    if (password !== process.env.VERSE_PASSWORD) {
+    // Check if the password matches
+    if (password !== expectedPassword) {
       console.log('Password verification failed: Incorrect password');
       return NextResponse.json({ error: 'Unauthorized - Incorrect password' }, { status: 401 });
     }

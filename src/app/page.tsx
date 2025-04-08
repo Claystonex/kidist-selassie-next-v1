@@ -4,6 +4,7 @@ import Link from "next/link";
 import { faXTwitter, faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TranslatableText from './_components/TranslatableText';
+import VerseOfTheDay from './_components/VerseOfTheDay';
 
 
 // export default async function Home() {
@@ -77,13 +78,16 @@ export default function Home() {
       
       {/* Verse of the Day Section */}
       <div className="w-full max-w-5xl px-4 mb-8 text-center">
-        <div className="mb-4 flex flex-row justify-left">
+        <div className="mb-4 flex flex-row justify-center">
           <h2 className="text-xl font-semibold mr-3">
             <TranslatableText>Verse of the Day:</TranslatableText>
           </h2>
           <p className="text-xl">
             <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
           </p>
+        </div>
+        <div className="bg-white/10 p-4 rounded-lg border border-yellow-400/30">
+          <VerseOfTheDay />
         </div>
       </div>
 
@@ -142,12 +146,12 @@ export default function Home() {
       <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
         {/* Feature Cards */}
         <FeatureCard 
-          title="Post Your Funny Audio" 
+          title="Post Your Funnies" 
           description="Share your short (clean) jokes and laugh with our community."
           link="/jokes"
         />
         <FeatureCard 
-          title="Q&A" 
+          title="Questions Forum" 
           description="Ask questions and get answers from our community."
           link="/questions"
         />
