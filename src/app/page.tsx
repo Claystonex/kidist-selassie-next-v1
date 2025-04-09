@@ -30,15 +30,15 @@ export default function Home() {
     <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
       <style>{blinkingStyle}</style>
       
-      {/* Main Title Section */}
-      <div className="w-full text-center mb-6">
-        <h1 className="font-montserrat font-bold text-6xl inline-block whitespace-nowrap">
+      {/* Main Title Section - with responsive font size */}
+      <div className="w-full text-center mb-6 px-4">
+        <h1 className="font-montserrat font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl break-words sm:whitespace-normal">
           <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
         </h1>
       </div>
       
-      {/* Social Media Section */}
-      <div className="absolute top-48 right-24">
+      {/* Social Media Section - repositioned for mobile */}
+      <div className="hidden md:block absolute top-48 right-24">
         <div className="flex flex-col space-y-4 items-center">
           <h2 className="text-lg"><TranslatableText>Follow Us</TranslatableText></h2>
           <a 
@@ -76,13 +76,51 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Verse of the Day Section */}
+      {/* Mobile Social Media Section */}
+      <div className="md:hidden w-full flex justify-center mb-6">
+        <div className="flex space-x-6 items-center">
+          <a 
+            href="https://facebook.com/selassieyouth" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faFacebook} size="lg" />
+          </a>
+          <a 
+            href="https://instagram.com/selassieyouth/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faInstagram} size="lg" />
+          </a>
+          <a 
+            href="https://tiktok.com/@selassieyouthint.network" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faTiktok} size="lg" />
+          </a>
+          <a 
+            href="https://x.com/selassieyouth" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white hover:text-yellow-400 transition-colors"
+          >
+            <FontAwesomeIcon icon={faXTwitter} size="lg" />
+          </a>
+        </div>
+      </div>
+      
+      {/* Verse of the Day Section - improved for mobile */}
       <div className="w-full max-w-5xl px-4 mb-8 text-center">
-        <div className="mb-4 flex flex-row justify-center">
-          <h2 className="text-xl font-semibold mr-3">
+        <div className="mb-4 flex flex-col sm:flex-row justify-center items-center">
+          <h2 className="text-lg sm:text-xl font-semibold sm:mr-3">
             <TranslatableText>Verse of the Day:</TranslatableText>
           </h2>
-          <p className="text-xl">
+          <p className="text-lg sm:text-xl">
             <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
           </p>
         </div>
@@ -116,9 +154,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Tagline Box */}
+      {/* Tagline Box - fixed text wrapping for mobile */}
       <div className="bg-white/10 p-4 rounded-lg mb-8 max-w-5xl w-full mx-auto text-center border border-[#ffb43c]/30">
-        <p className="text-white text-2xl font-medium whitespace-nowrap">
+        <p className="text-white text-lg sm:text-xl md:text-2xl font-medium break-words">
           <TranslatableText>
             Christ-centered and Youth-Focused International Network to Grow Love and Faith.
           </TranslatableText>
@@ -161,8 +199,8 @@ export default function Home() {
           link="/feedback"
         />
       </div>
-      <div className="border-t-4 w-[80wh] pb-4 border-[#c4142c]"></div>
-      <div className="border-t-4 w-[50wh] border-[#c4142c]"></div>
+      <div className="border-t-4 w-[80%] pb-4 border-[#c4142c]"></div>
+      <div className="border-t-4 w-[50%] border-[#c4142c]"></div>
 
     </div>
   );

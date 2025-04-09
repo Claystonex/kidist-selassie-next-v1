@@ -77,10 +77,10 @@ export default function VerseOfTheDay() {
   if (!verse) return <div className="text-white py-4">No verse available for today.</div>;
 
   return (
-    <div className="text-white">
-      <h3 className="text-xl font-bold text-yellow-400 mb-2">{verse.title}</h3>
-      <p className="text-lg italic mb-2">"{verse.scripture}"</p>
-      <p className="text-sm text-gray-300">Added on {new Date(verse.createdAt).toLocaleDateString()}</p>
+    <div className="text-white px-2">
+      <h3 className="text-lg sm:text-xl font-bold text-yellow-400 mb-2">{verse.title}</h3>
+      <p className="text-base sm:text-lg italic mb-2 break-words">"{verse.scripture}"</p>
+      <p className="text-xs sm:text-sm text-gray-300">Added on {new Date(verse.createdAt).toLocaleDateString()}</p>
     </div>
   );
 }

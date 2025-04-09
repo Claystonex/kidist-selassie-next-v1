@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { usePathname, useRouter } from 'next/navigation';
 
 // Languages supported
-type Language = 'en' | 'am' | 'fr' | 'es'; // English, Amharic, French, or Spanish
+type Language = 'en' | 'am' | 'fr' | 'es' | 'ru' | 'zh' | 'sv' | 'de' | 'af' | 'it' | 'pt'; // English, Amharic, French, Spanish, Russian, Chinese, Swedish, German, Afrikaans, Italian, Portuguese
 
 // Common translations that we can use immediately without API calls
 const COMMON_TRANSLATIONS: Record<string, Record<Language, string>> = {
@@ -13,128 +13,288 @@ const COMMON_TRANSLATIONS: Record<string, Record<Language, string>> = {
     en: 'Services',
     am: 'አገልግሎቶች',
     fr: 'Services',
-    es: 'Servicios'
+    es: 'Servicios',
+    ru: 'Услуги',
+    zh: '服务',
+    sv: 'Tjänster',
+    de: 'Dienstleistungen',
+    af: 'Dienste',
+    it: 'Servizi',
+    pt: 'Serviços'
   },
   'Questions': {
     en: 'Questions',
     am: 'ጥያቄዎች',
     fr: 'Questions',
-    es: 'Preguntas'
+    es: 'Preguntas',
+    ru: 'Вопросы',
+    zh: '问题',
+    sv: 'Frågor',
+    de: 'Fragen',
+    af: 'Vrae',
+    it: 'Domande',
+    pt: 'Perguntas'
   },
   'Mentorship': {
     en: 'Mentorship',
     am: 'አመራር',
     fr: 'Mentorat',
-    es: 'Mentoría'
+    es: 'Mentoría',
+    ru: 'Наставничество',
+    zh: '导师制',
+    sv: 'Mentorskap',
+    de: 'Mentorschaft',
+    af: 'Mentorskap',
+    it: 'Mentoring',
+    pt: 'Mentoria'
   },
   'Bootcamps': {
     en: 'Bootcamps',
     am: 'ቡትካምፖች',
     fr: 'Bootcamps',
-    es: 'Bootcamps'
+    es: 'Bootcamps',
+    ru: 'Буткемпы',
+    zh: '训练营',
+    sv: 'Bootcamps',
+    de: 'Bootcamps',
+    af: 'Bootcamps',
+    it: 'Bootcamp',
+    pt: 'Bootcamps'
   },
   'Interact': {
     en: 'Interact',
     am: 'መስተጋብር',
     fr: 'Interagir',
-    es: 'Interactuar'
+    es: 'Interactuar',
+    ru: 'Взаимодействие',
+    zh: '互动',
+    sv: 'Interagera',
+    de: 'Interagieren',
+    af: 'Interaksie',
+    it: 'Interagire',
+    pt: 'Interagir'
   },
   'Forum': {
     en: 'Forum',
     am: 'መድረክ',
     fr: 'Forum',
-    es: 'Foro'
+    es: 'Foro',
+    ru: 'Форум',
+    zh: '论坛',
+    sv: 'Forum',
+    de: 'Forum',
+    af: 'Forum',
+    it: 'Forum',
+    pt: 'Fórum'
   },
   'Prayer Requests': {
     en: 'Prayer Requests',
     am: 'የጸሎት ጥያቄዎች',
     fr: 'Demandes de prière',
-    es: 'Peticiones de oración'
+    es: 'Peticiones de oración',
+    ru: 'Молитвенные просьбы',
+    zh: '祈祷请求',
+    sv: 'Böneförfrågningar',
+    de: 'Gebetsanliegen',
+    af: 'Gebedsversoeke',
+    it: 'Richieste di preghiera',
+    pt: 'Pedidos de oração'
   },
   'Miracles': {
     en: 'Miracles',
     am: 'ተዓምራት',
     fr: 'Miracles',
-    es: 'Milagros'
+    es: 'Milagros',
+    ru: 'Чудеса',
+    zh: '奇迹',
+    sv: 'Mirakel',
+    de: 'Wunder',
+    af: 'Wonderwerke',
+    it: 'Miracoli',
+    pt: 'Milagres'
   },
   'Gallery': {
     en: 'Gallery',
     am: 'ጋለሪ',
     fr: 'Galerie',
-    es: 'Galería'
+    es: 'Galería',
+    ru: 'Галерея',
+    zh: '画廊',
+    sv: 'Galleri',
+    de: 'Galerie',
+    af: 'Galery',
+    it: 'Galleria',
+    pt: 'Galeria'
   },
   'Bible Tracker': {
     en: 'Bible Tracker',
     am: 'የመጽሐፍ ቅዱስ መከታተያ',
     fr: 'Suivi de la Bible',
-    es: 'Rastreador de la Biblia'
+    es: 'Rastreador de la Biblia',
+    ru: 'Трекер Библии',
+    zh: '圣经跟踪器',
+    sv: 'Bibelspårare',
+    de: 'Bibel-Tracker',
+    af: 'Bybel Volger',
+    it: 'Tracciatore Biblico',
+    pt: 'Rastreador da Bíblia'
   },
   'Teachings': {
     en: 'Teachings',
     am: 'ትምህርቶች',
     fr: 'Enseignements',
-    es: 'Enseñanzas'
+    es: 'Enseñanzas',
+    ru: 'Учения',
+    zh: '教义',
+    sv: 'Läror',
+    de: 'Lehren',
+    af: 'Leringe',
+    it: 'Insegnamenti',
+    pt: 'Ensinamentos'
   },
   'Donate': {
     en: 'Donate',
     am: 'ለመለገስ',
     fr: 'Faire un don',
-    es: 'Donar'
+    es: 'Donar',
+    ru: 'Пожертвовать',
+    zh: '捐赠',
+    sv: 'Donera',
+    de: 'Spenden',
+    af: 'Skenk',
+    it: 'Donare',
+    pt: 'Doar'
   },
   'Join': {
     en: 'Join',
     am: 'ተቀላቀል',
     fr: 'Rejoindre',
-    es: 'Unirse'
+    es: 'Unirse',
+    ru: 'Присоединиться',
+    zh: '加入',
+    sv: 'Gå med',
+    de: 'Beitreten',
+    af: 'Sluit aan',
+    it: 'Unisciti',
+    pt: 'Juntar-se'
   },
   // Common headings and phrases
   'Kidist Selassie Youth International Network': {
     en: 'Kidist Selassie Youth International Network',
     am: 'ቅድስት ሰላሴ ዓለም አቀፍ የወጣቶች ኔትወርክ',
     fr: 'Réseau international de la jeunesse Kidist Selassie',
-    es: 'Red Internacional de Jóvenes Kidist Selassie'
+    es: 'Red Internacional de Jóvenes Kidist Selassie',
+    ru: 'Международная молодежная сеть Кидист Селассие',
+    zh: '基迪斯特·塞拉西国际青年网络',
+    sv: 'Kidist Selassie Internationella Ungdomsnätverk',
+    de: 'Kidist Selassie Internationales Jugendnetzwerk',
+    af: 'Kidist Selassie Internasionale Jeugnetwerk',
+    it: 'Rete Internazionale Giovanile Kidist Selassie',
+    pt: 'Rede Internacional de Jovens Kidist Selassie'
   },
   'Follow Us': {
     en: 'Follow Us',
     am: 'ተከተሉን',
     fr: 'Suivez-nous',
-    es: 'Síguenos'
+    es: 'Síguenos',
+    ru: 'Подписывайтесь на нас',
+    zh: '关注我们',
+    sv: 'Följ oss',
+    de: 'Folgen Sie uns',
+    af: 'Volg ons',
+    it: 'Seguici',
+    pt: 'Siga-nos'
   },
   'Bible Teachings': {
     en: 'Bible Teachings',
     am: 'የመጽሐፍ ቅዱስ ትምህርቶች',
     fr: 'Enseignements bibliques',
-    es: 'Enseñanzas bíblicas'
+    es: 'Enseñanzas bíblicas',
+    ru: 'Библейские учения',
+    zh: '圣经教义',
+    sv: 'Bibelläror',
+    de: 'Biblische Lehren',
+    af: 'Bybelse leringe',
+    it: 'Insegnamenti biblici',
+    pt: 'Ensinamentos bíblicos'
   },
   'Submit Prayer Request': {
     en: 'Submit Prayer Request',
     am: 'የጸሎት ጥያቄ አስገባ',
     fr: 'Soumettre une demande de prière',
-    es: 'Enviar petición de oración'
+    es: 'Enviar petición de oración',
+    ru: 'Отправить молитвенную просьбу',
+    zh: '提交祈祷请求',
+    sv: 'Skicka böneförfrågan',
+    de: 'Gebetsanliegen einreichen',
+    af: 'Dien gebedsversoek in',
+    it: 'Invia richiesta di preghiera',
+    pt: 'Enviar pedido de oração'
   },
   'Prayer Title': {
     en: 'Prayer Title',
     am: 'የጸሎት ርዕስ',
     fr: 'Titre de la prière',
-    es: 'Título de la oración'
+    es: 'Título de la oración',
+    ru: 'Название молитвы',
+    zh: '祈祷标题',
+    sv: 'Bönetitel',
+    de: 'Gebetsüberschrift',
+    af: 'Gebedstitel',
+    it: 'Titolo della preghiera',
+    pt: 'Título da oração'
   },
   'Prayer Description': {
     en: 'Prayer Description',
     am: 'የጸሎት መግለጫ',
     fr: 'Description de la prière',
-    es: 'Descripción de la oración'
+    es: 'Descripción de la oración',
+    ru: 'Описание молитвы',
+    zh: '祈祷描述',
+    sv: 'Bönebeskrivning',
+    de: 'Gebetsbeschreibung',
+    af: 'Gebedsbeskrywing',
+    it: 'Descrizione della preghiera',
+    pt: 'Descrição da oração'
   },
   'Private Prayer': {
     en: 'Private Prayer',
     am: 'የግል ጸሎት',
     fr: 'Prière privée',
-    es: 'Oración privada'
+    es: 'Oración privada',
+    ru: 'Личная молитва',
+    zh: '私人祈祷',
+    sv: 'Privat bön',
+    de: 'Privates Gebet',
+    af: 'Private gebed',
+    it: 'Preghiera privata',
+    pt: 'Oração privada'
   },
   'Public Prayer': {
     en: 'Public Prayer',
     am: 'የህዝብ ጸሎት',
     fr: 'Prière publique',
-    es: 'Oración pública'
+    es: 'Oración pública',
+    ru: 'Общественная молитва',
+    zh: '公共祈祷',
+    sv: 'Offentlig bön',
+    de: 'Öffentliches Gebet',
+    af: 'Openbare gebed',
+    it: 'Preghiera pubblica',
+    pt: 'Oração pública'
+  },
+  'Jokes': {
+    en: 'Jokes',
+    am: 'ቀልዶች',
+    fr: 'Blagues',
+    es: 'Chistes',
+    ru: 'Шутки',
+    zh: '笑话',
+    sv: 'Skämt',
+    de: 'Witze',
+    af: 'Grappe',
+    it: 'Barzellette',
+    pt: 'Piadas'
   },
 };
 
@@ -391,7 +551,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 
     // Check persistent cache in state
     if (translations[text] && translations[text][language]) {
-      const translated = translations[text][language];
+      const translated = translations[text][language] || text;
       // Add to memory cache too
       translationCache.current.set(cacheKey, translated);
       return translated;
@@ -408,7 +568,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
       setTranslations(prev => {
         const newTranslations = { ...prev };
         if (!newTranslations[text]) {
-          newTranslations[text] = { en: text, am: '', fr: '', es: '' };
+          newTranslations[text] = { en: text, am: '', fr: '', es: '', ru: '', zh: '', sv: '', de: '', af: '', it: '', pt: '' };
         }
         newTranslations[text][language] = translatedText;
         

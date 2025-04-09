@@ -182,7 +182,28 @@ async function callGoogleTranslateAPI(text: string, targetLanguage: string): Pro
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, targetLanguage } = await request.json();
+    // Add robust JSON parsing with detailed error handling
+    let requestData;
+    try {
+      const rawText = await request.text();
+      console.log('Raw request body:', rawText.substring(0, 200)); // Log first 200 chars for debugging
+      
+      if (!rawText || rawText.trim() === '') {
+        return NextResponse.json(
+          { error: 'Empty request body' },
+          { status: 400 }
+        );
+      }
+      
+      requestData = JSON.parse(rawText);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      return NextResponse.json({ 
+        error: `Invalid JSON: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}` 
+      }, { status: 400 });
+    }
+    
+    const { text, targetLanguage } = requestData;
     
     if (!text || !targetLanguage) {
       return NextResponse.json(
@@ -191,6 +212,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log(`Translating text: "${text.substring(0, 50)}..." to ${targetLanguage}`);
+    
     // Translate the text
     const translation = await translateText(text, targetLanguage);
     

@@ -3,7 +3,7 @@ export default function AboutPage() {
       <div className="min-h-screen p-8 flex flex-col items-center">
         <h1 className="text-4xl font-montserrat text-[#ffb43c] mb-6 w-full text-center">Our Mission and Goals</h1>
         
-        <div className="text-xl prose prose-xl text-white max-w-4xl text-center w-full">
+        <div className="text-xl prose prose-xl text-white max-w-4xl text-left w-full">
           <p>
             We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.
           </p>
@@ -15,11 +15,11 @@ export default function AboutPage() {
           <p>
             <strong>Our program focuses on:</strong>
           </p>
-          <ul className="list-none pl-0 flex flex-col items-center">
-            <li className="mb-3">• Fostering successful friendships, enhancing education and career opportunities, and creating unique meetups and events around the world.</li>
-            <li className="mb-3">• Building a dynamic network that includes mentorship programs, online communities, sports teams, and shared experiences like travel, group camping, and recreational activities.</li>
-            <li className="mb-3">• Engaging in worship songs, Bible study sessions, comedy nights, games, art projects, poetry workshops, and other creative outlets.</li>
-            <li className="mb-3">• Providing a platform to showcase your talents and connect with others who share your passion for creativity.</li>
+          <ul className="list-disc pl-6 text-left">
+            <li className="mb-3">Fostering successful friendships, enhancing education and career opportunities, and creating unique meetups and events around the world.</li>
+            <li className="mb-3">Building a dynamic network that includes mentorship programs, online communities, sports teams, and shared experiences like travel, group camping, and recreational activities.</li>
+            <li className="mb-3">Engaging in worship songs, Bible study sessions, comedy nights, games, art projects, poetry workshops, and other creative outlets.</li>
+            <li className="mb-3">Providing a platform to showcase your talents and connect with others who share your passion for creativity.</li>
           </ul>
           
           <p>

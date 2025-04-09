@@ -44,52 +44,77 @@ export async function POST(req: Request) {
   
   if (eventType === 'user.created') {
     // A new user was created
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    console.log('Processing user.created webhook event');
     
-    // Make sure we have at least one email address
-    if (email_addresses && email_addresses.length > 0) {
-      const primaryEmail = email_addresses[0]?.email_address;
-      const userName = [first_name, last_name].filter(Boolean).join(' ') || 'Member';
+    try {
+      const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+      console.log('User data received:', { id, email_addresses, first_name, last_name });
       
-      // Only proceed if we have a valid email
-      if (primaryEmail) {
-        try {
-          // Create user in our database
-          console.log(`Creating user record in database for ${id} (${primaryEmail})`);
-          await prisma.user.create({
-            data: {
-              id: id,
-              firstName: first_name || '',
-              lastName: last_name || '',
-              emailAddress: primaryEmail,
-              imageUrl: image_url || null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          }).then(() => {
-            console.log(`User ${id} successfully added to database`);
-          }).catch((error) => {
-            if (error.code === 'P2002') {
-              console.log(`User ${id} already exists in database, skipping creation`);
-            } else {
-              console.error(`Error creating user ${id} in database:`, error);
-            }
-          });
-          
-          // Send welcome email asynchronously
-          // Note: we're not awaiting this to prevent blocking the webhook response
-          sendWelcomeEmail(primaryEmail, userName).catch(error => {
-            console.error('Error sending welcome email:', error);
-          });
-          
-          console.log(`Welcome email triggered for user ${id} (${primaryEmail})`);
-        } catch (error) {
-          console.error('Error processing new user webhook:', error);
-        }
-      } else {
-        console.log(`User ${id} created but has no valid email address for welcome email`);
+      // Make sure we have at least one email address
+      if (!email_addresses || email_addresses.length === 0) {
+        console.error(`User ${id} has no email addresses, cannot create in database`);
+        return NextResponse.json({ success: false, error: 'No email address provided' }, { status: 400 });
       }
+      
+      const primaryEmail = email_addresses[0]?.email_address;
+      if (!primaryEmail) {
+        console.error(`User ${id} has invalid primary email, cannot create in database`);
+        return NextResponse.json({ success: false, error: 'Invalid email address' }, { status: 400 });
+      }
+      
+      const userName = [first_name, last_name].filter(Boolean).join(' ') || 'Member';
+      console.log(`Attempting to create user in database: ${id} (${primaryEmail})`);
+      
+      // Test database connection first
+      try {
+        await prisma.$connect();
+        console.log('Database connection successful');
+      } catch (dbConnectError) {
+        console.error('Failed to connect to database:', dbConnectError);
+        return NextResponse.json({ success: false, error: 'Database connection failed' }, { status: 500 });
+      }
+      
+      // Create user in database with better error handling
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            id: id,
+            firstName: first_name || '',
+            lastName: last_name || '',
+            emailAddress: primaryEmail,
+            imageUrl: image_url || null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        });
+        
+        console.log(`User ${id} successfully added to database`, newUser);
+        
+        // Send welcome email asynchronously
+        sendWelcomeEmail(primaryEmail, userName).catch(emailError => {
+          console.error('Error sending welcome email:', emailError);
+        });
+        
+        console.log(`Welcome email triggered for user ${id} (${primaryEmail})`);
+      } catch (createError: any) {
+        if (createError.code === 'P2002') {
+          console.log(`User ${id} already exists in database, skipping creation`);
+        } else {
+          console.error(`Error creating user ${id} in database:`, createError);
+          console.error('Error details:', JSON.stringify(createError, null, 2));
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Failed to create user in database',
+            details: createError.message
+          }, { status: 500 });
+        }
+      }
+    } catch (error) {
+      console.error('Error processing user.created webhook:', error);
+      return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
     }
+  } else {
+    console.log(`Received webhook event: ${eventType} (not handling)`);
   }
 
   // Return a 200 response

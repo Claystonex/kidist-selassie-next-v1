@@ -18,7 +18,14 @@ const languages: Record<string, LanguageInfo> = {
   en: { name: 'English', native: 'English', flag: '🇺🇸' },
   am: { name: 'Amharic', native: 'አማርኛ', flag: '🇪🇹' },
   fr: { name: 'French', native: 'Français', flag: '🇫🇷' },
-  es: { name: 'Spanish', native: 'Español', flag: '🇪🇸' }
+  es: { name: 'Spanish', native: 'Español', flag: '🇪🇸' },
+  ru: { name: 'Russian', native: 'Русский', flag: '🇷🇺' },
+  zh: { name: 'Chinese', native: '中文', flag: '🇨🇳' },
+  sv: { name: 'Swedish', native: 'Svenska', flag: '🇸🇪' },
+  de: { name: 'German', native: 'Deutsch', flag: '🇩🇪' },
+  af: { name: 'Afrikaans', native: 'Afrikaans', flag: '🇿🇦' },
+  it: { name: 'Italian', native: 'Italiano', flag: '🇮🇹' },
+  pt: { name: 'Portuguese', native: 'Português', flag: '🇵🇹' }
 };
 
 const LanguageToggle: React.FC<LanguageToggleProps> = ({ onLanguageChange }) => {
@@ -42,7 +49,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ onLanguageChange }) => 
 
   const toggleDropdown = () => setIsOpen(!isOpen);
   
-  const handleLanguageChange = (lang: 'en' | 'am' | 'fr' | 'es') => {
+  const handleLanguageChange = (lang: 'en' | 'am' | 'fr' | 'es' | 'ru' | 'zh' | 'sv' | 'de' | 'af' | 'it' | 'pt') => {
     setLanguage(lang);
     setIsOpen(false);
     

@@ -103,11 +103,12 @@ const PrayerPage = () => {
               />
             </div>
 
-            <div className="flex items-center space-x-6">
+            {/* Toggle Buttons - Improved for mobile */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:space-x-6">
               {/* Private Toggle */}
-              <div className="relative" onMouseEnter={() => setShowPrivateTooltip(true)} onMouseLeave={() => setShowPrivateTooltip(false)}>
-                <div className={`p-3 rounded-lg ${isPrivate ? 'bg-yellow-400/10' : 'bg-gray-700'}`}>
-                  <div className="flex items-center space-x-3">
+              <div className="relative w-full sm:w-auto" onMouseEnter={() => setShowPrivateTooltip(true)} onMouseLeave={() => setShowPrivateTooltip(false)}>
+                <div className={`p-3 rounded-lg ${isPrivate ? 'bg-yellow-400/10' : 'bg-gray-700'} w-full`}>
+                  <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
                     <Switch
                       checked={isPrivate}
                       onChange={(checked) => {
@@ -122,21 +123,21 @@ const PrayerPage = () => {
                           inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
-                    <span className={`text-sm ${isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}><TranslatableText>Private Prayer</TranslatableText></span>
+                    <span className={`text-sm ${isPrivate ? 'text-yellow-400' : 'text-gray-300'} ml-3`}><TranslatableText>Private Prayer</TranslatableText></span>
                   </div>
                 </div>
 
                 {showPrivateTooltip && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-gray-700 text-white text-sm rounded-lg p-2 shadow-lg">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-gray-700 text-white text-sm rounded-lg p-2 shadow-lg z-10">
                     <TranslatableText>Private prayers will only be visible to our prayer team and won't be displayed publicly on the website.</TranslatableText>
                   </div>
                 )}
               </div>
 
               {/* Public Toggle */}
-              <div className="relative">
-                <div className={`p-3 rounded-lg ${!isPrivate ? 'bg-yellow-400/10' : 'bg-gray-700'}`}>
-                  <div className="flex items-center space-x-3">
+              <div className="relative w-full sm:w-auto">
+                <div className={`p-3 rounded-lg ${!isPrivate ? 'bg-yellow-400/10' : 'bg-gray-700'} w-full`}>
+                  <div className="flex items-center justify-between sm:justify-start sm:space-x-3">
                     <Switch
                       checked={!isPrivate}
                       onChange={(checked) => {
@@ -151,7 +152,7 @@ const PrayerPage = () => {
                           inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                       />
                     </Switch>
-                    <span className={`text-sm ${!isPrivate ? 'text-yellow-400' : 'text-gray-300'}`}><TranslatableText>Public Prayer</TranslatableText></span>
+                    <span className={`text-sm ${!isPrivate ? 'text-yellow-400' : 'text-gray-300'} ml-3`}><TranslatableText>Public Prayer</TranslatableText></span>
                   </div>
                 </div>
               </div>

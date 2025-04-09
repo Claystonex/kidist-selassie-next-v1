@@ -133,6 +133,7 @@ export default function Header() {
                   <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
                   <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
                   <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
+                  <MobileNavLink href="/jokes" onClick={() => setIsMenuOpen(false)}><TranslatableText>Jokes</TranslatableText></MobileNavLink>
                 </div>
               </div>
             </div>
@@ -246,6 +247,7 @@ export default function Header() {
                   <DropdownNavLink href="/forum"><TranslatableText>Forum</TranslatableText></DropdownNavLink>
                   <DropdownNavLink href="/prayer"><TranslatableText>Prayer Requests</TranslatableText></DropdownNavLink>
                   <DropdownNavLink href="/miracles"><TranslatableText>Miracles</TranslatableText></DropdownNavLink>
+                  <DropdownNavLink href="/jokes"><TranslatableText>Jokes</TranslatableText></DropdownNavLink>
                 </div>
               </div>
             </div>
