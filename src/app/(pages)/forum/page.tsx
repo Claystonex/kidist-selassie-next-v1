@@ -69,10 +69,21 @@ const containsProfanity = (text: string | undefined): boolean => {
   
   // Check each word in our profanity list
   for (const word of PROFANITY_LIST) {
-    const regex = new RegExp('\\b' + word + '\\b', 'i');
-    if (regex.test(lowerText)) {
-      console.log(`Profanity detected: '${word}' found in text`);
-      return true;
+    try {
+      // Escape special regex characters in the word, especially for words with asterisks
+      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Replace asterisks with a character class that matches any character
+      const regexPattern = escapedWord.replace(/\\\*/g, '.');
+      const regex = new RegExp('\\b' + regexPattern + '\\b', 'i');
+      
+      if (regex.test(lowerText)) {
+        console.log(`Profanity detected: '${word}' found in text`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Error with profanity regex for word '${word}':`, error);
+      // Continue checking other words even if one regex fails
+      continue;
     }
   }
   

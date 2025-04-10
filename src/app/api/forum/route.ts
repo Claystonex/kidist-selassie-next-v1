@@ -29,10 +29,21 @@ function containsProfanity(text: string | undefined): boolean {
   console.log('API checking text for profanity');
   
   for (const word of PROFANITY_LIST) {
-    const regex = new RegExp('\\b' + word + '\\b', 'i');
-    if (regex.test(lowerText)) {
-      console.log(`API profanity filter: profanity found in text`);
-      return true;
+    try {
+      // Escape special regex characters in the word, especially for words with asterisks
+      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Replace asterisks with a character class that matches any character
+      const regexPattern = escapedWord.replace(/\\\*/g, '.');
+      const regex = new RegExp('\\b' + regexPattern + '\\b', 'i');
+      
+      if (regex.test(lowerText)) {
+        console.log(`API profanity filter: profanity found in text`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Error with profanity regex for word '${word}':`, error);
+      // Continue checking other words even if one regex fails
+      continue;
     }
   }
   
