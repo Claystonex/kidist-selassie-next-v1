@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/app/_contexts/TranslationContext';
 
-// Use the same Language type from TranslationContext
-type Language = 'en' | 'am' | 'fr' | 'es';
+// Import the Language type directly from TranslationContext to keep it in sync
+import type { Language } from '@/app/_contexts/TranslationContext';
 
 type LanguageInfo = {
   name: string;
@@ -16,7 +16,14 @@ const languages: Record<Language, LanguageInfo> = {
   en: { name: 'English', flag: '🇺🇸' },
   am: { name: 'Amharic', native: 'አማርኛ', flag: '🇪🇹' },
   fr: { name: 'French', native: 'Français', flag: '🇫🇷' },
-  es: { name: 'Spanish', native: 'Español', flag: '🇪🇸' }
+  es: { name: 'Spanish', native: 'Español', flag: '🇪🇸' },
+  ru: { name: 'Russian', native: 'Русский', flag: '🇷🇺' },
+  zh: { name: 'Chinese', native: '中文', flag: '🇨🇳' },
+  sv: { name: 'Swedish', native: 'Svenska', flag: '🇸🇪' },
+  de: { name: 'German', native: 'Deutsch', flag: '🇩🇪' },
+  af: { name: 'Afrikaans', native: 'Afrikaans', flag: '🇿🇦' },
+  it: { name: 'Italian', native: 'Italiano', flag: '🇮🇹' },
+  pt: { name: 'Portuguese', native: 'Português', flag: '🇵🇹' }
 };
 
 const CommentTranslator: React.FC = () => {
@@ -75,8 +82,8 @@ const CommentTranslator: React.FC = () => {
               className="flex items-center justify-between w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#086c47] bg-white hover:bg-gray-50"
             >
               <span className="flex items-center">
-                <span className="mr-2">{languages[language].flag}</span>
-                {languages[language].native ?? languages[language].name}
+                <span className="mr-2">{languages[language]?.flag || '🌐'}</span>
+                {languages[language]?.native || languages[language]?.name || language}
               </span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

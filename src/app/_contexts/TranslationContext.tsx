@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { usePathname, useRouter } from 'next/navigation';
 
 // Languages supported
-type Language = 'en' | 'am' | 'fr' | 'es' | 'ru' | 'zh' | 'sv' | 'de' | 'af' | 'it' | 'pt'; // English, Amharic, French, Spanish, Russian, Chinese, Swedish, German, Afrikaans, Italian, Portuguese
+export type Language = 'en' | 'am' | 'fr' | 'es' | 'ru' | 'zh' | 'sv' | 'de' | 'af' | 'it' | 'pt'; // English, Amharic, French, Spanish, Russian, Chinese, Swedish, German, Afrikaans, Italian, Portuguese
 
 // Common translations that we can use immediately without API calls
 const COMMON_TRANSLATIONS: Record<string, Record<Language, string>> = {
@@ -499,7 +499,10 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
           
           // Add to persistent cache
           if (!newTranslations[text]) {
-            newTranslations[text] = { en: text, am: '', fr: '', es: '' };
+            newTranslations[text] = { 
+              en: text, am: '', fr: '', es: '', 
+              ru: '', zh: '', sv: '', de: '', af: '', it: '', pt: '' 
+            };
           }
           newTranslations[text][language] = translatedText;
         }
@@ -568,7 +571,10 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
       setTranslations(prev => {
         const newTranslations = { ...prev };
         if (!newTranslations[text]) {
-          newTranslations[text] = { en: text, am: '', fr: '', es: '', ru: '', zh: '', sv: '', de: '', af: '', it: '', pt: '' };
+          newTranslations[text] = { 
+            en: text, am: '', fr: '', es: '', 
+            ru: '', zh: '', sv: '', de: '', af: '', it: '', pt: '' 
+          };
         }
         newTranslations[text][language] = translatedText;
         
