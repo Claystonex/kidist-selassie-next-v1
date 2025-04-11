@@ -3,7 +3,7 @@ export default function AboutPage() {
       <div className="min-h-screen p-8 flex flex-col items-center">
         <h1 className="text-4xl font-montserrat text-[#ffb43c] mb-6 w-full text-center">Our Mission and Goals</h1>
         
-        <div className="text-xl prose prose-xl text-white max-w-4xl text-left w-full">
+        <div className="text-lg prose prose-lg text-white max-w-4xl text-left w-full">
           <p>
             We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network that is dedicated to supporting and inspiring young individuals to grow in faith, confidence, and purpose.
           </p>
