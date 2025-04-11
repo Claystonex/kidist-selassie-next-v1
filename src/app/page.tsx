@@ -30,24 +30,24 @@ export default function Home() {
     <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
       <style>{blinkingStyle}</style>
       
-      {/* Main Title Section - with responsive font size */}
-      <div className="w-full text-center mb-6 px-4">
-        <h1 className="font-montserrat font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl break-words sm:whitespace-normal">
+      {/* Main Title Section - with improved responsive font size and spacing */}
+      <div className="w-full text-center mb-8 sm:mb-10 px-4">
+        <h1 className="font-montserrat font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl break-words hyphens-auto">
           <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
         </h1>
       </div>
       
-      {/* Social Media Section - repositioned for mobile */}
-      <div className="hidden md:block absolute top-48 right-24">
-        <div className="flex flex-col space-y-4 items-center">
-          <h2 className="text-lg"><TranslatableText>Follow Us</TranslatableText></h2>
+      {/* Social Media Section - repositioned to the side */}
+      <div className="hidden lg:block fixed top-1/3 right-6 xl:right-12 z-10">
+        <div className="flex flex-col space-y-4 items-center bg-[#006241]/50 p-3 rounded-lg backdrop-blur-sm">
+          <h2 className="text-sm font-semibold"><TranslatableText>Follow Us</TranslatableText></h2>
           <a 
             href="https://facebook.com/selassieyouth" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faFacebook} size="2xl" />
+            <FontAwesomeIcon icon={faFacebook} size="lg" />
           </a>
           <a 
             href="https://instagram.com/selassieyouth/" 
@@ -55,7 +55,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faInstagram} size="2xl" />
+            <FontAwesomeIcon icon={faInstagram} size="lg" />
           </a>
           <a 
             href="https://tiktok.com/@selassieyouthint.network" 
@@ -63,7 +63,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faTiktok} size="2xl" />
+            <FontAwesomeIcon icon={faTiktok} size="lg" />
           </a>
           <a 
             href="https://x.com/selassieyouth" 
@@ -71,13 +71,13 @@ export default function Home() {
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faXTwitter} size="2xl" />
+            <FontAwesomeIcon icon={faXTwitter} size="lg" />
           </a>
         </div>
       </div>
       
       {/* Mobile Social Media Section */}
-      <div className="md:hidden w-full flex justify-center mb-6">
+      <div className="lg:hidden w-full flex justify-center mb-6">
         <div className="flex space-x-6 items-center">
           <a 
             href="https://facebook.com/selassieyouth" 
@@ -115,39 +115,39 @@ export default function Home() {
       </div>
       
       {/* Verse of the Day Section - improved for mobile */}
-      <div className="w-full max-w-5xl px-4 mb-8 text-center">
-        <div className="mb-4 flex flex-col sm:flex-row justify-center items-center">
-          <h2 className="text-lg sm:text-xl font-semibold sm:mr-3">
+      <div className="w-full max-w-4xl px-4 mb-8 text-center">
+        <div className="mb-3 flex flex-col sm:flex-row justify-center items-center gap-1">
+          <h2 className="text-base sm:text-lg font-semibold sm:mr-1">
             <TranslatableText>Verse of the Day:</TranslatableText>
           </h2>
-          <p className="text-lg sm:text-xl">
+          <p className="text-base sm:text-lg">
             <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
           </p>
         </div>
-        <div className="bg-white/10 p-4 rounded-lg border border-yellow-400/30">
+        <div className="bg-white/10 p-3 sm:p-4 rounded-lg border border-yellow-400/30">
           <VerseOfTheDay />
         </div>
       </div>
 
       {/* Mission Statement Box */}
-      <div className="bg-white/10 p-6 rounded-lg mb-8 max-w-5xl w-full mx-auto hover:bg-white/20 transition-colors flex-row">
-        <h2 className="font-montserrat font-bold text-2xl mb-2 text-center">
+      <div className="bg-white/10 p-4 sm:p-6 rounded-lg mb-6 max-w-4xl w-full mx-auto hover:bg-white/20 transition-colors flex-row">
+        <h2 className="font-montserrat font-bold text-xl sm:text-2xl mb-2 text-center">
           <TranslatableText>Our Mission and Goals</TranslatableText>
         </h2>
         <div className="text-center">
-          <span className="text-gray-200 text-sm">
+          <span className="text-gray-200 text-xs sm:text-sm">
             <TranslatableText>
               We're joyful to welcome you to our community, Kidist Selassie Youth International Network! By joining, you are stepping into a youth-focused, Christ-centered network.
             </TranslatableText>
           </span>
-          {" "}
+          <br className="sm:hidden" />
           <Link 
             href="../about" 
-            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center text-sm ml-1"
+            className="text-[#ffb43c] font-bold hover:text-white inline-flex items-center text-xs sm:text-sm mt-1 sm:ml-1"
             style={{ animation: 'blink 1.5s linear infinite' }}
           >
             <TranslatableText>Read More</TranslatableText>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </Link>
@@ -155,15 +155,15 @@ export default function Home() {
       </div>
 
       {/* Tagline Box - fixed text wrapping for mobile */}
-      <div className="bg-white/10 p-4 rounded-lg mb-8 max-w-5xl w-full mx-auto text-center border border-[#ffb43c]/30">
-        <p className="text-white text-lg sm:text-xl md:text-2xl font-medium break-words">
+      <div className="bg-white/10 p-3 sm:p-4 rounded-lg mb-6 max-w-4xl w-full mx-auto text-center border border-[#ffb43c]/30">
+        <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium break-words hyphens-auto">
           <TranslatableText>
             Christ-centered and Youth-Focused International Network to Grow Love and Faith.
           </TranslatableText>
         </p>
       </div>
 
-      <div className=" font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4">
+      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl w-full px-4">
         {/* Feature Cards */}
         <FeatureCard 
           title="Mentorship" 
@@ -181,7 +181,7 @@ export default function Home() {
           link="/miracles"
         />
       </div>
-      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
+      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl w-full px-4 mt-6 sm:mt-8">
         {/* Feature Cards */}
         <FeatureCard 
           title="Post Your Funnies" 
