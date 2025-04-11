@@ -3,16 +3,50 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const VERSES_FILE = path.join(process.cwd(), 'data', 'verses.json');
+// Improved path resolution with better error handling
+const DATA_DIR = path.join(process.cwd(), 'data');
+const VERSES_FILE = path.join(DATA_DIR, 'verses.json');
 
-// Ensure the data directory exists
+// Debug information
+console.log('Verses API initialized with paths:', {
+  cwd: process.cwd(),
+  dataDir: DATA_DIR,
+  versesFile: VERSES_FILE
+});
+
+// Ensure the data directory exists with improved error handling
 const ensureDataDir = () => {
-  const dir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  if (!fs.existsSync(VERSES_FILE)) {
-    fs.writeFileSync(VERSES_FILE, JSON.stringify([]));
+  try {
+    // Create data directory if it doesn't exist
+    if (!fs.existsSync(DATA_DIR)) {
+      console.log(`Creating data directory at: ${DATA_DIR}`);
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    
+    // Create verses file if it doesn't exist
+    if (!fs.existsSync(VERSES_FILE)) {
+      console.log(`Creating verses file at: ${VERSES_FILE}`);
+      fs.writeFileSync(VERSES_FILE, JSON.stringify([]), { encoding: 'utf8', flag: 'w' });
+    }
+    
+    // Verify file is writable
+    try {
+      fs.accessSync(VERSES_FILE, fs.constants.W_OK);
+    } catch (accessError) {
+      console.error(`Verses file exists but is not writable: ${VERSES_FILE}`, accessError);
+      // Try to fix permissions
+      try {
+        fs.chmodSync(VERSES_FILE, 0o666);
+        console.log('Updated file permissions to make it writable');
+      } catch (chmodError) {
+        console.error('Failed to update file permissions:', chmodError);
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error ensuring data directory and file exist:', error);
+    return false;
   }
 };
 
@@ -151,21 +185,49 @@ export async function POST(request: NextRequest) {
     // Add the new verse
     verses.push(newVerse);
     
-    // Write the updated verses array back to the file
+    // Write the updated verses array back to the file with improved error handling
     try {
       // Make sure the data directory exists again just to be safe
-      const dir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+      if (!fs.existsSync(DATA_DIR)) {
+        console.log(`Creating data directory at: ${DATA_DIR}`);
+        fs.mkdirSync(DATA_DIR, { recursive: true, mode: 0o777 });
       }
       
-      // Write the file with pretty formatting
-      fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2));
+      // Log the current state before writing
+      console.log(`Writing to verses file at: ${VERSES_FILE}`);
+      console.log(`File exists: ${fs.existsSync(VERSES_FILE)}`);
+      
+      // Try to write with different methods if needed
+      try {
+        // First attempt: standard write
+        fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2), { encoding: 'utf8', flag: 'w' });
+      } catch (initialWriteError) {
+        console.error('Initial write attempt failed:', initialWriteError);
+        
+        // Second attempt: create a temporary file and rename
+        const tempFile = `${VERSES_FILE}.tmp`;
+        fs.writeFileSync(tempFile, JSON.stringify(verses, null, 2), { encoding: 'utf8', flag: 'w' });
+        fs.renameSync(tempFile, VERSES_FILE);
+      }
+      
       console.log('Verse added successfully:', newVerse.id);
       return NextResponse.json(newVerse, { status: 201 });
-    } catch (writeError) {
+    } catch (error) {
+      const writeError = error as Error;
       console.error('Error writing to verses file:', writeError);
-      return NextResponse.json({ error: 'Failed to save verse' }, { status: 500 });
+      // Log detailed error information
+      console.error('Write error details:', {
+        errorName: writeError.name,
+        errorMessage: writeError.message,
+        errorStack: writeError.stack,
+        cwd: process.cwd(),
+        dataDir: DATA_DIR,
+        versesFile: VERSES_FILE,
+        fileExists: fs.existsSync(VERSES_FILE),
+        dirExists: fs.existsSync(DATA_DIR)
+      });
+      
+      return NextResponse.json({ error: 'Failed to save verse', details: writeError.message }, { status: 500 });
     }
   } catch (error) {
     console.error('Verse API error:', error);
@@ -242,14 +304,49 @@ export async function DELETE(request: NextRequest) {
     // Filter out the verse to delete
     verses = verses.filter((verse: any) => verse.id !== id);
     
-    // Write the updated verses array back to the file
+    // Write the updated verses array back to the file with improved error handling
     try {
-      fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2));
+      // Make sure the data directory exists
+      if (!fs.existsSync(DATA_DIR)) {
+        console.log(`Creating data directory at: ${DATA_DIR}`);
+        fs.mkdirSync(DATA_DIR, { recursive: true, mode: 0o777 });
+      }
+      
+      // Log the current state before writing
+      console.log(`Writing to verses file at: ${VERSES_FILE}`);
+      console.log(`File exists: ${fs.existsSync(VERSES_FILE)}`);
+      
+      // Try to write with different methods if needed
+      try {
+        // First attempt: standard write
+        fs.writeFileSync(VERSES_FILE, JSON.stringify(verses, null, 2), { encoding: 'utf8', flag: 'w' });
+      } catch (initialWriteError) {
+        console.error('Initial write attempt failed:', initialWriteError);
+        
+        // Second attempt: create a temporary file and rename
+        const tempFile = `${VERSES_FILE}.tmp`;
+        fs.writeFileSync(tempFile, JSON.stringify(verses, null, 2), { encoding: 'utf8', flag: 'w' });
+        fs.renameSync(tempFile, VERSES_FILE);
+      }
+      
       console.log('Verse deleted successfully:', id);
       return NextResponse.json({ message: 'Verse deleted successfully' });
-    } catch (writeError) {
+    } catch (error) {
+      const writeError = error as Error;
       console.error('Error writing to verses file:', writeError);
-      return NextResponse.json({ error: 'Failed to save updated verses' }, { status: 500 });
+      // Log detailed error information
+      console.error('Delete write error details:', {
+        errorName: writeError.name,
+        errorMessage: writeError.message,
+        errorStack: writeError.stack,
+        cwd: process.cwd(),
+        dataDir: DATA_DIR,
+        versesFile: VERSES_FILE,
+        fileExists: fs.existsSync(VERSES_FILE),
+        dirExists: fs.existsSync(DATA_DIR)
+      });
+      
+      return NextResponse.json({ error: 'Failed to save updated verses', details: writeError.message }, { status: 500 });
     }
   } catch (error) {
     console.error('Verse delete API error:', error);
