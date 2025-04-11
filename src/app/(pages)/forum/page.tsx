@@ -301,6 +301,7 @@ export default function Forum() {
       const response = await fetch('/api/forum', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // Include credentials for authentication
       });
       
       console.log('Response received:', response.status, response.statusText);
