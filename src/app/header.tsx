@@ -170,7 +170,7 @@ export default function Header() {
               {user ? (
                 <div className="flex flex-col items-center">
                   <p className="text-white mb-2 text-sm"><TranslatableText>Your Account</TranslatableText></p>
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton afterSignOutUrl="/sign-in" />
                 </div>
               ) : (
                 <Button variant="outline" asChild className="w-full bg-[#edcf08] hover:bg-[#ffba00] transition-colors duration-300 py-6 shadow-lg rounded-lg">
@@ -324,7 +324,7 @@ export default function Header() {
           </div>
           
           {user ? (
-            <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/sign-in" />
           ) : (
             <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none text-center flex items-center justify-center min-w-[80px] h-10">
               <Link href="/sign-up" className="text-[#086c47] px-4">

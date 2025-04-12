@@ -199,8 +199,9 @@ export default function Home() {
           link="/feedback"
         />
       </div>
-      <div className="border-t-4 w-[80%] pb-4 border-[#c4142c]"></div>
-      <div className="border-t-4 w-[50%] border-[#c4142c]"></div>
+      {/* Themed border lines that match our color scheme */}
+      <div className="border-t-4 w-[80%] pb-4 border-[#ffb43c]"></div>
+      <div className="border-t-4 w-[50%] border-[#006241]"></div>
 
     </div>
   );
