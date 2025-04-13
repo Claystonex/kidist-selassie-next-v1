@@ -66,6 +66,15 @@ model SummerSuggestion {
   createdAt DateTime @default(now())
 }
 
+model Joke {
+  id          String   @id @default(cuid())
+  content     String
+  userName    String
+  timestamp   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model ForumPost {
   id          String       @id @default(cuid())
   title       String
@@ -82,13 +91,15 @@ model ForumPost {
 
 
 model Attachment {
-  id        String    @id @default(cuid())
-  fileName  String
-  fileUrl   String
-  fileType  FileType
-  postId    String
-  post      ForumPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime   @default(now())
+  id            String    @id @default(cuid())
+  fileName      String
+  fileUrl       String
+  fileType      FileType
+  postId        String
+  post          ForumPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt     DateTime   @default(now())
+  audioData     Bytes?     // To store audio data directly
+  audioDuration Int?       // Duration in seconds
 }
 
 model Vote {

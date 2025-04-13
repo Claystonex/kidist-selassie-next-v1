@@ -54,7 +54,8 @@ export default function VerseAdmin() {
       setLoading(true);
       console.log('Submitting verse:', { title, hasPassword: !!password });
       
-      const response = await fetch('/api/verses', {
+      // Use the new verses/add endpoint which is more reliable
+      const response = await fetch('/api/verses/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +69,10 @@ export default function VerseAdmin() {
         setMessage('Verse added successfully!');
         setTitle('');
         setScripture('');
-        fetchVerses();
+        // Wait a moment to ensure file is saved before fetching
+        setTimeout(() => {
+          fetchVerses();
+        }, 500);
       } else {
         console.error('Error response:', response.status, data);
         setError(data.error || `Failed to add verse (Status: ${response.status})`);

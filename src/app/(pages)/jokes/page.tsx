@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import AudioRecorder from '@/app/_components/AudioRecorder/AudioRecorder';
 
 interface Joke {
   id: string;
   content: string;
   userName: string;
   timestamp: string;
+  hasAudio?: boolean;
+  audioUrl?: string | null;
+  audioDuration?: number;
 }
 
 const JokesPage = () => {
@@ -15,6 +19,10 @@ const JokesPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showRecorder, setShowRecorder] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetchJokes();
@@ -52,8 +60,9 @@ const JokesPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!jokeContent.trim()) {
-      setError('Please enter a joke');
+    // Allow either voice recording OR text joke, not requiring both
+    if (!audioBlob && !jokeContent.trim()) {
+      setError('Please either record or type a joke');
       return;
     }
     
@@ -62,17 +71,37 @@ const JokesPage = () => {
       setError('');
       setSuccess('');
       
-      const response = await fetch('/api/jokes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: jokeContent,
-        }),
-      });
+      // Submit with audio if available, otherwise just text
+      if (audioBlob) {
+        const formData = new FormData();
+        formData.append('jokeContent', jokeContent || 'Voice joke'); // Use placeholder text if not provided
+        formData.append('audio', audioBlob);
+        formData.append('duration', audioDuration.toString());
+        
+        const response = await fetch('/api/jokes/audio/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) throw new Error('Failed to submit joke with audio');
+        
+        // Reset audio state
+        setAudioBlob(null);
+        setShowRecorder(false);
+      } else {
+        // Regular text-only joke submission
+        const response = await fetch('/api/jokes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: jokeContent,
+          }),
+        });
 
-      if (!response.ok) throw new Error('Failed to submit joke');
+        if (!response.ok) throw new Error('Failed to submit joke');
+      }
 
       setSuccess('Your joke has been shared with the community!');
       setJokeContent('');
@@ -80,23 +109,19 @@ const JokesPage = () => {
     } catch (error) {
       console.error('Error submitting joke:', error);
       setError('Failed to submit your joke. Please try again.');
-      
-      // For now, add the joke locally since the API might not be implemented yet
-      setJokes(prev => [
-        {
-          id: Date.now().toString(),
-          content: jokeContent,
-          timestamp: new Date().toISOString(),
-          userName: 'You'
-        },
-        ...prev
-      ]);
-      
-      setJokeContent('');
-      setSuccess('Your joke has been shared with the community!');
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleSaveAudio = (blob: Blob, duration: number) => {
+    setAudioBlob(blob);
+    setAudioDuration(duration);
+  };
+  
+  const handleCancelAudio = () => {
+    setShowRecorder(false);
+    setAudioBlob(null);
   };
 
   return (
@@ -106,11 +131,11 @@ const JokesPage = () => {
         
         {/* Joke Submission Form */}
         <div className="bg-[#064d32] rounded-lg shadow-xl p-6 mb-8">
-          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Share a Clean Joke</h2>
+          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Record or Type Your Joke (Clean)</h2>
           {error && <div className="bg-red-500 bg-opacity-20 text-red-200 p-3 rounded mb-4">{error}</div>}
           {success && <div className="bg-green-500 bg-opacity-20 text-green-200 p-3 rounded mb-4">{success}</div>}
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="jokeContent" className="block text-sm font-medium text-gray-300">
                 Your Joke
@@ -119,12 +144,46 @@ const JokesPage = () => {
                 id="jokeContent"
                 value={jokeContent}
                 onChange={(e) => setJokeContent(e.target.value)}
-                required
                 rows={4}
+                placeholder={audioBlob ? "Voice recording will be used" : "Share a clean, family-friendly joke..."}
+                disabled={!!audioBlob}
                 className="mt-1 block w-full rounded-md bg-white border-transparent focus:border-yellow-500 focus:ring-0 text-black"
-                placeholder="Share a clean, family-friendly joke..."
+
               />
             </div>
+            
+            {showRecorder ? (
+              <div className="p-4 bg-[#053a27] rounded-lg border border-yellow-400 border-opacity-30">
+                <h3 className="text-yellow-400 text-sm font-medium mb-2">Record Your Joke Instead of Typing</h3>
+                <AudioRecorder 
+                  onSave={handleSaveAudio} 
+                  onCancel={handleCancelAudio} 
+                />
+                {audioBlob && (
+                  <p className="text-green-300 text-xs mt-2">
+                    Audio recording ready! Submit your joke to share it.
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setAudioBlob(null);
+                        setJokeContent('');
+                      }}
+                      className="ml-2 text-xs text-red-300 underline"
+                    >
+                      Remove recording to type instead
+                    </button>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowRecorder(true)}
+                className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
+              >
+                Add Voice Recording (Optional)
+              </button>
+            )}
 
             <button
               type="submit"
@@ -147,6 +206,21 @@ const JokesPage = () => {
               jokes.map((joke) => (
                 <div key={joke.id} className="bg-white/10 rounded-lg p-4">
                   <p className="text-lg text-white">"{joke.content}"</p>
+                  
+                  {joke.hasAudio && joke.audioUrl && (
+                    <div className="mt-3 bg-[#053a27] p-2 rounded">
+                      <audio 
+                        src={joke.audioUrl} 
+                        controls 
+                        className="w-full"
+                        controlsList="nodownload"
+                      />
+                      <div className="text-xs text-yellow-200 mt-1">
+                        {joke.audioDuration ? `${Math.floor(joke.audioDuration / 60)}:${(joke.audioDuration % 60).toString().padStart(2, '0')}` : ''} Voice Recording
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="mt-2 text-sm text-gray-400">
                     Shared by {joke.userName} on {new Date(joke.timestamp).toLocaleDateString()}
                   </div>

@@ -26,7 +26,14 @@ const ensureDataDir = () => {
     // Create verses file if it doesn't exist
     if (!fs.existsSync(VERSES_FILE)) {
       console.log(`Creating verses file at: ${VERSES_FILE}`);
-      fs.writeFileSync(VERSES_FILE, JSON.stringify([]), { encoding: 'utf8', flag: 'w' });
+      try {
+        fs.writeFileSync(VERSES_FILE, JSON.stringify([]), { encoding: 'utf8', flag: 'w' });
+        console.log('Successfully created verses file');
+      } catch (writeError) {
+        console.error('Error creating verses file:', writeError);
+        // Try with different permissions
+        fs.writeFileSync(VERSES_FILE, JSON.stringify([]), { encoding: 'utf8', flag: 'w', mode: 0o666 });
+      }
     }
     
     // Verify file is writable

@@ -1,0 +1,154 @@
+.recorderContainer {
+  background: #064d32;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.waveform {
+  width: 100%;
+  height: 80px;
+  background: #064d32;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(248, 224, 92, 0.3);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.recordButton, 
+.stopButton, 
+.saveButton, 
+.cancelButton {
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.recordButton {
+  background-color: #f8e05c;
+  color: #000;
+}
+
+.recordButton:hover {
+  background-color: #e0c94e;
+}
+
+.recordIcon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #c4142c;
+}
+
+.stopButton {
+  background-color: #c4142c;
+  color: white;
+}
+
+.stopButton:hover {
+  background-color: #a3111f;
+}
+
+.stopIcon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background-color: white;
+}
+
+.saveButton {
+  background-color: #f8e05c;
+  color: #000;
+  min-width: 120px;
+}
+
+.saveButton:hover {
+  background-color: #e0c94e;
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  min-width: 120px;
+}
+
+.cancelButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.recordingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.recordingDot {
+  width: 10px;
+  height: 10px;
+  background-color: #c4142c;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.recordingControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.previewControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.previewButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.audioPreview {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+.audioPreview::-webkit-media-controls-panel {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}

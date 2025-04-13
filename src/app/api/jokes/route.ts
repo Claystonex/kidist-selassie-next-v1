@@ -1,60 +1,32 @@
 // File: /app/api/jokes/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { getAuth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/prisma';
 
-const JOKES_FILE = path.join(process.cwd(), 'data', 'jokes.json');
-
-// Ensure the data directory exists
-const ensureDataDir = () => {
-  const dir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  if (!fs.existsSync(JOKES_FILE)) {
-    fs.writeFileSync(JOKES_FILE, JSON.stringify([]));
-  }
+// Helper to get audio URL for jokes
+const getAudioUrl = (jokeId: string) => {
+  return `/api/jokes/audio/${jokeId}`;
 };
 
 // GET handler - Get all jokes
 export async function GET(request: NextRequest) {
   try {
-    // First ensure the data directory and file exist
-    ensureDataDir();
+    // Get jokes from database with attachments - use type casting to bypass TS errors
+    const jokes = await (prisma as any).joke.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
     
-    // Check if file exists and is readable
-    if (!fs.existsSync(JOKES_FILE)) {
-      console.log('jokes.json does not exist, creating it');
-      fs.writeFileSync(JOKES_FILE, '[]');
-      return NextResponse.json([]);
-    }
+    // Add audio URLs directly to jokes (all jokes with hasAudio=true have audio files)
+    const jokesWithAudio = jokes.map((joke: any) => {
+      return {
+        ...joke,
+        hasAudio: joke.hasAudio || false,
+        audioUrl: joke.hasAudio ? getAudioUrl(joke.id) : null,
+        audioDuration: joke.audioDuration || 0
+      };
+    });
     
-    // Read the file
-    const jokesData = fs.readFileSync(JOKES_FILE, 'utf8');
-    
-    // Handle empty file case
-    if (jokesData.trim() === '') {
-      console.log('jokes.json is empty, initializing with empty array');
-      fs.writeFileSync(JOKES_FILE, '[]');
-      return NextResponse.json([]);
-    }
-    
-    // Parse the JSON
-    try {
-      const jokes = JSON.parse(jokesData);
-      
-      // Ensure jokes is an array
-      if (!Array.isArray(jokes)) {
-        console.error('jokes.json does not contain an array');
-        return NextResponse.json([]);
-      }
-      
-      return NextResponse.json(jokes);
-    } catch (parseError) {
-      console.error('Error parsing jokes.json:', parseError);
-      return NextResponse.json({ error: 'Failed to parse jokes data' }, { status: 500 });
-    }
+    return NextResponse.json(jokesWithAudio);
   } catch (error) {
     console.error('Error retrieving jokes:', error);
     return NextResponse.json({ error: 'Failed to retrieve jokes' }, { status: 500 });
@@ -64,93 +36,104 @@ export async function GET(request: NextRequest) {
 // POST handler - Add a new joke
 export async function POST(request: NextRequest) {
   try {
-    // First ensure the data directory and file exist
-    ensureDataDir();
-    
-    // Parse the request body
-    let body;
-    try {
-      body = await request.json();
-    } catch (parseError) {
-      console.error('Failed to parse request body as JSON:', parseError);
-      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
-    }
-    
-    const { content } = body;
+    // Check if request is multipart form data (has audio) or JSON
+    const contentType = request.headers.get('content-type') || '';
     
     // Get user information from Clerk
-    const auth = getAuth(request);
-    const userId = auth.userId;
+    const { userId } = await auth();
     
-    // Validate required fields
-    if (!content) {
-      return NextResponse.json({ error: 'Joke content is required' }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Read the jokes file with robust error handling
-    let jokes = [];
-    let jokesData = '';
-    
-    try {
-      // Check if file exists and is readable
-      if (fs.existsSync(JOKES_FILE)) {
-        jokesData = fs.readFileSync(JOKES_FILE, 'utf8');
-        
-        // Handle empty file case
-        if (jokesData.trim() === '') {
-          console.log('jokes.json is empty, initializing with empty array');
-          jokesData = '[]';
-        }
-        
-        try {
-          jokes = JSON.parse(jokesData);
-          
-          // Ensure jokes is an array
-          if (!Array.isArray(jokes)) {
-            console.error('jokes.json does not contain an array, resetting to empty array');
-            jokes = [];
-          }
-        } catch (parseError) {
-          console.error('Error parsing jokes.json, resetting to empty array:', parseError);
-          jokes = [];
-        }
-      } else {
-        // File doesn't exist, create it with an empty array
-        console.log('jokes.json does not exist, creating it');
-        fs.writeFileSync(JOKES_FILE, '[]');
+    // Get user info for attribution
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        firstName: true,
+        lastName: true,
+        nickname: true,
       }
-    } catch (readError) {
-      console.error('Error accessing jokes file:', readError);
-      // Initialize with empty array if file can't be read
-      jokes = [];
-    }
-
-    // Create the new joke object
-    const newJoke = {
-      id: Date.now().toString(),
-      content,
-      userName: userId ? 'User' : 'Anonymous User', // In a real app, you'd get this from auth
-      timestamp: new Date().toISOString()
-    };
+    });
     
-    // Add the new joke at the beginning of the array
-    jokes.unshift(newJoke);
+    const userName = user?.nickname || 
+                    [user?.firstName, user?.lastName]
+                      .filter(Boolean)
+                      .join(' ') || 
+                    'Anonymous';
     
-    // Write the updated jokes array back to the file
-    try {
-      // Make sure the data directory exists again just to be safe
-      const dir = path.join(process.cwd(), 'data');
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+    // Handle multipart form data (with audio)
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const jokeContent = formData.get('jokeContent') as string;
+      const audioFile = formData.get('audio') as File;
+      const duration = parseInt(formData.get('duration') as string || '0');
+      
+      // Validate required fields
+      if (!jokeContent || jokeContent.trim() === '') {
+        return NextResponse.json({ error: 'Joke content is required' }, { status: 400 });
       }
       
-      // Write the file with pretty formatting
-      fs.writeFileSync(JOKES_FILE, JSON.stringify(jokes, null, 2));
-      console.log('Joke added successfully:', newJoke.id);
-      return NextResponse.json(newJoke, { status: 201 });
-    } catch (writeError) {
-      console.error('Error writing to jokes file:', writeError);
-      return NextResponse.json({ error: 'Failed to save joke' }, { status: 500 });
+      if (!audioFile) {
+        return NextResponse.json({ error: 'Audio file is required' }, { status: 400 });
+      }
+      
+      // Generate a unique filename
+      const filename = `${userId}-${Date.now()}.webm`;
+      
+      // Read the audio file as an ArrayBuffer
+      const arrayBuffer = await audioFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      // Store the joke directly with hasAudio flag
+      const joke = await (prisma as any).joke.create({
+        data: {
+          content: jokeContent,
+          userName: userName,
+          timestamp: new Date().toISOString(),
+          hasAudio: true,          // Store flag directly in joke record
+          audioDuration: duration,  // Store duration directly in joke record
+        }
+      });
+      
+      // Store the audio data separately with the joke ID as the key
+      // We'll create a separate endpoint for this
+      
+      return NextResponse.json(joke, { status: 201 });
+    } 
+    // Handle regular JSON request (no audio)
+    else {
+      // Parse the JSON request body
+      let body;
+      try {
+        body = await request.json();
+      } catch (parseError) {
+        console.error('Failed to parse request body as JSON:', parseError);
+        return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+      }
+      
+      const { content } = body;
+      
+      // Validate required fields
+      if (!content || content.trim() === '') {
+        return NextResponse.json({ error: 'Joke content is required' }, { status: 400 });
+      }
+      
+      // Create a joke without audio
+      const joke = await (prisma as any).joke.create({
+        data: {
+          content: content,
+          userName: userName,
+          timestamp: new Date().toISOString(),
+        }
+      });
+      
+      return NextResponse.json({
+        ...joke,
+        hasAudio: false,
+        audioUrl: null,
+        audioDuration: 0
+      }, { status: 201 });
     }
   } catch (error) {
     console.error('Joke API error:', error);
