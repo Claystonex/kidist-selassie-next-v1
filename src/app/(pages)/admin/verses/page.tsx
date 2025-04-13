@@ -24,14 +24,37 @@ export default function VerseAdmin() {
   const fetchVerses = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/verses?all=true');
-      if (response.ok) {
-        const data = await response.json();
+      // Try to load verses from public data directory first
+      const publicResponse = await fetch('/data/verses.json');
+      if (publicResponse.ok) {
+        const data = await publicResponse.json();
+        console.log('Loaded verses from public data directory');
         setVerses(data);
       } else {
-        setError('Failed to load verses');
+        // Fall back to backup file
+        try {
+          const backupResponse = await fetch('/verses-backup.json');
+          if (backupResponse.ok) {
+            const data = await backupResponse.json();
+            console.log('Loaded verses from backup file');
+            setVerses(data);
+          } else {
+            // Try original API as last resort
+            const apiResponse = await fetch('/api/verses?all=true');
+            if (apiResponse.ok) {
+              const data = await apiResponse.json();
+              console.log('Loaded verses from original API');
+              setVerses(data);
+            } else {
+              setError('Failed to load verses from any source');
+            }
+          }
+        } catch (backupErr) {
+          setError('Error loading verses');
+        }
       }
     } catch (err) {
+      console.error('Error fetching verses:', err);
       setError('Error connecting to server');
     } finally {
       setLoading(false);
@@ -54,8 +77,8 @@ export default function VerseAdmin() {
       setLoading(true);
       console.log('Submitting verse:', { title, hasPassword: !!password });
       
-      // Use the new verses/add endpoint which is more reliable
-      const response = await fetch('/api/verses/add', {
+      // Using emergency endpoint as a last resort
+      const response = await fetch('/api/verses/emergency-add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,19 +86,19 @@ export default function VerseAdmin() {
         body: JSON.stringify({ title, scripture, password }),
       });
       
-      const data = await response.json();
+      const responseData = await response.json();
       
       if (response.ok) {
-        setMessage('Verse added successfully!');
+        setMessage(responseData.message || 'Verse added successfully!');
         setTitle('');
         setScripture('');
         // Wait a moment to ensure file is saved before fetching
         setTimeout(() => {
           fetchVerses();
-        }, 500);
+        }, 1000);
       } else {
-        console.error('Error response:', response.status, data);
-        setError(data.error || `Failed to add verse (Status: ${response.status})`);
+        console.error('Error response:', response.status, responseData);
+        setError(responseData.error || `Failed to add verse (Status: ${response.status})`);
       }
     } catch (err) {
       console.error('Submission error:', err);
