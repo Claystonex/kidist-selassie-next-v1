@@ -6,9 +6,8 @@ import { prisma } from '@/lib/prisma';
 // This endpoint serves audio files for jokes
 export async function GET(
   request: NextRequest,
-  context: { params: { jokeId: string } }
+  { params }: { params: { jokeId: string } }
 ) {
-  const { params } = context;
   try {
     const jokeId = params.jokeId;
     
