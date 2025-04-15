@@ -4,12 +4,12 @@ import path from 'path';
 import { prisma } from '@/lib/prisma';
 
 // This endpoint serves audio files for jokes
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { jokeId: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const jokeId = params.jokeId;
+    // Extract jokeId from the URL path
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const jokeId = pathSegments[pathSegments.length - 1];
     
     if (!jokeId) {
       return NextResponse.json({ error: 'Joke ID is required' }, { status: 400 });

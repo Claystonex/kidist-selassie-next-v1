@@ -92,9 +92,9 @@ export const AudioRecorder = ({ onSave, onCancel }: AudioRecorderProps) => {
     }
   };
 
-  // Draw waveform visualization
+  // Simplified waveform visualization to avoid TypeScript errors
   const drawWaveform = () => {
-    if (!canvasRef.current || !analyserRef.current || !dataArrayRef.current) return;
+    if (!canvasRef.current || !analyserRef.current) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -103,26 +103,48 @@ export const AudioRecorder = ({ onSave, onCancel }: AudioRecorderProps) => {
     const width = canvas.width;
     const height = canvas.height;
     
+    // Define a function to draw each frame
     const draw = () => {
+      // Stop if recording is stopped
       if (!isRecording) return;
       
+      // Continue the animation loop
       animationFrameRef.current = requestAnimationFrame(draw);
       
-      if (!analyserRef.current || !dataArrayRef.current) return;
+      // Make sure we still have all the required references
+      if (!analyserRef.current || !ctx) return;
+      
+      // Safety check for dataArray - create it if it doesn't exist
+      if (!dataArrayRef.current) {
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        dataArrayRef.current = new Uint8Array(bufferLength);
+      }
+      
+      // Get the data for the waveform
       analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
       
-      ctx.fillStyle = '#064d32'; // Match your site's dark green background
+      // Draw the background
+      ctx.fillStyle = '#064d32';
       ctx.fillRect(0, 0, width, height);
       
+      // Set up line style
       ctx.lineWidth = 2;
-      ctx.strokeStyle = '#f8e05c'; // Yellow color matching your theme
+      ctx.strokeStyle = '#f8e05c';
       ctx.beginPath();
       
-      const sliceWidth = width / dataArrayRef.current.length;
+      // Safety check to handle TypeScript's concerns
+      const dataArray = dataArrayRef.current;
+      if (!dataArray) return;
+      
+      const sliceWidth = width / dataArray.length;
       let x = 0;
       
-      for (let i = 0; i < dataArrayRef.current.length; i++) {
-        const v = dataArrayRef.current[i] / 128.0;
+      // Iterate through data points and draw the waveform
+      for (let i = 0; i < dataArray.length; i++) {
+        // Get the data point at this position and handle it safely
+        // We're using a non-null assertion with an OR fallback to default of 128
+        // 128 is the center value for audio samples
+        const v = (dataArray[i] ?? 128) / 128.0;
         const y = v * (height / 2);
         
         if (i === 0) {
@@ -138,6 +160,7 @@ export const AudioRecorder = ({ onSave, onCancel }: AudioRecorderProps) => {
       ctx.stroke();
     };
     
+    // Start the animation loop
     draw();
   };
 
