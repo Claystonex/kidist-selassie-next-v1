@@ -129,11 +129,22 @@ export default function Header() {
               <div 
                 className={`flex flex-col items-center overflow-hidden transition-all duration-500 ease-in-out bg-[#065539] rounded-b-lg ${mobileInteractOpen ? 'max-h-96 py-4 mb-4 shadow-inner' : 'max-h-0'}`}
               >
-                <div className="w-full max-w-xs space-y-3">
-                  <MobileNavLink href="/forum" onClick={() => setIsMenuOpen(false)}><TranslatableText>Forum</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/prayer" onClick={() => setIsMenuOpen(false)}><TranslatableText>Prayer Requests</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/miracles" onClick={() => setIsMenuOpen(false)}><TranslatableText>Miracles</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/jokes" onClick={() => setIsMenuOpen(false)}><TranslatableText>Jokes</TranslatableText></MobileNavLink>
+                <div className="rounded-b-lg shadow-xl overflow-hidden">  
+                  <div className="bg-white py-1">
+                    {/* Mobile Interact Dropdown Items */}
+                    <div className="block px-4 py-2 text-gray-800 text-center" onClick={() => setIsMenuOpen(false)}>  
+                      <Link href="/forum" className="block">Forum</Link>
+                    </div>
+                    <div className="block px-4 py-2 text-gray-800 text-center" onClick={() => setIsMenuOpen(false)}>  
+                      <Link href="/prayer" className="block">Prayer Requests</Link>
+                    </div>
+                    <div className="block px-4 py-2 text-gray-800 text-center" onClick={() => setIsMenuOpen(false)}>  
+                      <Link href="/miracles" className="block">Miracles</Link>
+                    </div>
+                    <div className="block px-4 py-2 text-gray-800 text-center" onClick={() => setIsMenuOpen(false)}>  
+                      <Link href="/contact" className="block">Contact Us</Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -247,7 +258,7 @@ export default function Header() {
                   <DropdownNavLink href="/forum"><TranslatableText>Forum</TranslatableText></DropdownNavLink>
                   <DropdownNavLink href="/prayer"><TranslatableText>Prayer Requests</TranslatableText></DropdownNavLink>
                   <DropdownNavLink href="/miracles"><TranslatableText>Miracles</TranslatableText></DropdownNavLink>
-                  <DropdownNavLink href="/jokes"><TranslatableText>Jokes</TranslatableText></DropdownNavLink>
+                  <DropdownNavLink href="/contact"><TranslatableText>Contact Us</TranslatableText></DropdownNavLink>
                 </div>
               </div>
             </div>

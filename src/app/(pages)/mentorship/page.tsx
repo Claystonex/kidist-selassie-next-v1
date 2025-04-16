@@ -22,24 +22,8 @@ const MentorshipPage = () => {
           link="/miracles"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full px-4 mt-8">
-        {/* Feature Cards */}
-        <FeatureCard 
-          title="Post Your Funny Audio" 
-          description="Share your short (clean) jokes and laugh with our community."
-          link="/jokes"
-        />
-        
-        <FeatureCard 
-          title="Feedback &
-          Comments" 
-          description="Share your feedback and comments about the website."
-          link="/feedback"
-        />
-      </div>
       <div className="border-t-4 w-[80wh] pb-4 border-[#c4142c]"></div>
       <div className="border-t-4 w-[50wh] border-[#c4142c]"></div>
-
     </div>
   );
 }

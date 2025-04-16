@@ -184,8 +184,8 @@ export default function Home() {
       <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl w-full px-4 mt-6 sm:mt-8">
         {/* Feature Cards */}
         <FeatureCard 
-          title="Post Your Funnies" 
-          description="Share your short (clean) jokes and laugh with our community."
+          title="Jokes" 
+          description="Share your clean jokes and laugh with our community."
           link="/jokes"
         />
         <FeatureCard 
@@ -194,9 +194,9 @@ export default function Home() {
           link="/questions"
         />
         <FeatureCard 
-          title="Feedback/Comments" 
+          title="Contact Us" 
           description="Share your feedback and comments about the website."
-          link="/feedback"
+          link="/contact"
         />
       </div>
       {/* Themed border lines that match our color scheme */}
