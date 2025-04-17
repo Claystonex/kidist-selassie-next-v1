@@ -8,6 +8,7 @@ import { useUser } from '@clerk/nextjs';
 import TranslatableText from '@/app/_components/TranslatableText';
 import CommentTranslator from '@/app/_components/CommentTranslator';
 import { useTranslation } from '@/app/_contexts/TranslationContext';
+import VerseOfTheDay from '@/app/_components/VerseOfTheDay';
 
 interface Post {
   id: string;
@@ -511,7 +512,16 @@ export default function Forum() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto p-6 relative">
+      {/* Verse of the Day - Small display in upper right */}
+      <div className="absolute top-2 right-2 w-64 bg-[#006241]/60 p-2 rounded-lg text-sm shadow-md border border-yellow-400/30">
+        <div className="text-sm font-semibold text-center mb-1 text-yellow-400">
+          <TranslatableText>Verse of the Day</TranslatableText>
+        </div>
+        <div className="text-xs">
+          <VerseOfTheDay />
+        </div>
+      </div>
       {/* Comment Translator Section */}
       <div id="comment-translator" className="mb-8">
         <CommentTranslator />

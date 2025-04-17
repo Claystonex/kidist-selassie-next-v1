@@ -26,7 +26,7 @@ export default function DonatePage() {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringPeriod, setRecurringPeriod] = useState('monthly');
 
-  const predefinedAmounts = ['5.00', '10.00', '25.00', '50.00', '100.00'];
+  const predefinedAmounts = ['1.00', '3.00', '7.00', '15.00', '25.00', '50.00', '100.00'];
 
   // Handle PayPal payment submission
   const createOrder = async () => {
@@ -164,7 +164,10 @@ export default function DonatePage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Make a Donation</h1>
+      <h1 className="text-3xl font-bold mb-4">Make a Donation</h1>
+      <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-6">
+        <p>We have cause based fundraising for our youth benefit. Reach out to us and you can fundraise here for your specific group's cause. They'll receive 100% of your donations.</p>
+      </div>
       
       {success ? (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

@@ -3,8 +3,17 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
+// Define types for page props
+type PageProps = {
+  params: {
+    book: string;
+    chapter: string;
+  };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
 // Dynamic metadata
-export async function generateMetadata({ params }: { params: { book: string; chapter: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const bookSlug = params.book;
   const chapterNumber = parseInt(params.chapter);
   const chapterData = await getChapter(bookSlug, chapterNumber);
@@ -174,7 +183,7 @@ async function getNavigation(bookSlug: string, chapterNumber: number): Promise<N
   }
 }
 
-export default async function ChapterPage({ params }: { params: { book: string; chapter: string } }) {
+export default async function ChapterPage({ params }: PageProps) {
   // Correctly await params to satisfy Next.js dynamic route requirements
   const bookSlug = params.book;
   const chapterNumber = parseInt(params.chapter);

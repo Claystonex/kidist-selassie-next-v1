@@ -226,7 +226,7 @@ const JokesPage = () => {
                   }}
                   className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
                 >
-                  Add Voice Recording (Optional)
+                  Record your Funny Audio
                 </button>
               )}
 
@@ -263,7 +263,7 @@ const JokesPage = () => {
                   }}
                   className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
                 >
-                  Add Video Recording (Optional)
+                  Record your Funny Video
                 </button>
               )}
             </div>
