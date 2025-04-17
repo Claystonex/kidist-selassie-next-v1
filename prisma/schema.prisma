@@ -10,6 +10,29 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// Bible Models
+model Book {
+  id        Int      @id @default(autoincrement())
+  name      String   // e.g., "Genesis"
+  slug      String   @unique  // e.g., "genesis" for clean URLs
+  chapters  Chapter[]
+}
+
+model Chapter {
+  id        Int      @id @default(autoincrement())
+  number    Int      // e.g., 1 for Chapter 1
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  verses    Verse[]
+}
+
+model Verse {
+  id        Int      @id @default(autoincrement())
+  number    Int      // e.g., 1 for Verse 1
+  text      String   // e.g., "In the beginning..."
+  chapterId Int
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
 
 
 model User {

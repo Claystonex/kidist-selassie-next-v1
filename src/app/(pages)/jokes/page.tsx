@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import AudioRecorder from '@/app/_components/AudioRecorder/AudioRecorder';
+import VideoRecorder from '@/app/_components/VideoRecorder/VideoRecorder';
 
 interface Joke {
   id: string;
@@ -11,6 +12,9 @@ interface Joke {
   hasAudio?: boolean;
   audioUrl?: string | null;
   audioDuration?: number;
+  hasVideo?: boolean;
+  videoUrl?: string | null;
+  videoDuration?: number;
 }
 
 const JokesPage = () => {
@@ -19,9 +23,12 @@ const JokesPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showRecorder, setShowRecorder] = useState(false);
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false);
+  const [showVideoRecorder, setShowVideoRecorder] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -60,8 +67,8 @@ const JokesPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Allow either voice recording OR text joke, not requiring both
-    if (!audioBlob && !jokeContent.trim()) {
+    // Allow either voice/video recording OR text joke, not requiring both
+    if (!audioBlob && !videoBlob && !jokeContent.trim()) {
       setError('Please either record or type a joke');
       return;
     }
@@ -71,8 +78,26 @@ const JokesPage = () => {
       setError('');
       setSuccess('');
       
-      // Submit with audio if available, otherwise just text
-      if (audioBlob) {
+      // Submit with video if available
+      if (videoBlob) {
+        const formData = new FormData();
+        formData.append('jokeContent', jokeContent || 'Video joke'); // Use placeholder text if not provided
+        formData.append('video', videoBlob);
+        formData.append('duration', videoDuration.toString());
+        
+        const response = await fetch('/api/jokes/video/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) throw new Error('Failed to submit joke with video');
+        
+        // Reset video state
+        setVideoBlob(null);
+        setShowVideoRecorder(false);
+      }
+      // Submit with audio if available
+      else if (audioBlob) {
         const formData = new FormData();
         formData.append('jokeContent', jokeContent || 'Voice joke'); // Use placeholder text if not provided
         formData.append('audio', audioBlob);
@@ -87,7 +112,7 @@ const JokesPage = () => {
         
         // Reset audio state
         setAudioBlob(null);
-        setShowRecorder(false);
+        setShowAudioRecorder(false);
       } else {
         // Regular text-only joke submission
         const response = await fetch('/api/jokes', {
@@ -117,11 +142,25 @@ const JokesPage = () => {
   const handleSaveAudio = (blob: Blob, duration: number) => {
     setAudioBlob(blob);
     setAudioDuration(duration);
+    // Clear video if audio is saved
+    setVideoBlob(null);
   };
   
   const handleCancelAudio = () => {
-    setShowRecorder(false);
+    setShowAudioRecorder(false);
     setAudioBlob(null);
+  };
+  
+  const handleSaveVideo = (blob: Blob, duration: number) => {
+    setVideoBlob(blob);
+    setVideoDuration(duration);
+    // Clear audio if video is saved
+    setAudioBlob(null);
+  };
+  
+  const handleCancelVideo = () => {
+    setShowVideoRecorder(false);
+    setVideoBlob(null);
   };
 
   return (
@@ -131,59 +170,103 @@ const JokesPage = () => {
         
         {/* Joke Submission Form */}
         <div className="bg-[#064d32] rounded-lg shadow-xl p-6 mb-8">
-          <h2 className="text-2xl font-bold text-yellow-400 mb-6">Record or Type Your Joke (Clean)</h2>
-          {error && <div className="bg-red-500 bg-opacity-20 text-red-200 p-3 rounded mb-4">{error}</div>}
-          {success && <div className="bg-green-500 bg-opacity-20 text-green-200 p-3 rounded mb-4">{success}</div>}
+          {error && <div className="mb-4 p-3 bg-red-500 bg-opacity-20 text-white rounded">{error}</div>}
+          {success && <div className="mb-4 p-3 bg-green-500 bg-opacity-20 text-white rounded">{success}</div>}
           
+          <h2 className="text-xl font-semibold text-yellow-400 mb-4">Share a Joke</h2>
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="jokeContent" className="block text-sm font-medium text-gray-300">
-                Your Joke
-              </label>
-              <textarea
-                id="jokeContent"
-                value={jokeContent}
-                onChange={(e) => setJokeContent(e.target.value)}
-                rows={4}
-                placeholder={audioBlob ? "Voice recording will be used" : "Share a clean, family-friendly joke..."}
-                disabled={!!audioBlob}
-                className="mt-1 block w-full rounded-md bg-white border-transparent focus:border-yellow-500 focus:ring-0 text-black"
-
-              />
-            </div>
-            
-            {showRecorder ? (
-              <div className="p-4 bg-[#053a27] rounded-lg border border-yellow-400 border-opacity-30">
-                <h3 className="text-yellow-400 text-sm font-medium mb-2">Record Your Joke Instead of Typing</h3>
-                <AudioRecorder 
-                  onSave={handleSaveAudio} 
-                  onCancel={handleCancelAudio} 
+              <label htmlFor="joke-content" className="block text-sm font-medium text-gray-300">Your Joke</label>
+              <div className="mt-1">
+                <textarea
+                  id="joke-content"
+                  name="jokeContent"
+                  value={jokeContent}
+                  onChange={(e) => setJokeContent(e.target.value)}
+                  rows={4}
+                  placeholder={videoBlob ? "Video recording will be used" : audioBlob ? "Voice recording will be used" : "Share a clean, family-friendly joke..."}
+                  disabled={!!audioBlob || !!videoBlob}
+                  className="mt-1 block w-full rounded-md bg-white border-transparent focus:border-yellow-500 focus:ring-0 text-black"
                 />
-                {audioBlob && (
-                  <p className="text-green-300 text-xs mt-2">
-                    Audio recording ready! Submit your joke to share it.
-                    <button 
-                      type="button" 
-                      onClick={() => {
-                        setAudioBlob(null);
-                        setJokeContent('');
-                      }}
-                      className="ml-2 text-xs text-red-300 underline"
-                    >
-                      Remove recording to type instead
-                    </button>
-                  </p>
-                )}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowRecorder(true)}
-                className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
-              >
-                Add Voice Recording (Optional)
-              </button>
-            )}
+            </div>
+
+            {/* Recording Controls */}
+            <div className="flex flex-col space-y-4 mt-4">
+              {/* Audio Recorder */}
+              {showAudioRecorder ? (
+                <div className="p-4 bg-[#053a27] rounded-lg border border-yellow-400 border-opacity-30">
+                  <h3 className="text-yellow-400 text-sm font-medium mb-2">Record Your Voice Joke</h3>
+                  <AudioRecorder 
+                    onSave={handleSaveAudio} 
+                    onCancel={handleCancelAudio} 
+                  />
+                  {audioBlob && (
+                    <p className="text-green-300 text-xs mt-2">
+                      Audio recording ready! Submit your joke to share it.
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setAudioBlob(null);
+                          setJokeContent('');
+                        }}
+                        className="ml-2 text-xs text-red-300 underline"
+                      >
+                        Remove recording to type instead
+                      </button>
+                    </p>
+                  )}
+                </div>
+              ) : !videoBlob && !showVideoRecorder && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAudioRecorder(true);
+                    setShowVideoRecorder(false);
+                  }}
+                  className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
+                >
+                  Add Voice Recording (Optional)
+                </button>
+              )}
+
+              {/* Video Recorder */}
+              {showVideoRecorder ? (
+                <div className="p-4 bg-[#053a27] rounded-lg border border-yellow-400 border-opacity-30">
+                  <h3 className="text-yellow-400 text-sm font-medium mb-2">Record Your Video Joke</h3>
+                  <VideoRecorder 
+                    onSave={handleSaveVideo} 
+                    onCancel={handleCancelVideo} 
+                  />
+                  {videoBlob && (
+                    <p className="text-green-300 text-xs mt-2">
+                      Video recording ready! Submit your joke to share it.
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setVideoBlob(null);
+                          setJokeContent('');
+                        }}
+                        className="ml-2 text-xs text-red-300 underline"
+                      >
+                        Remove recording to type instead
+                      </button>
+                    </p>
+                  )}
+                </div>
+              ) : !audioBlob && !showAudioRecorder && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowVideoRecorder(true);
+                    setShowAudioRecorder(false);
+                  }}
+                  className="w-full flex justify-center py-2 px-4 border border-white rounded-md shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
+                >
+                  Add Video Recording (Optional)
+                </button>
+              )}
+            </div>
 
             <button
               type="submit"
@@ -206,6 +289,20 @@ const JokesPage = () => {
               jokes.map((joke) => (
                 <div key={joke.id} className="bg-white/10 rounded-lg p-4">
                   <p className="text-lg text-white">"{joke.content}"</p>
+                  
+                  {joke.hasVideo && joke.videoUrl && (
+                    <div className="mt-3 bg-[#053a27] p-2 rounded">
+                      <video
+                        src={joke.videoUrl}
+                        controls
+                        className="w-full"
+                        controlsList="nodownload"
+                      />
+                      <div className="text-xs text-yellow-200 mt-1">
+                        {joke.videoDuration ? `${Math.floor(joke.videoDuration / 60)}:${(joke.videoDuration % 60).toString().padStart(2, '0')}` : ''} Video Recording
+                      </div>
+                    </div>
+                  )}
                   
                   {joke.hasAudio && joke.audioUrl && (
                     <div className="mt-3 bg-[#053a27] p-2 rounded">

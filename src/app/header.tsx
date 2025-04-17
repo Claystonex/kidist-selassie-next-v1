@@ -17,6 +17,7 @@ export default function Header() {
   const [interactOpen, setInteractOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileInteractOpen, setMobileInteractOpen] = useState(false);
+  const [mobileBibleOpen, setMobileBibleOpen] = useState(false);
   const { language, setLanguage } = useTranslation();
   const { user } = useUser();
   
@@ -106,11 +107,14 @@ export default function Header() {
               <div 
                 className={`flex flex-col items-center overflow-hidden transition-all duration-500 ease-in-out bg-[#065539] rounded-b-lg ${mobileServicesOpen ? 'max-h-96 py-4 mb-4 shadow-inner' : 'max-h-0'}`}
               >
-                <div className="w-full max-w-xs space-y-3">
-                  <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
-                  <MobileNavLink href="/bootcamp" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
-                </div>
+                {/* Mobile Services submenu */}
+                {mobileServicesOpen && (
+                  <div className="bg-[#064d32] rounded-lg p-4 mt-2 w-full">
+                    <MobileNavLink href="/questions" onClick={() => setIsMenuOpen(false)}><TranslatableText>Questions</TranslatableText></MobileNavLink>
+                    <MobileNavLink href="/mentorship" onClick={() => setIsMenuOpen(false)}><TranslatableText>Mentorship</TranslatableText></MobileNavLink>
+                    <MobileNavLink href="/bootcamps" onClick={() => setIsMenuOpen(false)}><TranslatableText>Bootcamps</TranslatableText></MobileNavLink>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -154,19 +158,39 @@ export default function Header() {
               <MobileNavLink href="/gallery" onClick={() => setIsMenuOpen(false)}><TranslatableText>Gallery</TranslatableText></MobileNavLink>
             </div>
             
-            <div className="w-full border-b border-[#0a8055]">
-              <a 
-                href="https://v0-bible-chapter-tracker.vercel.app/" 
-                onClick={() => setIsMenuOpen(false)}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-[#edcf08] text-lg py-4 flex justify-center items-center w-full transition-colors font-semibold tracking-wide"
+            {/* Mobile Bible Section */}
+            <div className="w-full">
+              <button
+                className="text-lg font-montserrat text-white hover:text-[#edcf08] py-4 flex justify-center items-center w-full transition-colors duration-300 font-semibold tracking-wide focus:outline-none focus:text-[#edcf08]" 
+                onClick={() => setMobileBibleOpen(!mobileBibleOpen)}
               >
-                <div className="flex items-center">
-                  <span><TranslatableText>Bible Tracker</TranslatableText></span>
-                  <FontAwesomeIcon icon={faBook} className="ml-3 h-4 w-4 animate-pulse text-[#edcf08]" />
+                <span className="flex items-center justify-center">
+                  <TranslatableText>Bible</TranslatableText>
+                  <FontAwesomeIcon 
+                    icon={faBook} 
+                    className="ml-2 h-4 w-4 text-[#edcf08]"
+                  />
+                  <FontAwesomeIcon 
+                    icon={faChevronDown} 
+                    className={`ml-2 h-3 w-3 transition-transform duration-300 ${mobileBibleOpen ? 'rotate-180' : ''}`}
+                  />
+                </span>
+              </button>
+              
+              {/* Mobile Bible submenu */}
+              {mobileBibleOpen && (
+                <div className="bg-[#064d32] rounded-lg p-4 mt-2 w-full">
+                  <MobileNavLink href="/bible" onClick={() => setIsMenuOpen(false)}>
+                    <TranslatableText>Read Bible</TranslatableText>
+                  </MobileNavLink>
+                  <MobileNavLink 
+                    href="https://v0-bible-chapter-tracker.vercel.app/" 
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <TranslatableText>Track Bible Reading</TranslatableText>
+                  </MobileNavLink>
                 </div>
-              </a>
+              )}
             </div>
             
             <div className="w-full border-b border-[#0a8055]">
@@ -220,12 +244,11 @@ export default function Header() {
               onMouseLeave={() => setServicesOpen(false)}
             >
               {/* This empty div creates a seamless hover area between trigger and menu */}
-              <div className="absolute h-2 w-full top-[-8px]"></div>
-              <div className="bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className="py-1">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg overflow-hidden transform opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto z-50 transition-all duration-300 origin-top-left">
+                <div className="py-2">
                   <DropdownNavLink href="/questions"><TranslatableText>Questions</TranslatableText></DropdownNavLink>
                   <DropdownNavLink href="/mentorship"><TranslatableText>Mentorship</TranslatableText></DropdownNavLink>
-                  <DropdownNavLink href="/bootcamp"><TranslatableText>Bootcamps</TranslatableText></DropdownNavLink>
+                  <DropdownNavLink href="/bootcamps"><TranslatableText>Bootcamps</TranslatableText></DropdownNavLink>
                 </div>
               </div>
             </div>
@@ -285,27 +308,39 @@ export default function Header() {
             <NavLink href="/forum"><TranslatableText>Forum</TranslatableText></NavLink>
           </div>
           
-          <div 
-            className="group whitespace-nowrap"
+          {/* Bible Dropdown */}
+          <div
+            className="relative group whitespace-nowrap"
             onMouseOver={() => {
               setServicesOpen(false);
               setInteractOpen(false);
             }}
           >
-            <a 
-              href="https://v0-bible-chapter-tracker.vercel.app/" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <button
               className="text-sm font-montserrat text-white hover:text-[#ffb43c] transition-colors px-2 py-2 rounded-md"
+              aria-expanded={interactOpen}
+              aria-haspopup="true"
             >
               <span className="flex items-center">
-                <span className="mr-1"><TranslatableText>Bible Tracker</TranslatableText></span>
-                <FontAwesomeIcon 
-                  icon={faBook} 
+                <span className="mr-1"><TranslatableText>Bible</TranslatableText></span>
+                <FontAwesomeIcon
+                  icon={faBook}
                   className="h-3 w-3 transform group-hover:scale-125 transition-transform duration-300 group-hover:text-[#ffb43c]"
                 />
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className="ml-1 h-3 w-3 transition-transform duration-300 group-hover:text-[#ffb43c] group-hover:rotate-180"
+                />
               </span>
-            </a>
+            </button>
+            
+            {/* Bible dropdown menu */}
+            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg overflow-hidden transform opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto z-50 transition-all duration-300 origin-top-left">
+              <div className="py-2">
+                <DropdownNavLink href="/bible"><TranslatableText>Read Bible</TranslatableText></DropdownNavLink>
+                <DropdownNavLink href="https://v0-bible-chapter-tracker.vercel.app/" target="_blank" rel="noopener noreferrer"><TranslatableText>Track Bible Reading</TranslatableText></DropdownNavLink>
+              </div>
+            </div>
           </div>
           
           <div 
@@ -368,11 +403,13 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
-function DropdownNavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function DropdownNavLink({ href, children, target, rel }: { href: string; children: React.ReactNode; target?: string; rel?: string }) {
   return (
     <Link 
       href={href} 
       className="block px-3 py-2 text-xs lg:text-sm text-gray-800 hover:bg-gray-100 hover:text-[#086c47] whitespace-nowrap"
+      target={target}
+      rel={rel}
     >
       {children}
     </Link>

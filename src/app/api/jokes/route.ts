@@ -8,6 +8,11 @@ const getAudioUrl = (jokeId: string) => {
   return `/api/jokes/audio/${jokeId}`;
 };
 
+// Helper to get video URL for jokes
+const getVideoUrl = (jokeId: string) => {
+  return `/api/jokes/video/${jokeId}`;
+};
+
 // GET handler - Get all jokes
 export async function GET(request: NextRequest) {
   try {
@@ -16,17 +21,20 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
     
-    // Add audio URLs directly to jokes (all jokes with hasAudio=true have audio files)
-    const jokesWithAudio = jokes.map((joke: any) => {
+    // Add audio and video URLs directly to jokes
+    const jokesWithMedia = jokes.map((joke: any) => {
       return {
         ...joke,
         hasAudio: joke.hasAudio || false,
         audioUrl: joke.hasAudio ? getAudioUrl(joke.id) : null,
-        audioDuration: joke.audioDuration || 0
+        audioDuration: joke.audioDuration || 0,
+        hasVideo: joke.hasVideo || false,
+        videoUrl: joke.hasVideo ? getVideoUrl(joke.id) : null,
+        videoDuration: joke.videoDuration || 0
       };
     });
     
-    return NextResponse.json(jokesWithAudio);
+    return NextResponse.json(jokesWithMedia);
   } catch (error) {
     console.error('Error retrieving jokes:', error);
     return NextResponse.json({ error: 'Failed to retrieve jokes' }, { status: 500 });
@@ -132,7 +140,10 @@ export async function POST(request: NextRequest) {
         ...joke,
         hasAudio: false,
         audioUrl: null,
-        audioDuration: 0
+        audioDuration: 0,
+        hasVideo: false,
+        videoUrl: null,
+        videoDuration: 0
       }, { status: 201 });
     }
   } catch (error) {

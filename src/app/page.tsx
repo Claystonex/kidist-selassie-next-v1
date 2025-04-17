@@ -158,7 +158,7 @@ export default function Home() {
       <div className="bg-white/10 p-3 sm:p-4 rounded-lg mb-6 max-w-4xl w-full mx-auto text-center border border-[#ffb43c]/30">
         <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium break-words hyphens-auto">
           <TranslatableText>
-            Christ-centered and Youth-Focused International Network to Grow Love and Faith.
+            Christ-centered and Youth-Focused International Network to Grow Love, Faith, Unity, Education, Prosperity, and Entertainment.
           </TranslatableText>
         </p>
       </div>
