@@ -168,8 +168,8 @@ async function getNavigation(bookSlug: string, chapterNumber: number) {
 }
 
 // Main page component - simple version to fix type issues
+const bookSlug = params.book;
 export default async function Page({ params }) {
-  const bookSlug = params.book;
   const chapterNumber = parseInt(params.chapter);
   
   // Get chapter data

@@ -171,3 +171,12 @@ model Donation {
   user            User?    @relation(fields: [userId], references: [id])
   receiptSent     Boolean  @default(false)
 }
+
+// Model for inspirational or daily verses (not from the Bible)
+model DailyVerse {
+  id          String   @id @default(cuid())
+  title       String
+  scripture   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

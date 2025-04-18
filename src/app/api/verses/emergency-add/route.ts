@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { PrismaClient } from '@prisma/client';
 
-// Create the data directory path with more accessible location
-const DATA_DIR = path.join(process.cwd(), 'public', 'data');
-const VERSES_FILE = path.join(DATA_DIR, 'verses.json');
+// Workaround for TypeScript not recognizing new models
+// This tells TypeScript that our PrismaClient has the dailyVerse property
+interface CustomPrismaClient extends PrismaClient {
+  dailyVerse: {
+    create: (args: { data: { title: string; scripture: string } }) => Promise<any>;
+    findMany: (args?: any) => Promise<any[]>;
+    findFirst: (args?: any) => Promise<any | null>;
+    findUnique: (args?: any) => Promise<any | null>;
+    delete: (args?: any) => Promise<any>;
+  };
+}
+
+// Initialize Prisma client with type assertion
+const prisma = new PrismaClient() as CustomPrismaClient;
 
 // Debug log
-console.log('EMERGENCY Verses API initialized with paths:', {
-  cwd: process.cwd(),
-  publicDataDir: DATA_DIR,
-  versesFile: VERSES_FILE
-});
+console.log('EMERGENCY Verses API initialized with Prisma');
 
 // POST handler for emergency verse addition
 export async function POST(request: NextRequest) {
@@ -37,83 +43,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title and scripture are required' }, { status: 400 });
     }
     
-    // Create new verse
-    const newVerse = {
-      id: Date.now().toString(),
-      title,
-      scripture,
-      createdAt: new Date().toISOString()
-    };
-    
     try {
-      // Ensure directory exists
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      console.log(`Created directory: ${DATA_DIR}`);
-      
-      // Read existing verses or start with empty array
-      let verses = [];
-      try {
-        const fileExists = await fs.stat(VERSES_FILE).then(() => true).catch(() => false);
-        if (fileExists) {
-          const data = await fs.readFile(VERSES_FILE, 'utf8');
-          verses = JSON.parse(data || '[]');
+      // Create the verse directly in the database using Prisma
+      const newVerse = await prisma.dailyVerse.create({
+        data: {
+          title,
+          scripture
+          // createdAt and updatedAt will be automatically set by Prisma
         }
-      } catch (readError) {
-        console.log('Could not read existing verses, starting with empty array:', readError);
-      }
+      });
       
-      // Add new verse
-      verses.push(newVerse);
-      
-      // Write to file
-      await fs.writeFile(VERSES_FILE, JSON.stringify(verses, null, 2), 'utf8');
-      console.log('Successfully wrote verse to file');
+      console.log('Successfully saved verse to database:', newVerse);
       
       return NextResponse.json({ 
         success: true, 
         message: 'Verse added successfully!',
         verse: newVerse
       });
-    } catch (fsError) {
-      console.error('Filesystem error:', fsError);
-      
-      // Try an alternative storage approach - localStorage simulation in public directory
-      const backupFile = path.join(process.cwd(), 'public', 'verses-backup.json');
-      
-      try {
-        console.log(`Trying backup approach with file: ${backupFile}`);
-        
-        // Read existing backup verses or start with empty array
-        let backupVerses = [];
-        try {
-          const backupExists = await fs.stat(backupFile).then(() => true).catch(() => false);
-          if (backupExists) {
-            const data = await fs.readFile(backupFile, 'utf8');
-            backupVerses = JSON.parse(data || '[]');
-          }
-        } catch (readError) {
-          console.log('Starting with empty backup array');
-        }
-        
-        // Add new verse
-        backupVerses.push(newVerse);
-        
-        // Write to backup file
-        await fs.writeFile(backupFile, JSON.stringify(backupVerses, null, 2), 'utf8');
-        console.log('Successfully wrote verse to backup file');
-        
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Verse added successfully (using backup storage)!',
-          verse: newVerse
-        });
-      } catch (backupError) {
-        console.error('Even backup approach failed:', backupError);
-        return NextResponse.json({ 
-          error: 'Failed to save verse after multiple attempts',
-          details: backupError instanceof Error ? backupError.message : 'Unknown error'
-        }, { status: 500 });
-      }
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return NextResponse.json({ 
+        error: 'Failed to save verse to database',
+        details: dbError instanceof Error ? dbError.message : 'Unknown error'
+      }, { status: 500 });
     }
   } catch (error) {
     console.error('Emergency verse API error:', error);
@@ -121,5 +73,8 @@ export async function POST(request: NextRequest) {
       error: 'Server error processing verse',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
+  } finally {
+    // Always disconnect Prisma client to prevent connection pool issues
+    await prisma.$disconnect();
   }
 }
