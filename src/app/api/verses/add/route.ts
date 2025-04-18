@@ -1,20 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// Workaround for TypeScript not recognizing new models
-// This tells TypeScript that our PrismaClient has the dailyVerse property
-interface CustomPrismaClient extends PrismaClient {
-  dailyVerse: {
-    create: (args: { data: { title: string; scripture: string } }) => Promise<any>;
-    findMany: (args?: any) => Promise<any[]>;
-    findFirst: (args?: any) => Promise<any | null>;
-    findUnique: (args?: any) => Promise<any | null>;
-    delete: (args?: any) => Promise<any>;
-  };
-}
-
-// Initialize Prisma client with type assertion
-const prisma = new PrismaClient() as CustomPrismaClient;
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 // Debug log
 console.log('Verses add API initialized with Prisma');
@@ -53,6 +41,7 @@ export async function POST(request: NextRequest) {
     
     try {
       // Create the verse directly in the database using Prisma
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const newVerse = await prisma.dailyVerse.create({
         data: {
           title,

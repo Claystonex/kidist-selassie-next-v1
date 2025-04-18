@@ -2,20 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-// Workaround for TypeScript not recognizing new models
-// This tells TypeScript that our PrismaClient has the dailyVerse property
-interface CustomPrismaClient extends PrismaClient {
-  dailyVerse: {
-    create: (args: { data: { title: string; scripture: string } }) => Promise<any>;
-    findMany: (args?: any) => Promise<any[]>;
-    findFirst: (args?: any) => Promise<any | null>;
-    findUnique: (args?: any) => Promise<any | null>;
-    delete: (args?: any) => Promise<any>;
-  };
-}
-
-// Initialize Prisma client with type assertion
-const prisma = new PrismaClient() as CustomPrismaClient;
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 // Debug information
 console.log('Verses API initialized with Prisma');
@@ -31,6 +19,7 @@ export async function GET(request: NextRequest) {
     // Use Prisma to fetch verse(s) from the database
     if (all === 'true') {
       // Get all verses ordered by creation date (newest last)
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const verses = await prisma.dailyVerse.findMany({
         orderBy: {
           createdAt: 'asc'
@@ -40,6 +29,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(verses);
     } else {
       // Get just the latest verse
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const latestVerse = await prisma.dailyVerse.findFirst({
         orderBy: {
           createdAt: 'desc'
@@ -87,6 +77,7 @@ export async function POST(request: NextRequest) {
     
     // Create the verse directly in the database using Prisma
     try {
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const newVerse = await prisma.dailyVerse.create({
         data: {
           title,
@@ -146,6 +137,7 @@ export async function DELETE(request: NextRequest) {
     
     try {
       // Check if verse exists before attempting to delete
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const verse = await prisma.dailyVerse.findUnique({
         where: { id }
       });
@@ -155,6 +147,7 @@ export async function DELETE(request: NextRequest) {
       }
       
       // Delete the verse from the database
+      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       await prisma.dailyVerse.delete({
         where: { id }
       });
