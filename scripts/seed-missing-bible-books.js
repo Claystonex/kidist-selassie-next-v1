@@ -60,6 +60,12 @@ const MISSING_BIBLE_BOOKS = [
 ];
 
 // Function to generate sample verse content
+/**
+ * @param {string} bookName - The name of the book
+ * @param {number} chapterNum - The chapter number
+ * @param {number} verseNum - The verse number
+ * @returns {string} - The generated verse text
+ */
 function generateSampleVerseText(bookName, chapterNum, verseNum) {
   return `This is sample verse ${verseNum} for ${bookName} ${chapterNum}. The actual Bible text would appear here in a real deployment.`;
 }
