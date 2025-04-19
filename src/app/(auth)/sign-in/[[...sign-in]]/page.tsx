@@ -19,13 +19,26 @@ const GrandOpeningTwoBanner = dynamic(
 const SignInPage = () => {
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const [redirectUrl, setRedirectUrl] = useState('/');
+
+  // Get redirect URL from query parameters if available
+  React.useEffect(() => {
+    // Check if window is available (client-side only)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const redirectParam = params.get('redirect_url');
+      if (redirectParam) {
+        setRedirectUrl(redirectParam);
+      }
+    }
+  }, []);
 
   // Redirect to dashboard if already signed in
   React.useEffect(() => {
     if (isSignedIn) {
-      router.push('/');
+      router.push(redirectUrl);
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, router, redirectUrl]);
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#086c47]">
@@ -82,7 +95,7 @@ const SignInPage = () => {
                   rootBox: 'relative',
                 }
               }}
-              redirectUrl="/"
+              redirectUrl={redirectUrl}
             />
             
             {/* Yellow placeholder for the space where development mode text was */}

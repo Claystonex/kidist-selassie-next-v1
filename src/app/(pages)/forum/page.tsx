@@ -522,8 +522,16 @@ export default function Forum() {
           <VerseOfTheDay />
         </div>
       </div>
-      {/* Comment Translator Section */}
-      <div id="comment-translator" className="mb-8">
+      {/* Comment Translator Section - with clear explanation */}
+      <div id="comment-translator" className="mb-8 bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div className="flex items-center mb-2">
+          <FaLanguage className="text-[#086c47] mr-2 text-xl" />
+          <h2 className="text-xl font-semibold text-[#086c47]"><TranslatableText>Comment Translator Tool</TranslatableText></h2>
+        </div>
+        <div className="mb-3 px-2 py-2 bg-yellow-50 border-l-4 border-yellow-400 text-sm">
+          <p><TranslatableText>This tool only translates text you paste here. It will not translate the entire page.</TranslatableText></p>
+          <p className="mt-1 text-xs text-gray-600"><TranslatableText>For translating the entire page, use the language selector in the header instead.</TranslatableText></p>
+        </div>
         <CommentTranslator />
       </div>
 

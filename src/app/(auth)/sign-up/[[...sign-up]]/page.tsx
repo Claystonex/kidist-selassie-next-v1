@@ -19,13 +19,26 @@ const GrandOpeningTwoBanner = dynamic(
 const SignUpPage = () => {
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const [redirectUrl, setRedirectUrl] = React.useState('/');
+
+  // Get redirect URL from query parameters if available
+  React.useEffect(() => {
+    // Check if window is available (client-side only)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const redirectParam = params.get('redirect_url');
+      if (redirectParam) {
+        setRedirectUrl(redirectParam);
+      }
+    }
+  }, []);
 
   // Redirect to home page if already signed in
   React.useEffect(() => {
     if (isSignedIn) {
-      router.push('/');
+      router.push(redirectUrl);
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, router, redirectUrl]);
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#086c47]">
@@ -81,7 +94,7 @@ const SignUpPage = () => {
                   footer: 'hidden',
                 }
               }}
-              redirectUrl="/"
+              redirectUrl={redirectUrl}
             />
             
             {/* Sign in link */}

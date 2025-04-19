@@ -20,7 +20,7 @@ export default function Header() {
   const [mobileBibleOpen, setMobileBibleOpen] = useState(false);
   const { language, setLanguage } = useTranslation();
   const { user } = useUser();
-  
+
   // Close mobile menu when window gets resized to desktop size
   useEffect(() => {
     const handleResize = () => {
@@ -28,17 +28,57 @@ export default function Header() {
         setIsMenuOpen(false);
       }
     };
-    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
+  // Only show flag, logo, and join button if not signed in
+  if (!user) {
+    return (
+      <nav className="relative border-b bg-[#086c47]">
+        <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-full lg:max-w-7xl">
+          {/* Flag (if you have a flag image, add it here) */}
+          {/* <img src="/assets/your-flag.png" alt="Flag" className="w-8 h-8 mr-2" /> */}
+
+          {/* Logo */}
+          <div className="flex items-center flex-shrink-0">
+            <img 
+              src="/assets/lion-of-judah-2.jpg" 
+              alt="Kidist Selassie Youth International Network" 
+              className='w-14 h-9 mr-1 object-contain' 
+              fetchPriority="high"
+              loading="eager"
+            />
+            <Link href="/" className="flex items-center">
+              <span className="text-base text-white xl:block hidden font-bold whitespace-nowrap mr-2">
+                <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
+              </span>
+              <span className="text-base text-white hidden lg:block xl:hidden font-bold whitespace-nowrap mr-2">
+                <TranslatableText>Kidist Selassie</TranslatableText>
+              </span>
+              <span className="text-sm text-white lg:hidden leading-tight truncate max-w-[100px] sm:max-w-[150px]">
+                <TranslatableText>Kidist Selassie</TranslatableText>
+              </span>
+            </Link>
+          </div>
+
+          {/* Join Button */}
+          <Button variant="outline" asChild className="bg-[#edcf08] hover:bg-[#e6a037] border-none text-center flex items-center justify-center min-w-[80px] h-10">
+            <Link href="/sign-up" className="text-[#086c47] px-4">
+              <TranslatableText className='text-lg font-bold'>Join</TranslatableText>
+            </Link>
+          </Button>
+        </div>
+      </nav>
+    );
+  }
+
+  // Full header for signed-in users
   return (
     <nav className="relative border-b bg-[#086c47]">
       <div className="container mx-auto flex justify-between h-20 items-center px-2 md:px-4 font-montserrat max-w-full lg:max-w-7xl">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0">
-          {/* Simple img tag with importance attribute for better loading */}
           <img 
             src="/assets/lion-of-judah-2.jpg" 
             alt="Kidist Selassie Youth International Network" 
