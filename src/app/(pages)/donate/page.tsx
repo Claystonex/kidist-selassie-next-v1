@@ -26,7 +26,7 @@ export default function DonatePage() {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringPeriod, setRecurringPeriod] = useState('monthly');
 
-  const predefinedAmounts = ['1.00', '3.00', '7.00', '15.00', '25.00', '50.00', '100.00'];
+  const predefinedAmounts = ['1.00', '3.00', '5.00', '7.00', '10.00', '15.00', '25.00', '50.00', '100.00'];
 
   // Handle PayPal payment submission
   const createOrder = async () => {

@@ -180,3 +180,19 @@ model DailyVerse {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Model for church teachings (sermons, bible studies, etc.)
+model Teaching {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  priestName   String
+  mediaType    String   // "audio" or "video"
+  mediaUrl     String   // URL to media file or embed
+  vimeoId      String?  // Optional Vimeo ID if using Vimeo
+  thumbnailUrl String?  // Thumbnail image URL
+  duration     Int?     // Duration in seconds
+  category     String   @default("Uncategorized") // e.g., Sermon, Bible Study, etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

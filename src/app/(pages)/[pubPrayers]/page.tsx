@@ -71,18 +71,10 @@
 //   );
 // }
 
-import { prayerList } from "./prayerList";
-
 export default function PrayerRequestsPage() {
   return (
     <div>
       <h1 className="text-white font-anton flex text-center justify-center">Coming Soon</h1>
-      
-      <div>
-        {prayerList.map((prayer) => (
-          <div key={prayer.id}>{prayer.title}{prayer.description}{prayer.prayer}</div>
-        ))}
-      </div>
     </div>
   );
 }
