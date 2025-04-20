@@ -10,6 +10,8 @@ type GalleryItem = {
   type: 'image' | 'video' | 'audio';
   mediaUrl: string;
   thumbnailUrl: string;
+  category: string;
+  uploader: string;
   createdAt: string;
 };
 
@@ -17,6 +19,8 @@ export default function GalleryDisplay() {
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<GalleryItem[]>([]);
   const [activeFilter, setActiveFilter] = useState<'all' | 'image' | 'video' | 'audio'>('all');
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('all');
+  const [categories, setCategories] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,12 +30,28 @@ export default function GalleryDisplay() {
   }, []);
 
   useEffect(() => {
-    if (activeFilter === 'all') {
-      setFilteredItems(allItems);
-    } else {
-      setFilteredItems(allItems.filter(item => item.type === activeFilter));
+    // Extract unique categories when items are loaded
+    if (allItems.length > 0) {
+      const uniqueCategories = Array.from(new Set(allItems.map(item => item.category || 'Uncategorized')));
+      setCategories(uniqueCategories);
     }
-  }, [activeFilter, allItems]);
+  }, [allItems]);
+
+  useEffect(() => {
+    let filtered = [...allItems];
+    
+    // Filter by media type
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(item => item.type === activeFilter);
+    }
+    
+    // Filter by category
+    if (activeCategoryFilter !== 'all') {
+      filtered = filtered.filter(item => item.category === activeCategoryFilter);
+    }
+    
+    setFilteredItems(filtered);
+  }, [activeFilter, activeCategoryFilter, allItems]);
 
   const fetchGalleryItems = async () => {
     try {
@@ -130,13 +150,13 @@ export default function GalleryDisplay() {
 
   return (
     <div className={styles.container}>
-      {/* Filter Tabs */}
+      {/* Media Type Filter Tabs */}
       <div className={styles.filterTabs}>
         <button 
           className={`${styles.filterButton} ${activeFilter === 'all' ? styles.active : ''}`}
           onClick={() => setActiveFilter('all')}
         >
-          All
+          All Types
         </button>
         <button 
           className={`${styles.filterButton} ${activeFilter === 'image' ? styles.active : ''}`}
@@ -157,6 +177,27 @@ export default function GalleryDisplay() {
           Audio
         </button>
       </div>
+      
+      {/* Category Filter Tabs - only show if categories are available */}
+      {categories.length > 0 && (
+        <div className={`${styles.filterTabs} mt-4`}>
+          <button 
+            className={`${styles.filterButton} ${activeCategoryFilter === 'all' ? styles.active : ''}`}
+            onClick={() => setActiveCategoryFilter('all')}
+          >
+            All Categories
+          </button>
+          {categories.map(category => (
+            <button 
+              key={category}
+              className={`${styles.filterButton} ${activeCategoryFilter === category ? styles.active : ''}`}
+              onClick={() => setActiveCategoryFilter(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Modal for selected media */}
       {selectedItem && (
@@ -177,6 +218,16 @@ export default function GalleryDisplay() {
                 <p className={styles.mediaDate}>
                   Added on: {new Date(selectedItem.createdAt).toLocaleDateString()}
                 </p>
+                {selectedItem.category && (
+                  <p className={styles.mediaCategory}>
+                    Category: {selectedItem.category}
+                  </p>
+                )}
+                {selectedItem.uploader && (
+                  <p className={styles.mediaUploader}>
+                    {selectedItem.uploader}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -208,7 +259,15 @@ export default function GalleryDisplay() {
             </div>
             <div className={styles.itemInfo}>
               <h3 className={styles.itemTitle}>{item.title}</h3>
-              <span className={styles.itemType}>{item.type}</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                <span className={styles.itemType}>{item.type}</span>
+                {item.category && (
+                  <span className={`${styles.itemType} bg-green-500`}>{item.category}</span>
+                )}
+              </div>
+              {item.uploader && (
+                <span className="text-xs text-gray-500 italic mt-1 block">{item.uploader}</span>
+              )}
             </div>
           </div>
         ))}

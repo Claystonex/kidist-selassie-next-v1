@@ -10,6 +10,8 @@ type GalleryItem = {
   type: 'image' | 'video' | 'audio';
   mediaUrl: string;
   thumbnailUrl: string;
+  category: string;
+  uploader: string;
   createdAt: string;
 };
 
@@ -20,6 +22,10 @@ export default function GalleryAdmin() {
   const [type, setType] = useState<'image' | 'video' | 'audio'>('image');
   const [mediaUrl, setMediaUrl] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [category, setCategory] = useState('');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState<'url' | 'file'>('url');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -53,8 +59,18 @@ export default function GalleryAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !type || !mediaUrl || !password) {
+    if (!title || !type || !password) {
       setError('Please fill in all required fields');
+      return;
+    }
+    
+    if (uploadType === 'url' && !mediaUrl) {
+      setError('Please provide a media URL');
+      return;
+    }
+    
+    if (uploadType === 'file' && !mediaFile) {
+      setError('Please select a file to upload');
       return;
     }
     
@@ -65,9 +81,22 @@ export default function GalleryAdmin() {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('type', type);
-      formData.append('mediaUrl', mediaUrl);
-      formData.append('thumbnailUrl', thumbnailUrl || mediaUrl);
+      formData.append('category', category);
       formData.append('password', password);
+      
+      // Add either file or URL based on upload type
+      if (uploadType === 'url') {
+        formData.append('mediaUrl', mediaUrl);
+        formData.append('thumbnailUrl', thumbnailUrl || '');
+      } else {
+        // For file uploads
+        if (mediaFile) {
+          formData.append('mediaFile', mediaFile);
+        }
+        if (thumbnailFile) {
+          formData.append('thumbnailFile', thumbnailFile);
+        }
+      }
       
       const response = await fetch('/api/gallery', {
         method: 'POST',
@@ -80,6 +109,14 @@ export default function GalleryAdmin() {
         setDescription('');
         setMediaUrl('');
         setThumbnailUrl('');
+        setCategory('');
+        setMediaFile(null);
+        setThumbnailFile(null);
+        // Reset file input fields by clearing their values
+        const mediaFileInput = document.getElementById('mediaFile') as HTMLInputElement;
+        const thumbnailFileInput = document.getElementById('thumbnailFile') as HTMLInputElement;
+        if (mediaFileInput) mediaFileInput.value = '';
+        if (thumbnailFileInput) thumbnailFileInput.value = '';
         fetchGalleryItems();
       } else {
         const data = await response.json();
@@ -265,28 +302,101 @@ export default function GalleryAdmin() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="mediaUrl">Media URL:</label>
-          <input
-            type="text"
-            id="mediaUrl"
-            value={mediaUrl}
-            onChange={(e) => setMediaUrl(e.target.value)}
-            placeholder="https://example.com/media.jpg"
-            required
-          />
-          <small>Direct URL to the media file</small>
+          <label>Upload Method:</label>
+          <div className="flex space-x-4 mt-2">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="uploadType"
+                value="url"
+                checked={uploadType === 'url'}
+                onChange={() => setUploadType('url')}
+                className="mr-2"
+              />
+              URL
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="uploadType"
+                value="file"
+                checked={uploadType === 'file'}
+                onChange={() => setUploadType('file')}
+                className="mr-2"
+              />
+              File Upload
+            </label>
+          </div>
         </div>
         
+        {uploadType === 'url' ? (
+          <>
+            <div className={styles.formGroup}>
+              <label htmlFor="mediaUrl">Media URL:</label>
+              <input
+                type="text"
+                id="mediaUrl"
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://example.com/media.jpg"
+                required
+              />
+              <small>Direct URL to the media file</small>
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="thumbnailUrl">Thumbnail URL (optional for videos/audio):</label>
+              <input
+                type="text"
+                id="thumbnailUrl"
+                value={thumbnailUrl}
+                onChange={(e) => setThumbnailUrl(e.target.value)}
+                placeholder="https://example.com/thumbnail.jpg"
+              />
+              <small>For images, leave blank to use the same URL</small>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.formGroup}>
+              <label htmlFor="mediaFile">Upload Media File:</label>
+              <input
+                type="file"
+                id="mediaFile"
+                onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
+                accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*'}
+                className="w-full p-2 border rounded"
+                required
+              />
+              <small>Select a {type} file to upload</small>
+            </div>
+            
+            {type !== 'image' && (
+              <div className={styles.formGroup}>
+                <label htmlFor="thumbnailFile">Upload Thumbnail Image (optional):</label>
+                <input
+                  type="file"
+                  id="thumbnailFile"
+                  onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
+                  accept="image/*"
+                  className="w-full p-2 border rounded"
+                />
+                <small>Select a thumbnail image for your {type}</small>
+              </div>
+            )}
+          </>
+        )}
+        
         <div className={styles.formGroup}>
-          <label htmlFor="thumbnailUrl">Thumbnail URL (optional for videos/audio):</label>
+          <label htmlFor="category">Category:</label>
           <input
             type="text"
-            id="thumbnailUrl"
-            value={thumbnailUrl}
-            onChange={(e) => setThumbnailUrl(e.target.value)}
-            placeholder="https://example.com/thumbnail.jpg"
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Worship, Teachings, Events, etc."
           />
-          <small>For images, leave blank to use the same URL</small>
+          <small>Will be tagged as "Uploaded by Selassie Youth" automatically</small>
         </div>
         
         <div className={styles.formGroup}>
@@ -320,6 +430,11 @@ export default function GalleryAdmin() {
                 <span className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs uppercase">
                   {item.type}
                 </span>
+                {item.category && (
+                  <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs">
+                    {item.category}
+                  </span>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-lg truncate">{item.title}</h3>
@@ -328,6 +443,9 @@ export default function GalleryAdmin() {
                 )}
                 <p className="text-gray-500 text-xs mt-2">
                   Added on: {new Date(item.createdAt).toLocaleDateString()}
+                </p>
+                <p className="text-gray-500 text-xs mt-1 italic">
+                  {item.uploader || 'Uploaded by Selassie Youth'}
                 </p>
                 <button
                   onClick={() => handleDelete(item.id)}

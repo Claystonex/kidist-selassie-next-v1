@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   '/images',
   '/fonts',
   '/assets', // Allow static assets like the logo
+  '/admin', // Admin pages have their own password protection
 ];
 
 function isPublicPath(pathname: string) {
