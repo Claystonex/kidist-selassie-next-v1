@@ -6,53 +6,87 @@ const POSTS_FILE = path.join(process.cwd(), 'data', 'forum-posts.json');
 const MEDIA_DIR = path.join(process.cwd(), 'public', 'forum-media');
 
 // Ensure the data directory and posts file exist
-const ensureDataDir = () => {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
+function ensureDataDir() {
+  try {
+    const dataDir = path.join(process.cwd(), 'data');
+    console.log('ensureDataDir: Checking data directory:', dataDir);
+    
+    if (!fs.existsSync(dataDir)) {
+      console.log('ensureDataDir: Creating data directory');
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    console.log('ensureDataDir: Checking posts file:', POSTS_FILE);
+    if (!fs.existsSync(POSTS_FILE)) {
+      console.log('ensureDataDir: Creating empty posts file');
+      fs.writeFileSync(POSTS_FILE, JSON.stringify([]));
+    }
+    
+    console.log('ensureDataDir: Checking media directory:', MEDIA_DIR);
+    // Ensure media directory exists
+    if (!fs.existsSync(MEDIA_DIR)) {
+      console.log('ensureDataDir: Creating media directory');
+      fs.mkdirSync(MEDIA_DIR, { recursive: true });
+    }
+    console.log('ensureDataDir: All directories and files verified');
+  } catch (error) {
+    console.error('Error in ensureDataDir:', error);
+    throw error; // Re-throw to be caught by the handler
   }
-  if (!fs.existsSync(POSTS_FILE)) {
-    fs.writeFileSync(POSTS_FILE, JSON.stringify([]));
-  }
-  
-  // Ensure media directory exists
-  if (!fs.existsSync(MEDIA_DIR)) {
-    fs.mkdirSync(MEDIA_DIR, { recursive: true });
-  }
-};
+}
 
 // GET handler - Get all admin posts
 export async function GET(request: NextRequest) {
-  ensureDataDir();
+  console.log('GET: Forum admin endpoint called');
   
   try {
+    console.log('GET: Ensuring data directory');
+    ensureDataDir();
+    console.log('GET: Reading posts file from', POSTS_FILE);
     const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
+    console.log('GET: Parsing posts data');
     let posts = JSON.parse(postsData);
     
     // Filter for admin posts only
+    console.log('GET: Filtering admin posts');
     posts = posts.filter((post: any) => 
       post.author === 'Kidist Selassie Youth International Network'
     );
     
+    console.log('GET: Returning posts, count:', posts.length);
     return NextResponse.json(posts);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return NextResponse.json({ error: 'Failed to retrieve posts' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error fetching posts:', error?.message || error);
+    return NextResponse.json({ error: 'Failed to retrieve posts: ' + (error?.message || 'Unknown error') }, { status: 500 });
   }
 }
 
 // POST handler - Add a new admin post
 export async function POST(request: NextRequest) {
-  ensureDataDir();
+  console.log('POST: Forum admin endpoint called');
   
   try {
+    console.log('POST: Ensuring data directory');
+    ensureDataDir();
+    
+    console.log('POST: Parsing form data');
     const formData = await request.formData();
+    console.log('POST: Form data received, extracting fields');
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
     const category = formData.get('category') as string;
     const password = formData.get('password') as string;
     const author = formData.get('author') as string;
     const mediaFile = formData.get('media') as File | null;
+    
+    console.log('POST: Fields extracted', { 
+      hasTitle: !!title, 
+      hasContent: !!content, 
+      hasCategory: !!category,
+      hasPassword: !!password,
+      hasAuthor: !!author,
+      hasMedia: !!mediaFile
+    });
     
     // Validate password
     if (password !== process.env.VERSE_PASSWORD) {
@@ -101,9 +135,11 @@ export async function POST(request: NextRequest) {
     fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
     
     return NextResponse.json(newPost, { status: 201 });
-  } catch (error) {
-    console.error('Error adding post:', error);
-    return NextResponse.json({ error: 'Failed to add post' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error adding post:', error?.message || error, error?.stack);
+    return NextResponse.json({ 
+      error: 'Failed to add post: ' + (error?.message || 'Unknown error')
+    }, { status: 500 });
   }
 }
 
