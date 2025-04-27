@@ -3,15 +3,26 @@
 import { useState, useEffect } from 'react';
 import styles from '@/styles/Admin.module.css';
 
+type Attachment = {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  postId: string;
+  createdAt: string;
+  audioDuration?: number | null;
+};
+
 type ForumPost = {
   id: string;
   title: string;
   content: string;
-  category: string;
-  mediaUrl?: string;
-  mediaType?: string;
+  type: string; // This represents the category in Prisma (PostType enum)
   createdAt: string;
-  author: string;
+  updatedAt: string;
+  isAdmin: boolean;
+  authorId: string;
+  attachments: Attachment[];
 };
 
 export default function ForumAdmin() {
@@ -39,11 +50,13 @@ export default function ForumAdmin() {
       const response = await fetch('/api/forum/admin');
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched admin posts:', data);
         setPosts(data);
       } else {
         setError('Failed to load forum posts');
       }
     } catch (err) {
+      console.error('Error fetching posts:', err);
       setError('Error connecting to server');
     } finally {
       setLoading(false);
@@ -66,7 +79,7 @@ export default function ForumAdmin() {
       formData.append('content', content);
       formData.append('category', category);
       formData.append('password', password);
-      formData.append('author', 'Kidist Selassie Youth International Network');
+      // No need to append author as it's handled by the server using the system user
       
       if (mediaFile) {
         formData.append('media', mediaFile);
@@ -173,6 +186,22 @@ export default function ForumAdmin() {
       month: 'long',
       day: 'numeric',
     });
+  };
+  
+  // Helper function to convert PostType enum to user-friendly category name
+  const getCategoryFromType = (type: string) => {
+    switch (type) {
+      case 'GENERAL_DISCUSSION':
+        return 'Announcements';
+      case 'EDUCATIONAL':
+        return 'Q&A';
+      case 'DAILY_INSPIRATION':
+        return 'Testimonies';
+      case 'HUMOR':
+        return 'Humor';
+      default:
+        return 'General';
+    }
   };
 
   if (!isAuthenticated) {
@@ -311,10 +340,10 @@ export default function ForumAdmin() {
                 <h3>{post.title}</h3>
                 <p>{post.content}</p>
                 <p className={styles.postMeta || styles.videoMeta}>
-                  <span>Category: {post.category}</span>
+                  <span>Category: {getCategoryFromType(post.type)}</span>
                   <span>Posted on: {formatDate(post.createdAt)}</span>
-                  {post.mediaUrl && (
-                    <span>Media: {post.mediaType === 'audio' ? 'Audio' : 'Video'} attached</span>
+                  {post.attachments && post.attachments.length > 0 && (
+                    <span>Media: {post.attachments[0]?.fileType === 'AUDIO' ? 'Audio' : 'Video/Other'} attached</span>
                   )}
                 </p>
                 <button

@@ -107,6 +107,7 @@ model ForumPost {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   type        PostType
+  isAdmin     Boolean      @default(false) // Added to identify official posts
   attachments Attachment[]
   votes       Vote[]
 }

@@ -26,7 +26,12 @@ const languages: Record<Language, LanguageInfo> = {
   pt: { name: 'Portuguese', native: 'Português', flag: '🇵🇹' }
 };
 
-const CommentTranslator: React.FC = () => {
+interface CommentTranslatorProps {
+  id?: string;
+  className?: string;
+}
+
+const CommentTranslator: React.FC<CommentTranslatorProps> = ({ id, className }) => {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +69,7 @@ const CommentTranslator: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-3 mb-4 max-w-md mx-auto">
+    <div id={id} className={`bg-white rounded-lg shadow-md p-3 mb-4 max-w-md mx-auto ${className || ''}`}>
       <h3 className="text-base font-semibold mb-2">Comment Translator</h3>
       <p className="text-xs text-gray-600 mb-3">
         Paste a comment from the forum to translate it using the currently selected language.

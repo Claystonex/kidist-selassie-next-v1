@@ -1,37 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
-const POSTS_FILE = path.join(process.cwd(), 'data', 'forum-posts.json');
+const prisma = new PrismaClient();
 const MEDIA_DIR = path.join(process.cwd(), 'public', 'forum-media');
 
-// Ensure the data directory and posts file exist
-function ensureDataDir() {
+// Ensure media directory exists for local file uploads
+function ensureMediaDir() {
   try {
-    const dataDir = path.join(process.cwd(), 'data');
-    console.log('ensureDataDir: Checking data directory:', dataDir);
-    
-    if (!fs.existsSync(dataDir)) {
-      console.log('ensureDataDir: Creating data directory');
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    
-    console.log('ensureDataDir: Checking posts file:', POSTS_FILE);
-    if (!fs.existsSync(POSTS_FILE)) {
-      console.log('ensureDataDir: Creating empty posts file');
-      fs.writeFileSync(POSTS_FILE, JSON.stringify([]));
-    }
-    
-    console.log('ensureDataDir: Checking media directory:', MEDIA_DIR);
-    // Ensure media directory exists
+    console.log('ensureMediaDir: Checking media directory:', MEDIA_DIR);
     if (!fs.existsSync(MEDIA_DIR)) {
-      console.log('ensureDataDir: Creating media directory');
+      console.log('ensureMediaDir: Creating media directory');
       fs.mkdirSync(MEDIA_DIR, { recursive: true });
     }
-    console.log('ensureDataDir: All directories and files verified');
+    console.log('ensureMediaDir: Media directory verified');
   } catch (error) {
-    console.error('Error in ensureDataDir:', error);
-    throw error; // Re-throw to be caught by the handler
+    console.error('Error in ensureMediaDir:', error);
+    throw error;
   }
 }
 
@@ -40,18 +27,19 @@ export async function GET(request: NextRequest) {
   console.log('GET: Forum admin endpoint called');
   
   try {
-    console.log('GET: Ensuring data directory');
-    ensureDataDir();
-    console.log('GET: Reading posts file from', POSTS_FILE);
-    const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
-    console.log('GET: Parsing posts data');
-    let posts = JSON.parse(postsData);
-    
-    // Filter for admin posts only
-    console.log('GET: Filtering admin posts');
-    posts = posts.filter((post: any) => 
-      post.author === 'Kidist Selassie Youth International Network'
-    );
+    // Fetch admin posts from database
+    console.log('GET: Fetching admin posts from database');
+    const posts = await prisma.forumPost.findMany({
+      where: {
+        isAdmin: { equals: true } as any
+      },
+      include: {
+        attachments: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
     
     console.log('GET: Returning posts, count:', posts.length);
     return NextResponse.json(posts);
@@ -66,9 +54,6 @@ export async function POST(request: NextRequest) {
   console.log('POST: Forum admin endpoint called');
   
   try {
-    console.log('POST: Ensuring data directory');
-    ensureDataDir();
-    
     console.log('POST: Parsing form data');
     const formData = await request.formData();
     console.log('POST: Form data received, extracting fields');
@@ -76,7 +61,6 @@ export async function POST(request: NextRequest) {
     const content = formData.get('content') as string;
     const category = formData.get('category') as string;
     const password = formData.get('password') as string;
-    const author = formData.get('author') as string;
     const mediaFile = formData.get('media') as File | null;
     
     console.log('POST: Fields extracted', { 
@@ -84,7 +68,6 @@ export async function POST(request: NextRequest) {
       hasContent: !!content, 
       hasCategory: !!category,
       hasPassword: !!password,
-      hasAuthor: !!author,
       hasMedia: !!mediaFile
     });
     
@@ -97,42 +80,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
     
-    let mediaUrl = '';
-    let mediaType = '';
+    // Map category to PostType enum
+    const postType = mapCategoryToPostType(category);
     
-    // Handle media file upload if present
-    if (mediaFile && typeof mediaFile.arrayBuffer === 'function') {
-      const buffer = Buffer.from(await mediaFile.arrayBuffer());
-      const fileType = mediaFile.type || '';
-      mediaType = fileType.startsWith('audio') ? 'audio' : 'video';
+    // Create transaction to ensure post and attachment are created together
+    const newPost = await prisma.$transaction(async (tx) => {
+      // Find the first user in the database to use as the author for admin posts
+      // In a real-world scenario, you would have a dedicated system user or admin user
+      const adminUser = await tx.user.findFirst();
       
-      const ext = mediaFile.name.split('.').pop();
-      const fileName = `${Date.now()}_${mediaFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-      const filePath = path.join(MEDIA_DIR, fileName);
+      if (!adminUser) {
+        throw new Error('No users found in the database. Cannot create admin post.');
+      }
       
-      fs.writeFileSync(filePath, buffer);
-      mediaUrl = `/forum-media/${fileName}`;
-    }
-    
-    // Load existing posts
-    const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
-    const posts = JSON.parse(postsData);
-    
-    // Create new post
-    const newPost = {
-      id: Date.now().toString(),
-      title,
-      content,
-      category,
-      author,
-      mediaUrl,
-      mediaType,
-      createdAt: new Date().toISOString()
-    };
-    
-    // Add to beginning of posts array
-    posts.unshift(newPost);
-    fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
+      // Create the forum post
+      const post = await tx.forumPost.create({
+        data: {
+          title,
+          content,
+          type: postType,
+          isAdmin: true as any,
+          // Using the first user as the author for admin posts
+          authorId: adminUser.id
+        }
+      });
+      
+      // Handle media file upload if present
+      if (mediaFile && typeof mediaFile.arrayBuffer === 'function') {
+        // Ensure media directory exists for local uploads
+        ensureMediaDir();
+        
+        const buffer = Buffer.from(await mediaFile.arrayBuffer());
+        const fileType = mediaFile.type || '';
+        const fileTypeEnum = fileType.startsWith('audio') ? 'AUDIO' : 'OTHER';
+        
+        const fileName = `${Date.now()}_${mediaFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const filePath = path.join(MEDIA_DIR, fileName);
+        
+        // Write file to local filesystem
+        fs.writeFileSync(filePath, buffer);
+        const fileUrl = `/forum-media/${fileName}`;
+        
+        // Create attachment record in database
+        await tx.attachment.create({
+          data: {
+            fileName,
+            fileUrl,
+            fileType: fileTypeEnum,
+            postId: post.id,
+            audioDuration: fileTypeEnum === 'AUDIO' ? 0 : null // Default duration or calculate actual duration
+          }
+        });
+      }
+      
+      return post;
+    });
     
     return NextResponse.json(newPost, { status: 201 });
   } catch (error: any) {
@@ -145,8 +147,6 @@ export async function POST(request: NextRequest) {
 
 // DELETE handler - Delete a post
 export async function DELETE(request: NextRequest) {
-  ensureDataDir();
-  
   try {
     const body = await request.json();
     const { id, password } = body;
@@ -160,32 +160,55 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
     }
     
-    // Load existing posts
-    const postsData = fs.readFileSync(POSTS_FILE, 'utf8');
-    let posts = JSON.parse(postsData);
+    // First fetch the post to check if it exists and get its attachments
+    const post = await prisma.forumPost.findUnique({
+      where: { id },
+      include: { attachments: true }
+    });
     
-    // Find post to delete
-    const postToDelete = posts.find((post: any) => post.id === id);
-    if (!postToDelete) {
+    if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
     
-    // Delete media file if exists
-    if (postToDelete.mediaUrl) {
-      const fileName = postToDelete.mediaUrl.split('/').pop();
-      const filePath = path.join(MEDIA_DIR, fileName);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+    // Delete any media files in the local filesystem if they exist
+    for (const attachment of post.attachments) {
+      if (attachment.fileUrl && attachment.fileUrl.startsWith('/forum-media/')) {
+        const fileName = attachment.fileUrl.split('/').pop();
+        if (fileName) {
+          const filePath = path.join(MEDIA_DIR, fileName);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        }
       }
     }
     
-    // Filter out deleted post
-    posts = posts.filter((post: any) => post.id !== id);
-    fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
+    // Delete the post (cascade delete will remove attachments too)
+    await prisma.forumPost.delete({
+      where: { id }
+    });
     
     return NextResponse.json({ message: 'Post deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error deleting post:', error?.message || error);
+    return NextResponse.json({ error: 'Failed to delete post: ' + (error?.message || 'Unknown error') }, { status: 500 });
+  }
+}
+
+// Helper function to map category to PostType enum
+function mapCategoryToPostType(category: string) {
+  switch (category.toLowerCase()) {
+    case 'announcements':
+      return 'GENERAL_DISCUSSION';
+    case 'q&a':
+      return 'EDUCATIONAL';
+    case 'events':
+      return 'GENERAL_DISCUSSION';
+    case 'testimonies':
+      return 'DAILY_INSPIRATION';
+    case 'humor':
+      return 'HUMOR';
+    default:
+      return 'GENERAL_DISCUSSION';
   }
 }

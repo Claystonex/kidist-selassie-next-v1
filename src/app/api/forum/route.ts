@@ -65,6 +65,7 @@ interface FormattedPost {
   type: PostType;
   votes: number;
   createdAt: string;
+  isAdmin: boolean;
   author: {
     name: string;
     imageUrl: string | null;
@@ -129,22 +130,17 @@ export async function GET(request: Request) {
       include: {
         author: {
           select: {
-            id: true,
             firstName: true,
             lastName: true,
             imageUrl: true,
-          }
+          },
         },
         attachments: true,
         votes: true,
       },
-      orderBy: [{
-        votes: {
-          _count: sort === 'votes' ? 'desc' : 'asc'
-        }
-      }, {
-        createdAt: 'desc'
-      }],
+      orderBy: [
+        { createdAt: sort === 'newest' ? 'desc' : 'asc' }
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
@@ -157,6 +153,7 @@ export async function GET(request: Request) {
       type: post.type,
       votes: Array.isArray(post.votes) ? post.votes.length : 0,
       createdAt: post.createdAt.toISOString(),
+      isAdmin: post.isAdmin || false, // Include isAdmin flag
       author: {
         name: post.author?.firstName || post.author?.lastName 
           ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() 
@@ -414,6 +411,7 @@ export async function POST(request: Request) {
       content: post?.content || '',
       type: post?.type || 'GENERAL_DISCUSSION',
       createdAt: post?.createdAt ? post.createdAt.toISOString() : new Date().toISOString(),
+      isAdmin: post?.isAdmin || false, // Include isAdmin flag
       author: {
         name: post?.author?.firstName || post?.author?.lastName 
           ? `${post?.author?.firstName || ''} ${post?.author?.lastName || ''}`.trim() 
