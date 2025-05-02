@@ -6,7 +6,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faTimes, faChevronDown, faBook } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faTimes, faChevronDown, faBook, faGamepad } from '@fortawesome/free-solid-svg-icons';
 import LanguageToggle from './_components/LanguageToggle';
 import TranslatableText from './_components/TranslatableText';
 import { useTranslation } from './_contexts/TranslationContext';
@@ -15,9 +15,11 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [interactOpen, setInteractOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileInteractOpen, setMobileInteractOpen] = useState(false);
   const [mobileBibleOpen, setMobileBibleOpen] = useState(false);
+  const [mobileGamesOpen, setMobileGamesOpen] = useState(false);
   const { language, setLanguage } = useTranslation();
   const { user } = useUser();
 
@@ -235,6 +237,35 @@ export default function Header() {
               )}
             </div>
             
+            {/* Mobile Games Section */}
+            <div className="w-full">
+              <button
+                className="text-lg font-montserrat text-white hover:text-[#edcf08] py-4 flex justify-center items-center w-full transition-colors duration-300 font-semibold tracking-wide focus:outline-none focus:text-[#edcf08] active:scale-95"
+                onClick={() => setMobileGamesOpen(!mobileGamesOpen)}
+              >
+                <span className="flex items-center justify-center">
+                  <TranslatableText>Games</TranslatableText>
+                  <FontAwesomeIcon 
+                    icon={faGamepad} 
+                    className="ml-2 h-4 w-4 text-[#edcf08]"
+                  />
+                  <FontAwesomeIcon 
+                    icon={faChevronDown} 
+                    className={`ml-2 h-3 w-3 transition-transform duration-300 ${mobileGamesOpen ? 'rotate-180' : ''}`}
+                  />
+                </span>
+              </button>
+              
+              {/* Mobile Games submenu */}
+              {mobileGamesOpen && (
+                <div className="bg-[#064d32] rounded-lg p-4 mt-2 w-full">
+                  <MobileNavLink href="/games/chess" onClick={() => setIsMenuOpen(false)}>
+                    <TranslatableText>Chess</TranslatableText>
+                  </MobileNavLink>
+                </div>
+              )}
+            </div>
+            
             <div className="w-full border-b border-[#0a8055]">
               <MobileNavLink href="/teachings" onClick={() => setIsMenuOpen(false)}><TranslatableText>Teachings</TranslatableText></MobileNavLink>
             </div>
@@ -272,6 +303,7 @@ export default function Header() {
               onMouseOver={() => {
                 setServicesOpen(true);
                 setInteractOpen(false);
+                setGamesOpen(false);
               }}
             >
               <span className="text-sm font-montserrat text-white transition-colors group-hover:text-[#ffb43c]"><TranslatableText>Services</TranslatableText></span>
@@ -303,6 +335,7 @@ export default function Header() {
               onMouseOver={() => {
                 setInteractOpen(true);
                 setServicesOpen(false);
+                setGamesOpen(false);
               }}
             >
               <span className="text-sm font-montserrat text-white transition-colors group-hover:text-[#ffb43c]"><TranslatableText>Interact</TranslatableText></span>
@@ -385,10 +418,47 @@ export default function Header() {
             </div>
           </div>
           
+          {/* Games Dropdown */}
+          <div
+            className="relative group whitespace-nowrap"
+            onMouseOver={() => {
+              setServicesOpen(false);
+              setInteractOpen(false);
+              setGamesOpen(true);
+            }}
+            onMouseLeave={() => setGamesOpen(false)}
+          >
+            <button 
+              className="text-sm font-montserrat text-white hover:text-[#ffb43c] transition-colors px-2 py-2 rounded-md"
+              aria-expanded={gamesOpen}
+              aria-haspopup="true"
+            >
+              <span className="flex items-center">
+                <span className="mr-1"><TranslatableText>Games</TranslatableText></span>
+                <FontAwesomeIcon
+                  icon={faGamepad}
+                  className="h-3 w-3 transform group-hover:scale-125 transition-transform duration-300 group-hover:text-[#ffb43c]"
+                />
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className="ml-1 h-3 w-3 transition-transform duration-300 group-hover:text-[#ffb43c] group-hover:rotate-180"
+                />
+              </span>
+            </button>
+            
+            {/* Games dropdown menu */}
+            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg overflow-hidden transform opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto z-50 transition-all duration-300 origin-top-left">
+              <div className="py-2">
+                <DropdownNavLink href="/games/chess"><TranslatableText>Chess</TranslatableText></DropdownNavLink>
+              </div>
+            </div>
+          </div>
+
           <div 
             onMouseOver={() => {
               setServicesOpen(false);
               setInteractOpen(false);
+              setGamesOpen(false);
             }}
             className="whitespace-nowrap"
           >
