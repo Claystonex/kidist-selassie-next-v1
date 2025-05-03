@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "1746227843098",
+    "title": "Mesmer No.1",
+    "description": "",
+    "type": "video",
+    "mediaUrl": "/uploads/gallery/1746227843081-Mesmer1.mp4",
+    "thumbnailUrl": "/images/video-placeholder.png",
+    "category": "Songs",
+    "uploader": "Selassie Youth",
+    "createdAt": "2025-05-02T23:17:23.098Z"
+  }
+]

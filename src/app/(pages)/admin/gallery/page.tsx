@@ -22,10 +22,8 @@ export default function GalleryAdmin() {
   const [type, setType] = useState<'image' | 'video' | 'audio'>('image');
   const [mediaUrl, setMediaUrl] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [vimeoUrl, setVimeoUrl] = useState('');
   const [category, setCategory] = useState('');
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<'url' | 'file'>('url');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -64,13 +62,15 @@ export default function GalleryAdmin() {
       return;
     }
     
-    if (uploadType === 'url' && !mediaUrl) {
-      setError('Please provide a media URL');
+    // For video type, Vimeo URL is required
+    if (type === 'video' && !vimeoUrl) {
+      setError('Please provide a Vimeo URL for video content');
       return;
     }
     
-    if (uploadType === 'file' && !mediaFile) {
-      setError('Please select a file to upload');
+    // For non-video types, media URL is required
+    if (type !== 'video' && !mediaUrl) {
+      setError('Please provide a media URL');
       return;
     }
     
@@ -84,17 +84,13 @@ export default function GalleryAdmin() {
       formData.append('category', category);
       formData.append('password', password);
       
-      // Add either file or URL based on upload type
-      if (uploadType === 'url') {
-        formData.append('mediaUrl', mediaUrl);
-        formData.append('thumbnailUrl', thumbnailUrl || '');
+      // Add different fields based on media type
+      if (type === 'video') {
+        formData.append('vimeoUrl', vimeoUrl);
       } else {
-        // For file uploads
-        if (mediaFile) {
-          formData.append('mediaFile', mediaFile);
-        }
-        if (thumbnailFile) {
-          formData.append('thumbnailFile', thumbnailFile);
+        formData.append('mediaUrl', mediaUrl);
+        if (thumbnailUrl) {
+          formData.append('thumbnailUrl', thumbnailUrl);
         }
       }
       
@@ -109,14 +105,8 @@ export default function GalleryAdmin() {
         setDescription('');
         setMediaUrl('');
         setThumbnailUrl('');
+        setVimeoUrl('');
         setCategory('');
-        setMediaFile(null);
-        setThumbnailFile(null);
-        // Reset file input fields by clearing their values
-        const mediaFileInput = document.getElementById('mediaFile') as HTMLInputElement;
-        const thumbnailFileInput = document.getElementById('thumbnailFile') as HTMLInputElement;
-        if (mediaFileInput) mediaFileInput.value = '';
-        if (thumbnailFileInput) thumbnailFileInput.value = '';
         fetchGalleryItems();
       } else {
         const data = await response.json();
@@ -330,40 +320,35 @@ export default function GalleryAdmin() {
             required
           >
             <option value="image">Image</option>
-            <option value="video">Video</option>
+            <option value="video">Vimeo Video</option>
             <option value="audio">Audio</option>
           </select>
+          {type === 'video' && (
+            <small className="block mt-1 text-blue-600">
+              For videos, you must first upload your video to Vimeo and then paste the URL here.
+            </small>
+          )}
+          {type !== 'video' && (
+            <small className="block mt-1">
+              For images and audio, provide a direct URL to the media file.
+            </small>
+          )}
         </div>
         
-        <div className={styles.formGroup}>
-          <label>Upload Method:</label>
-          <div className="flex space-x-4 mt-2">
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="uploadType"
-                value="url"
-                checked={uploadType === 'url'}
-                onChange={() => setUploadType('url')}
-                className="mr-2"
-              />
-              URL
-            </label>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="uploadType"
-                value="file"
-                checked={uploadType === 'file'}
-                onChange={() => setUploadType('file')}
-                className="mr-2"
-              />
-              File Upload
-            </label>
+        {type === 'video' ? (
+          <div className={styles.formGroup}>
+            <label htmlFor="vimeoUrl">Vimeo URL:</label>
+            <input
+              type="text"
+              id="vimeoUrl"
+              value={vimeoUrl}
+              onChange={(e) => setVimeoUrl(e.target.value)}
+              placeholder="https://vimeo.com/123456789"
+              required={true}
+            />
+            <small>URL to your video on Vimeo (e.g., https://vimeo.com/123456789)</small>
           </div>
-        </div>
-        
-        {uploadType === 'url' ? (
+        ) : (
           <>
             <div className={styles.formGroup}>
               <label htmlFor="mediaUrl">Media URL:</label>
@@ -372,14 +357,14 @@ export default function GalleryAdmin() {
                 id="mediaUrl"
                 value={mediaUrl}
                 onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="https://example.com/media.jpg"
-                required
+                placeholder="https://example.com/image.jpg"
+                required={true}
               />
-              <small>Direct URL to the media file</small>
+              <small>Direct link to the media file (image or audio)</small>
             </div>
             
             <div className={styles.formGroup}>
-              <label htmlFor="thumbnailUrl">Thumbnail URL (optional for videos/audio):</label>
+              <label htmlFor="thumbnailUrl">Thumbnail URL (optional):</label>
               <input
                 type="text"
                 id="thumbnailUrl"
@@ -389,35 +374,6 @@ export default function GalleryAdmin() {
               />
               <small>For images, leave blank to use the same URL</small>
             </div>
-          </>
-        ) : (
-          <>
-            <div className={styles.formGroup}>
-              <label htmlFor="mediaFile">Upload Media File:</label>
-              <input
-                type="file"
-                id="mediaFile"
-                onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
-                accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*'}
-                className="w-full p-2 border rounded"
-                required
-              />
-              <small>Select a {type} file to upload</small>
-            </div>
-            
-            {type !== 'image' && (
-              <div className={styles.formGroup}>
-                <label htmlFor="thumbnailFile">Upload Thumbnail Image (optional):</label>
-                <input
-                  type="file"
-                  id="thumbnailFile"
-                  onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
-                  accept="image/*"
-                  className="w-full p-2 border rounded"
-                />
-                <small>Select a thumbnail image for your {type}</small>
-              </div>
-            )}
           </>
         )}
         

@@ -2,11 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { writeFile } from 'fs/promises';
+import Vimeo from '@vimeo/vimeo';
 
 // Change file location to public directory, which is accessible by all serverless functions
 const GALLERY_FILE = path.join(process.cwd(), 'public', 'data', 'gallery.json');
-const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads', 'gallery');
+
+// Initialize Vimeo client
+const vimeoClient = new Vimeo.Vimeo(
+  process.env.VIMEO_CLIENT_ID || '',
+  process.env.VIMEO_CLIENT_SECRET || '',
+  process.env.VIMEO_ACCESS_TOKEN || ''
+);
 
 // Ensure the data directory exists in public folder
 const ensureDataDir = () => {
@@ -17,11 +23,22 @@ const ensureDataDir = () => {
   if (!fs.existsSync(GALLERY_FILE)) {
     fs.writeFileSync(GALLERY_FILE, JSON.stringify([]));
   }
-  
-  // Also ensure uploads directory exists
-  if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  }
+};
+
+// Helper function to get video data from Vimeo
+const getVimeoVideoDetails = (videoId: string): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    vimeoClient.request({
+      method: 'GET',
+      path: `/videos/${videoId}`
+    }, (error, body) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(body);
+      }
+    });
+  });
 };
 
 // GET handler - Get all gallery items or filtered by type
@@ -73,10 +90,9 @@ export async function POST(request: NextRequest) {
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const type = formData.get('type') as string;
-    const mediaFile = formData.get('mediaFile') as File;
-    const thumbnailFile = formData.get('thumbnailFile') as File;
     const mediaUrl = formData.get('mediaUrl') as string;
     const thumbnailUrl = formData.get('thumbnailUrl') as string;
+    const vimeoUrl = formData.get('vimeoUrl') as string; // New field for Vimeo videos
     const category = formData.get('category') as string;
     const password = formData.get('password') as string;
     
@@ -89,65 +105,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title and type are required' }, { status: 400 });
     }
     
-    // Either media file or URL must be provided
-    if (!mediaFile && !mediaUrl) {
-      return NextResponse.json({ error: 'Either media file or URL must be provided' }, { status: 400 });
+    // For videos, vimeoUrl is required
+    // For images and other types, mediaUrl is required
+    if (type === 'video' && !vimeoUrl) {
+      return NextResponse.json({ error: 'Vimeo URL is required for videos' }, { status: 400 });
+    } else if (type !== 'video' && !mediaUrl) {
+      return NextResponse.json({ error: 'Media URL is required' }, { status: 400 });
     }
     
     // Category is optional, but recommended
     const safeCategory = category || 'Uncategorized';
     
-    // Handle file uploads if provided
-    let finalMediaUrl = mediaUrl;
-    let finalThumbnailUrl = thumbnailUrl;
-    
-    // If mediaFile is provided, save it
-    if (mediaFile) {
-      const mediaBytes = await mediaFile.arrayBuffer();
-      const mediaBuffer = Buffer.from(mediaBytes);
-      const mediaFilename = `${Date.now()}-${mediaFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-      const mediaPath = path.join(UPLOADS_DIR, mediaFilename);
-      
-      await writeFile(mediaPath, mediaBuffer);
-      finalMediaUrl = `/uploads/gallery/${mediaFilename}`;
-    }
-    
-    // If thumbnailFile is provided, save it
-    if (thumbnailFile) {
-      const thumbBytes = await thumbnailFile.arrayBuffer();
-      const thumbBuffer = Buffer.from(thumbBytes);
-      const thumbFilename = `thumb-${Date.now()}-${thumbnailFile.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
-      const thumbPath = path.join(UPLOADS_DIR, thumbFilename);
-      
-      await writeFile(thumbPath, thumbBuffer);
-      finalThumbnailUrl = `/uploads/gallery/${thumbFilename}`;
-    }
-    
-    // Set default thumbnail for non-image types if none provided
-    if (!finalThumbnailUrl) {
-      if (type === 'audio') {
-        finalThumbnailUrl = '/images/audio-placeholder.png'; // Default audio thumbnail
-      } else if (type === 'video') {
-        finalThumbnailUrl = '/images/video-placeholder.png'; // Default video thumbnail
-      } else {
-        finalThumbnailUrl = finalMediaUrl; // For images, use the same URL
-      }
-    }
-    
-    const galleryData = fs.readFileSync(GALLERY_FILE, 'utf8');
-    const galleryItems = JSON.parse(galleryData);
-    
-    const newItem = {
+    // Prepare the response item
+    let newItem: any = {
       id: Date.now().toString(),
       title,
       description: description || '',
-      type, // 'image', 'video', 'audio'
-      mediaUrl: finalMediaUrl,
-      thumbnailUrl: finalThumbnailUrl,
+      type,
       category: safeCategory,
       uploader: 'Selassie Youth',
       createdAt: new Date().toISOString()
     };
+    
+    // Handle different media types
+    if (type === 'video' && vimeoUrl) {
+      // Extract Vimeo ID from URL
+      const vimeoIdMatch = vimeoUrl.match(/vimeo\.com\/(\d+)/);
+      if (!vimeoIdMatch || !vimeoIdMatch[1]) {
+        return NextResponse.json({ error: 'Invalid Vimeo URL format. Expected: https://vimeo.com/123456789' }, { status: 400 });
+      }
+      
+      const vimeoId = vimeoIdMatch[1]; // Now TypeScript knows this is defined
+      
+      // Get video details from Vimeo
+      try {
+        const vimeoDetails = await getVimeoVideoDetails(vimeoId);
+        
+        // Add Vimeo-specific details
+        newItem.vimeoId = vimeoId;
+        newItem.mediaUrl = vimeoUrl;
+        newItem.thumbnailUrl = vimeoDetails.pictures.sizes[3].link; // Medium size thumbnail
+        newItem.embedUrl = vimeoDetails.embed.html;
+        newItem.duration = vimeoDetails.duration;
+      } catch (vimeoError) {
+        console.error('Vimeo API error:', vimeoError);
+        return NextResponse.json({ error: 'Failed to fetch video details from Vimeo' }, { status: 500 });
+      }
+    } else {
+      // For images and other non-video types
+      newItem.mediaUrl = mediaUrl;
+      // Set thumbnail URL with fallback to media URL or default placeholder
+      if (thumbnailUrl) {
+        newItem.thumbnailUrl = thumbnailUrl;
+      } else if (mediaUrl) {
+        newItem.thumbnailUrl = mediaUrl;
+      } else if (type === 'audio') {
+        newItem.thumbnailUrl = '/images/audio-placeholder.png';
+      } else {
+        // Default placeholder for any other type
+        newItem.thumbnailUrl = '/images/media-placeholder.png';
+      }
+    }
+    
+    // Add to gallery JSON file
+    const galleryData = fs.readFileSync(GALLERY_FILE, 'utf8');
+    const galleryItems = JSON.parse(galleryData);
     
     galleryItems.push(newItem);
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryItems, null, 2));
