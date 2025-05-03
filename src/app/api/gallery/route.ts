@@ -1,8 +1,12 @@
 // File: /app/api/gallery/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import Vimeo from '@vimeo/vimeo';
 import fs from 'fs';
 import path from 'path';
-import Vimeo from '@vimeo/vimeo';
+
+// Initialize Prisma client (commented out as we're using file-based storage)
+// const prisma = new PrismaClient();
 
 // Change file location to public directory, which is accessible by all serverless functions
 const GALLERY_FILE = path.join(process.cwd(), 'public', 'data', 'gallery.json');
@@ -13,6 +17,26 @@ const vimeoClient = new Vimeo.Vimeo(
   process.env.VIMEO_CLIENT_SECRET || '',
   process.env.VIMEO_ACCESS_TOKEN || ''
 );
+
+// Helper function to extract Vimeo ID from URL
+const extractVimeoId = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  
+  // Match patterns like https://vimeo.com/123456789 or https://player.vimeo.com/video/123456789
+  const patterns = [
+    /vimeo\.com\/(\d+)/,
+    /player\.vimeo\.com\/video\/(\d+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+};
 
 // Ensure the data directory exists in public folder
 const ensureDataDir = () => {
@@ -86,18 +110,23 @@ export async function POST(request: NextRequest) {
   ensureDataDir();
   
   try {
+    console.log('Gallery POST request received');
+    
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const type = formData.get('type') as string;
     const mediaUrl = formData.get('mediaUrl') as string;
     const thumbnailUrl = formData.get('thumbnailUrl') as string;
-    const vimeoUrl = formData.get('vimeoUrl') as string; // New field for Vimeo videos
+    const vimeoUrl = formData.get('vimeoUrl') as string; // Field for Vimeo videos
     const category = formData.get('category') as string;
     const password = formData.get('password') as string;
     
+    console.log('Received gallery item:', { title, type, category });
+    
     // Validate password
     if (password !== process.env.VERSE_PASSWORD) {
+      console.log('Gallery add: password validation failed');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
@@ -105,19 +134,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title and type are required' }, { status: 400 });
     }
     
-    // For videos, vimeoUrl is required
-    // For images and other types, mediaUrl is required
-    if (type === 'video' && !vimeoUrl) {
-      return NextResponse.json({ error: 'Vimeo URL is required for videos' }, { status: 400 });
-    } else if (type !== 'video' && !mediaUrl) {
-      return NextResponse.json({ error: 'Media URL is required' }, { status: 400 });
-    }
-    
     // Category is optional, but recommended
     const safeCategory = category || 'Uncategorized';
     
-    // Prepare the response item
-    let newItem: any = {
+    // Create new gallery item using file-based approach
+    const newItem: any = {
       id: Date.now().toString(),
       title,
       description: description || '',
@@ -130,34 +151,35 @@ export async function POST(request: NextRequest) {
     // Handle different media types
     if (type === 'video' && vimeoUrl) {
       // Extract Vimeo ID from URL
-      const vimeoIdMatch = vimeoUrl.match(/vimeo\.com\/(\d+)/);
-      if (!vimeoIdMatch || !vimeoIdMatch[1]) {
-        return NextResponse.json({ error: 'Invalid Vimeo URL format. Expected: https://vimeo.com/123456789' }, { status: 400 });
+      const vimeoId = extractVimeoId(vimeoUrl);
+      if (!vimeoId) {
+        return NextResponse.json({ 
+          error: 'Invalid Vimeo URL format. Expected: https://vimeo.com/123456789' 
+        }, { status: 400 });
       }
-      
-      const vimeoId = vimeoIdMatch[1]; // Now TypeScript knows this is defined
       
       // Get video details from Vimeo
       try {
+        console.log('Fetching Vimeo details for ID:', vimeoId);
         const vimeoDetails = await getVimeoVideoDetails(vimeoId);
         
         // Add Vimeo-specific details
         newItem.vimeoId = vimeoId;
-        newItem.mediaUrl = vimeoUrl;
+        newItem.vimeoUrl = vimeoUrl;
         newItem.thumbnailUrl = vimeoDetails.pictures.sizes[3].link; // Medium size thumbnail
-        newItem.embedUrl = vimeoDetails.embed.html;
         newItem.duration = vimeoDetails.duration;
       } catch (vimeoError) {
         console.error('Vimeo API error:', vimeoError);
         return NextResponse.json({ error: 'Failed to fetch video details from Vimeo' }, { status: 500 });
       }
     } else {
-      // For images and other non-video types
+      // Handle image or audio URLs
       newItem.mediaUrl = mediaUrl;
-      // Set thumbnail URL with fallback to media URL or default placeholder
+      
+      // Set thumbnail URL
       if (thumbnailUrl) {
         newItem.thumbnailUrl = thumbnailUrl;
-      } else if (mediaUrl) {
+      } else if (mediaUrl && type === 'image') {
         newItem.thumbnailUrl = mediaUrl;
       } else if (type === 'audio') {
         newItem.thumbnailUrl = '/images/audio-placeholder.png';
@@ -174,10 +196,14 @@ export async function POST(request: NextRequest) {
     galleryItems.push(newItem);
     fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryItems, null, 2));
     
+    console.log('Gallery item created successfully:', newItem.id);
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
     console.error('Error adding gallery item:', error);
-    return NextResponse.json({ error: 'Failed to add gallery item' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to add gallery item',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
