@@ -1,6 +1,5 @@
 // File: /app/api/gallery/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import Vimeo from '@vimeo/vimeo';
 import fs from 'fs';
 import path from 'path';
