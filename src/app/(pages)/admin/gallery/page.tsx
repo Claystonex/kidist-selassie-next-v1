@@ -131,6 +131,11 @@ export default function GalleryAdmin() {
     
     try {
       setLoading(true);
+      setError(''); // Clear previous errors
+      setMessage(''); // Clear previous messages
+      
+      console.log('Sending delete request for ID:', id);
+      
       const response = await fetch('/api/gallery', {
         method: 'DELETE',
         headers: {
@@ -139,15 +144,20 @@ export default function GalleryAdmin() {
         body: JSON.stringify({ id, password }),
       });
       
+      console.log('Delete response status:', response.status);
+      
+      const data = await response.json();
+      console.log('Delete response data:', data);
+      
       if (response.ok) {
-        setMessage('Gallery item deleted successfully!');
+        setMessage(`Gallery item deleted successfully! ${data.remainingItems} items remaining.`);
         fetchGalleryItems();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to delete gallery item');
+        setError(`Failed to delete gallery item: ${data.error}${data.details ? ` (${data.details})` : ''}`);
       }
     } catch (err) {
-      setError('Error connecting to server');
+      console.error('Error in delete operation:', err);
+      setError(`Error connecting to server: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

@@ -186,26 +186,87 @@ export async function DELETE(request: NextRequest) {
   ensureDataDir();
   
   try {
-    const body = await request.json();
+    // Log the start of deletion process
+    console.log('Gallery DELETE request received');
+    
+    // Parse the request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('Failed to parse DELETE request JSON:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const { id, password } = body;
+    console.log('Deleting gallery item:', id);
     
     // Validate password
     if (password !== process.env.VERSE_PASSWORD) {
+      console.log('Gallery delete: password validation failed');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
     if (!id) {
+      console.log('Gallery delete: missing ID');
       return NextResponse.json({ error: 'Gallery item ID is required' }, { status: 400 });
     }
     
-    const galleryData = fs.readFileSync(GALLERY_FILE, 'utf8');
-    let galleryItems = JSON.parse(galleryData);
+    // Try to read the gallery data file
+    let galleryData, galleryItems;
+    try {
+      galleryData = fs.readFileSync(GALLERY_FILE, 'utf8');
+      galleryItems = JSON.parse(galleryData);
+      console.log(`Gallery file read successfully, contains ${galleryItems.length} items`);
+    } catch (fileError) {
+      console.error('Error reading gallery file:', fileError);
+      return NextResponse.json({
+        error: 'Failed to read gallery data',
+        details: fileError instanceof Error ? fileError.message : 'Unknown error'
+      }, { status: 500 });
+    }
     
+    // Check if the item exists
+    const originalLength = galleryItems.length;
+    const itemToDelete = galleryItems.find((item: any) => item.id === id);
+    
+    if (!itemToDelete) {
+      console.log(`Gallery item with ID ${id} not found`);
+      return NextResponse.json({ error: 'Gallery item not found' }, { status: 404 });
+    }
+    
+    // Filter out the item to delete
     galleryItems = galleryItems.filter((item: any) => item.id !== id);
-    fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryItems, null, 2));
     
-    return NextResponse.json({ message: 'Gallery item deleted successfully' });
+    // Verify the item was removed
+    if (galleryItems.length === originalLength) {
+      console.log('Warning: Gallery filter operation did not remove any items');
+    } else {
+      console.log(`Gallery item removed, new count: ${galleryItems.length}`);
+    }
+    
+    // Save the updated gallery items back to the file
+    try {
+      fs.writeFileSync(GALLERY_FILE, JSON.stringify(galleryItems, null, 2));
+      console.log('Gallery file updated successfully');
+    } catch (writeError) {
+      console.error('Error writing to gallery file:', writeError);
+      return NextResponse.json({
+        error: 'Failed to update gallery data',
+        details: writeError instanceof Error ? writeError.message : 'Unknown error'
+      }, { status: 500 });
+    }
+    
+    return NextResponse.json({
+      message: 'Gallery item deleted successfully',
+      id: id,
+      remainingItems: galleryItems.length
+    });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete gallery item' }, { status: 500 });
+    console.error('Unhandled error in gallery delete:', error);
+    return NextResponse.json({
+      error: 'Failed to delete gallery item',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
