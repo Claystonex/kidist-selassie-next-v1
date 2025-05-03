@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Bible Models
+model Book {
+  id        Int      @id @default(autoincrement())
+  name      String   // e.g., "Genesis"
+  slug      String   @unique  // e.g., "genesis" for clean URLs
+  chapters  Chapter[]
+}
+
+model Chapter {
+  id        Int      @id @default(autoincrement())
+  number    Int      // e.g., 1 for Chapter 1
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  verses    Verse[]
+}
+
+model Verse {
+  id        Int      @id @default(autoincrement())
+  number    Int      // e.g., 1 for Verse 1
+  text      String   // e.g., "In the beginning..."
+  chapterId Int
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
+
+
+model User {
+    id        String      @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    imageUrl  String?
+    firstName String?
+    lastName  String? 
+    nickname  String?
+    phoneNumber String?
+    onboardingCompleted Boolean @default(false)
+
+    emailAddress String @unique
+    hashedPassword String?
+    
+    votes     Vote[]
+    posts     ForumPost[]
+    donations Donation[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  // Add any other fields you need
+}
+
+model Prayer {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  isPrivate   Boolean  @default(false)
+  userName    String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Miracle {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  userName    String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SummerSuggestion {
+  id        String   @id
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Joke {
+  id          String   @id @default(cuid())
+  content     String
+  userName    String
+  timestamp   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ForumPost {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  type        PostType
+  isAdmin     Boolean      @default(false) // Added to identify official posts
+  attachments Attachment[]
+  votes       Vote[]
+}
+
+
+
+model Attachment {
+  id            String    @id @default(cuid())
+  fileName      String
+  fileUrl       String
+  fileType      FileType
+  postId        String
+  post          ForumPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt     DateTime   @default(now())
+  audioData     Bytes?     // To store audio data directly
+  audioDuration Int?       // Duration in seconds
+}
+
+model Vote {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([userId, postId])
+}
+
+
+enum PostType {
+  GENERAL_DISCUSSION
+  ART_EXPRESSION
+  EDUCATIONAL
+  DAILY_INSPIRATION
+  HUMOR
+}
+
+enum FileType {
+  IMAGE
+  AUDIO
+  VIDEO
+  OTHER
+}
+
+// Teaching videos
+model Teaching {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  priestName  String
+  mediaType   String
+  mediaUrl    String
+  vimeoId     String?
+  thumbnailUrl String?
+  duration    Int?
+  category    String   @default("Uncategorized")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Daily verse model
+model DailyVerse {
+  id          String   @id @default(cuid())
+  reference   String   // e.g., "John 3:16"
+  text        String   // The actual verse text
+  translation String   @default("KJV") // Bible translation used
+  date        DateTime @default(now()) // When this verse was featured
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Donation models
+model Donation {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Float
+  currency    String   @default("USD")
+  status      String   // e.g., "completed", "pending", "failed"
+  provider    String   // e.g., "paypal", "stripe"
+  transactionId String?
+  isRecurring Boolean  @default(false)
+  recurringId String?  // ID for recurring donations
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
