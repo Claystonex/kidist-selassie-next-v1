@@ -7,8 +7,7 @@ const postTypeMetadata: Record<PostType, { name: string; icon: string }> = {
   ART_EXPRESSION: { name: 'Art Expression', icon: '🎨' },
   EDUCATIONAL: { name: 'Educational', icon: '📚' },
   DAILY_INSPIRATION: { name: 'Daily Inspiration', icon: '✨' },
-  HUMOR: { name: 'Humor', icon: '😄' },
-  CAREER_SUPPORT: { name: 'Career Support', icon: '💼' }
+  HUMOR: { name: 'Humor', icon: '😄' }
 };
 
 export async function GET() {

@@ -1,6 +1,6 @@
 // File: /app/api/gallery/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Vimeo from '@vimeo/vimeo';
+import Vimeo, { VimeoError, VimeoResponse } from '@vimeo/vimeo';
 import fs from 'fs';
 import path from 'path';
 
@@ -48,13 +48,15 @@ const ensureDataDir = () => {
   }
 };
 
+// Using the VimeoError interface from the type definitions
+
 // Helper function to get video data from Vimeo
-const getVimeoVideoDetails = (videoId: string): Promise<any> => {
+const getVimeoVideoDetails = (videoId: string): Promise<VimeoResponse> => {
   return new Promise((resolve, reject) => {
     vimeoClient.request({
       method: 'GET',
       path: `/videos/${videoId}`
-    }, (error, body) => {
+    }, (error: VimeoError | null, body: VimeoResponse) => {
       if (error) {
         reject(error);
       } else {

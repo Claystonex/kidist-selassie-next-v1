@@ -106,10 +106,9 @@ async function sendSubscriptionEmail(donation: DonationData) {
     await transporter.sendMail(mailOptions);
     
     // Update the donation record to mark receipt as sent
-    await prisma.donation.update({
-      where: { id: donation.id },
-      data: { receiptSent: true }
-    });
+    // Since we don't have a receiptSent field in the Donation model,
+    // we can use a custom field in the email metadata or log instead
+    console.log(`Receipt sent for PayPal subscription donation ${donation.id}`);
     
     return true;
   } catch (error) {

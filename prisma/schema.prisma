@@ -195,3 +195,29 @@ model Donation {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Bible recordings model
+model BibleRecording {
+  id            String   @id @default(cuid())
+  bookId        Int
+  bookName      String   // Store book name directly for easier querying
+  chapterNumber Int
+  userId        String   // Clerk user ID
+  userName      String   // User's full name
+  duration      Int      // Recording duration in seconds
+  fileUrl       String   // S3 URL to the recording file
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Chess game models
+model ChessChallenge {
+  id           String   @id @default(cuid())
+  challengerId String   // Clerk user ID of challenger
+  opponentId   String   // Clerk user ID of opponent
+  status       String   // pending, accepted, declined, completed
+  matchId      String   // boardgame.io match ID
+  winnerId     String?  // Clerk user ID of the winner (if game completed)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

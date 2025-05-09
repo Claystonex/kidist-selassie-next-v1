@@ -15,6 +15,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [interactOpen, setInteractOpen] = useState(false);
+  const [bibleOpen, setBibleOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileInteractOpen, setMobileInteractOpen] = useState(false);
@@ -221,20 +222,33 @@ export default function Header() {
                 </span>
               </button>
               
-              {/* Mobile Bible submenu */}
-              {mobileBibleOpen && (
-                <div className="bg-[#064d32] rounded-lg p-4 mt-2 w-full">
-                  <MobileNavLink href="/bible" onClick={() => setIsMenuOpen(false)}>
+              {/* Mobile Bible menu */}
+              <div className={`${mobileBibleOpen ? 'max-h-96' : 'max-h-0'} overflow-hidden transition-all duration-500 ease-in-out bg-green-800`}>
+                <MobileNavLink href="/bible" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center">
+                    <FontAwesomeIcon icon={faBook} className="mr-2" />
                     <TranslatableText>Read Bible</TranslatableText>
-                  </MobileNavLink>
-                  <MobileNavLink 
-                    href="https://v0-bible-chapter-tracker.vercel.app/" 
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <TranslatableText>Track Bible Reading</TranslatableText>
-                  </MobileNavLink>
-                </div>
-              )}
+                  </span>
+                </MobileNavLink>
+                <MobileNavLink href="/bible/record" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center">
+                    <FontAwesomeIcon icon={faBook} className="mr-2" />
+                    <TranslatableText>Record Bible</TranslatableText>
+                  </span>
+                </MobileNavLink>
+                <MobileNavLink href="/bible/listen" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center">
+                    <FontAwesomeIcon icon={faBook} className="mr-2" />
+                    <TranslatableText>Listen to Bible</TranslatableText>
+                  </span>
+                </MobileNavLink>
+                <MobileNavLink href="/bible-tracker" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center">
+                    <FontAwesomeIcon icon={faBook} className="mr-2" />
+                    <TranslatableText>Bible Tracker</TranslatableText>
+                  </span>
+                </MobileNavLink>
+              </div>
             </div>
             
             {/* Mobile Games Section */}
@@ -256,14 +270,15 @@ export default function Header() {
                 </span>
               </button>
               
-              {/* Mobile Games submenu */}
-              {mobileGamesOpen && (
-                <div className="bg-[#064d32] rounded-lg p-4 mt-2 w-full">
-                  <MobileNavLink href="/games/chess" onClick={() => setIsMenuOpen(false)}>
+              {/* Mobile Games menu */}
+              <div className={`${mobileGamesOpen ? 'max-h-96' : 'max-h-0'} overflow-hidden transition-all duration-500 ease-in-out bg-green-800`}>
+                <MobileNavLink href="/games/chess" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center">
+                    <FontAwesomeIcon icon={faGamepad} className="mr-2" />
                     <TranslatableText>Chess</TranslatableText>
-                  </MobileNavLink>
-                </div>
-              )}
+                  </span>
+                </MobileNavLink>
+              </div>
             </div>
             
             <div className="w-full border-b border-[#0a8055]">
@@ -458,6 +473,7 @@ export default function Header() {
             onMouseOver={() => {
               setServicesOpen(false);
               setInteractOpen(false);
+              setBibleOpen(false);
               setGamesOpen(false);
             }}
             className="whitespace-nowrap"
