@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     // Find the pending donation in the database
     const pendingDonation = await prisma.donation.findFirst({
       where: {
-        paymentId: orderID,
+        transactionId: orderID, // Using transactionId instead of paymentId
         status: 'pending'
       }
     });
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
         donorEmail: donorEmail || pendingDonation.donorEmail,
         message: message || pendingDonation.message,
         isRecurring: isRecurring !== undefined ? isRecurring : pendingDonation.isRecurring,
-        recurringPeriod: recurringPeriod || pendingDonation.recurringPeriod,
+        recurringId: recurringPeriod || pendingDonation.recurringId, // Using recurringId instead of recurringPeriod
         receiptSent: false
       }
     });

@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
     
-    const { title, scripture, password } = body;
+    const { title:reference, scripture:text, password } = body;
     
-    console.log('Received verse submission:', { title, hasPassword: !!password });
+    console.log('Received verse submission:', { reference,hasText: !!text, hasPassword: !!password });
     
     // Use hardcoded password for now
     const expectedPassword = 'Youth100';
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Validate required fields
-    if (!title || !scripture) {
-      return NextResponse.json({ error: 'Title and scripture are required' }, { status: 400 });
+    if (!reference || !text) {
+      return NextResponse.json({ error: 'Reference and text are required' }, { status: 400 });
     }
     
     try {
@@ -44,8 +44,9 @@ export async function POST(request: NextRequest) {
       // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const newVerse = await prisma.dailyVerse.create({
         data: {
-          title,
-          scripture
+          reference,
+          text,
+          translation: 'KJV', // Using default translation
           // createdAt and updatedAt will be automatically set by Prisma
         }
       });

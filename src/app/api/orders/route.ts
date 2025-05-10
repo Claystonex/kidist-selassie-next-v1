@@ -61,12 +61,13 @@ export async function POST(req: NextRequest) {
           amount: parseFloat(amount),
           currency: 'USD',
           status: 'pending', // Initial status before capture
-          paymentId: orderId,
-          paymentType: 'paypal',
+          transactionId: orderId, // Using transactionId instead of paymentId
+          provider: 'paypal', // Using provider instead of paymentType
           isRecurring: firstItem.isRecurring || false,
-          recurringPeriod: firstItem.recurringPeriod,
-          message: description,
-          userId,
+          recurringId: firstItem.recurringPeriod ? firstItem.recurringPeriod : null,
+          // Store description in donorName for now until we run another migration
+          donorName: description,
+          userId: userId || 'anonymous', // Use 'anonymous' as fallback when userId is null
           receiptSent: false
         },
       });

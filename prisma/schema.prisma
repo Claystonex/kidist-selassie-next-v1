@@ -182,18 +182,24 @@ model DailyVerse {
 
 // Donation models
 model Donation {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  amount      Float
-  currency    String   @default("USD")
-  status      String   // e.g., "completed", "pending", "failed"
-  provider    String   // e.g., "paypal", "stripe"
-  transactionId String?
-  isRecurring Boolean  @default(false)
-  recurringId String?  // ID for recurring donations
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  amount          Float
+  currency        String   @default("USD")
+  status          String   // e.g., "completed", "pending", "failed"
+  provider        String   // e.g., "paypal", "stripe"
+  transactionId   String?
+  isRecurring     Boolean  @default(false)
+  recurringId     String?  // ID for recurring donations
+  receiptSent     Boolean  @default(false)
+  donorName       String?
+  donorEmail      String?
+  message         String?
+  recurringPeriod String?
+  paymentId       String?  // To store order ID from payment processor
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // Bible recordings model

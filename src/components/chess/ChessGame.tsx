@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Chess } from 'chess.js';
+import { Chess, Square } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import { io, Socket } from 'socket.io-client';
 import { useUser } from '@clerk/nextjs';
@@ -244,7 +244,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ matchId, opponentId, isNewGame = 
             setSelectedSquare(null);
           } else {
             // If the clicked square has one of our pieces, select that instead
-            const piece = chess.get(square);
+            const piece = chess.get(square as Square);
             const isOurPiece = piece && ((piece.color === 'w' && playerColor === 'white') || 
                                           (piece.color === 'b' && playerColor === 'black'));
                                           
@@ -260,7 +260,7 @@ const ChessGame: React.FC<ChessGameProps> = ({ matchId, opponentId, isNewGame = 
         }
       } else {
         // Select the piece if it belongs to the player
-        const piece = chess.get(square);
+        const piece = chess.get(square as Square);
         const isOurPiece = piece && ((piece.color === 'w' && playerColor === 'white') || 
                                       (piece.color === 'b' && playerColor === 'black'));
         
@@ -294,11 +294,13 @@ const ChessGame: React.FC<ChessGameProps> = ({ matchId, opponentId, isNewGame = 
       
       // Highlight possible moves
       try {
+        // Cast selectedSquare to the Square type required by chess.js
         const moves = chess.moves({ 
-          square: selectedSquare, 
+          square: selectedSquare as Square, 
           verbose: true 
-        });
+        }) as Array<{ to: string, from: string, [key: string]: any }>;
         
+        // Add indicators for possible moves
         moves.forEach((move) => {
           styles[move.to] = {
             background: 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',

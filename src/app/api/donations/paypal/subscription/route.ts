@@ -147,27 +147,41 @@ export async function POST(request: NextRequest) {
         amount: amount || 0, // Amount might be determined later for subscriptions
         currency: currency || 'USD',
         status: 'active',
-        paymentId: `sub_${new Date().getTime()}`, // Generate a unique ID for tracking
-        subscriptionId: subscriptionID,
-        paymentType: paymentType || 'paypal',
+        provider: 'paypal', // This matches the provider field in the schema
+        transactionId: `sub_${new Date().getTime()}`, // Generate a unique ID for tracking
         isRecurring: true,
-        recurringPeriod: recurringPeriod || 'monthly',
-        donorName,
-        donorEmail,
-        message,
-        userId,
-        receiptSent: false
+        recurringId: subscriptionID, // Store subscription ID in the recurringId field
+        userId: userId || 'anonymous', // Provide a fallback value when userId is null
       },
     });
+    
+    // Create a properly typed object for the email function
+    const donationData: DonationData = {
+      id: donation.id,
+      amount: donation.amount,
+      currency: donation.currency,
+      status: donation.status,
+      paymentId: donation.transactionId || undefined,
+      subscriptionId: donation.recurringId,
+      paymentType: 'paypal',
+      isRecurring: donation.isRecurring,
+      recurringPeriod: 'monthly',
+      donorName: donorName,
+      donorEmail: donorEmail,
+      message: message || null,
+      userId: donation.userId,
+      receiptSent: false,
+      createdAt: donation.createdAt
+    };
 
     // Send confirmation email
-    const emailSent = await sendSubscriptionEmail(donation);
+    const emailSent = await sendSubscriptionEmail(donationData);
 
     return NextResponse.json({
       success: true,
       donation: {
         id: donation.id,
-        subscriptionId: donation.subscriptionId,
+        subscriptionId: donation.recurringId,
         status: donation.status,
         receiptSent: emailSent
       },

@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body
     const body = await request.json();
-    const { title, scripture, password } = body;
+    const { title: reference, scripture: text, password } = body;
     
-    console.log('Received verse data:', { title, hasScripture: !!scripture, hasPassword: !!password });
+    console.log('Received verse data:', { reference, hasText: !!text, hasPassword: !!password });
     
     // Validate password
     const expectedPassword = 'Youth100';
@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Validate required fields
-    if (!title || !scripture) {
+    if (!reference || !text) {
       console.log('Missing required fields');
-      return NextResponse.json({ error: 'Title and scripture are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Reference and text are required' }, { status: 400 });
     }
     
     try {
@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
       // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const newVerse = await prisma.dailyVerse.create({
         data: {
-          title,
-          scripture
+          reference,
+          text,
+          translation: 'KJV', // Using default translation
           // createdAt and updatedAt will be automatically set by Prisma
         }
       });

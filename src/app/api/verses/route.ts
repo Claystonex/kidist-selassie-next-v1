@@ -72,16 +72,17 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!title || !scripture) {
-      return NextResponse.json({ error: 'Title and scripture are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Title (reference) and scripture (text) are required' }, { status: 400 });
     }
     
     // Create the verse directly in the database using Prisma
     try {
-      // @ts-ignore - Suppressing TypeScript error for new model that exists at runtime
       const newVerse = await prisma.dailyVerse.create({
         data: {
-          title,
-          scripture
+          reference: title, // Use 'title' from request as 'reference' in the schema
+          text: scripture,  // Use 'scripture' from request as 'text' in the schema
+          // Optional: you can set other fields like translation if needed
+          // translation: "KJV", // This has a default in the schema
           // createdAt and updatedAt will be automatically set by Prisma
         }
       });

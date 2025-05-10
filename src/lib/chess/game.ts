@@ -1,32 +1,75 @@
-import { Game, TurnOrder } from 'boardgame.io/core';
-import { Chess } from 'chess.js';
+import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
+import { Chess, Square } from 'chess.js';
 
-// Game definition using boardgame.io
-export const ChessGame = Game({
+// Define types for our game state
+// Use explicit literal types for playerColors to ensure type safety
+type ChessPlayerColor = 'w' | 'b';
+type PlayerId = '0' | '1';
+
+interface ChessGameState {
+  chess: string;
+  isPlayer0White: boolean;
+  playerColors: {
+    [key in PlayerId]: ChessPlayerColor;
+  };
+  winner?: ChessPlayerColor;
+  history: Array<{
+    from: string;
+    to: string;
+    promotion?: string;
+    piece: string;
+    color: string;
+  }>;
+}
+
+// Define context types for our game functions
+interface GameContext {
+  G: ChessGameState;
+  ctx: any; // Using any for ctx since we can't import Ctx directly
+  playerID?: string;
+}
+
+// Define return types for game end conditions
+type GameOverResult = 
+  | { winner: string; message?: string; draw?: never } 
+  | { draw: boolean; message: string; winner?: never } 
+  | undefined;
+
+
+// Game definition using boardgame.io v0.50.2 format
+// Note: Due to TypeScript limitations, we're using type assertions in places
+// where boardgame.io's types don't perfectly align with our code
+export const ChessGame = {
+  // Name of the game
   name: 'kidist-selassie-chess',
   
-  // Initial game state
-  setup: (ctx) => {
+  // Initial game state - updated for v0.50.2
+  setup: ({ ctx }: { ctx: any }) => {
     // Randomly assign colors - player 0 or 1 gets white
     const isPlayer0White = Math.random() < 0.5;
     
+    // Create a properly typed state object
     return {
       chess: new Chess().fen(),
-      isPlayer0White: isPlayer0White,
+      isPlayer0White,
       playerColors: {
         '0': isPlayer0White ? 'w' : 'b',
         '1': isPlayer0White ? 'b' : 'w',
-      }
+      } as { [key in PlayerId]: ChessPlayerColor },
+      history: []
     };
   },
   
-  // Available moves
+  // Available moves - updated for v0.50.2
   moves: {
     // Handle a piece movement
-    movePiece: (G, ctx, from, to, promotion) => {
+    movePiece: ({ G, ctx, playerID }: GameContext, from: string, to: string, promotion?: string) => {
       const chess = new Chess(G.chess);
       const currentTurn = chess.turn();
-      const playerColor = G.playerColors[ctx.currentPlayer];
+      
+      // Type assertion for ctx.currentPlayer
+      const currentPlayer = ctx.currentPlayer as PlayerId;
+      const playerColor = G.playerColors[currentPlayer];
       
       // Only allow moves for the player's assigned color
       if (currentTurn !== playerColor) {
@@ -35,13 +78,23 @@ export const ChessGame = Game({
       
       try {
         const move = chess.move({ 
-          from, 
-          to, 
+          from: from as Square, 
+          to: to as Square, 
           promotion: promotion || undefined 
         });
         
         if (move) {
-          return { ...G, chess: chess.fen() };
+          return { 
+            ...G, 
+            chess: chess.fen(),
+            history: [...G.history, {
+              from, 
+              to, 
+              promotion,
+              piece: move.piece,
+              color: move.color
+            }]
+          };
         }
       } catch (e) {
         // Invalid move
@@ -52,50 +105,62 @@ export const ChessGame = Game({
     },
     
     // Forfeit the game
-    resignGame: (G, ctx) => {
+    resignGame: ({ G, ctx }: GameContext) => {
+      // Type assertion for ctx.currentPlayer
+      const currentPlayer = ctx.currentPlayer as PlayerId;
+      
+      // Make sure we return a value of the correct type
+      const winner = G.playerColors[currentPlayer] === 'w' ? 'b' : 'w' as ChessPlayerColor;
+      
       return {
         ...G,
-        winner: G.playerColors[ctx.currentPlayer] === 'w' ? 'b' : 'w'
+        winner
       };
     }
   },
   
-  // Turn management
+  // Turn management - updated for v0.50.2
   turn: {
     order: TurnOrder.DEFAULT,
     minMoves: 1,
     maxMoves: 1,
   },
   
-  // Game end conditions
-  endIf: (G, ctx) => {
+  // Game end conditions - updated for v0.50.2
+  endIf: ({ G, ctx }: GameContext): GameOverResult => {
     // Check for manual resignation
     if (G.winner) {
-      return { winner: G.winner === 'w' 
+      // Convert chess color (w/b) to player ID (0/1)
+      const winningPlayerID = G.winner === 'w' 
         ? (G.isPlayer0White ? '0' : '1') 
-        : (G.isPlayer0White ? '1' : '0') 
-      };
+        : (G.isPlayer0White ? '1' : '0');
+      
+      return { winner: winningPlayerID };
     }
     
     // Check for game end conditions from chess.js
     const chess = new Chess(G.chess);
-    if (chess.game_over()) {
-      if (chess.in_checkmate()) {
-        // The player who just moved won
-        const winner = chess.turn() === 'w' ? 'b' : 'w';
-        return { 
-          winner: winner === 'w' 
+    if (chess.isGameOver()) {
+      if (chess.isCheckmate()) {
+        // The player who just moved won - get chess color (w/b)
+        const winnerColor = chess.turn() === 'w' ? 'b' : 'w' as ChessPlayerColor;
+        
+        // Convert to player ID
+        const winningPlayerID = winnerColor === 'w' 
             ? (G.isPlayer0White ? '0' : '1') 
-            : (G.isPlayer0White ? '1' : '0'),
+            : (G.isPlayer0White ? '1' : '0');
+            
+        return { 
+          winner: winningPlayerID,
           message: 'Checkmate!'
         };
-      } else if (chess.in_stalemate()) {
+      } else if (chess.isStalemate()) {
         return { draw: true, message: 'Draw by stalemate' };
-      } else if (chess.in_threefold_repetition()) {
+      } else if (chess.isThreefoldRepetition()) {
         return { draw: true, message: 'Draw by repetition' };
-      } else if (chess.insufficient_material()) {
+      } else if (chess.isInsufficientMaterial()) {
         return { draw: true, message: 'Draw by insufficient material' };
-      } else if (chess.in_draw()) {
+      } else if (chess.isDraw()) {
         return { draw: true, message: 'Draw' };
       }
     }
@@ -107,4 +172,4 @@ export const ChessGame = Game({
       start: true,
     }
   }
-});
+};
