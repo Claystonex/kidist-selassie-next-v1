@@ -16,7 +16,8 @@
 
 .filterButton {
   padding: 0.5rem 1.25rem;
-  background-color: #f5f5f5;
+  background-color: #086c47;
+  color: white;
   border: none;
   border-radius: 30px;
   font-weight: 500;
@@ -25,12 +26,16 @@
 }
 
 .filterButton:hover {
-  background-color: #e0e0e0;
+  background-color: #0a8457;
 }
 
 .filterButton.active {
-  background-color: #086c47;
-  color: white;
+  background-color: white;
+  color: #086c47;
+}
+
+.filterButton.active:hover {
+  background-color: #f0f0f0;
 }
 
 .galleryGrid {
