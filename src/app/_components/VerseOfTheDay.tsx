@@ -6,8 +6,8 @@ import styles from '@/styles/VerseOfTheDay.module.css'; // Create this CSS file
 
 type Verse = {
   id: string;
-  title: string;
-  scripture: string;
+  reference: string; // Changed from title to reference
+  text: string;      // Changed from scripture to text
   createdAt: string;
 } | null;
 
@@ -78,8 +78,8 @@ export default function VerseOfTheDay() {
 
   return (
     <div className="text-white px-2">
-      <h3 className="text-lg sm:text-xl font-bold text-yellow-400 mb-2">{verse.title}</h3>
-      <p className="text-base sm:text-lg italic mb-2 break-words">"{verse.scripture}"</p>
+      <h3 className="text-lg sm:text-xl font-bold text-yellow-400 mb-2">{verse.reference}</h3>
+      <p className="text-base sm:text-lg italic mb-2 break-words">"{verse.text}"</p>
       <p className="text-xs sm:text-sm text-gray-300">Added on {new Date(verse.createdAt).toLocaleDateString()}</p>
     </div>
   );
