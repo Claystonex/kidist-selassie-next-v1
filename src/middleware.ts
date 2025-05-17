@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)', // Matches /sign-in and /sign-in/*
   '/sign-up(.*)', // Matches /sign-up and /sign-up/*
-  // Note: API routes like /api/jokes are NOT listed here, so they will be protected.
+  // API routes like /api/jokes are NOT listed here, so they will be protected.
   '/favicon.ico',
   '/images/(.*)',
   '/fonts/(.*)',
@@ -14,9 +14,22 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((authInstance, req) => {
+  // Get pathname to handle homepage explicitly
+  const { pathname } = req.nextUrl;
+  
   // If the route is public, allow access without authentication.
   if (isPublicRoute(req)) {
     return NextResponse.next();
+  }
+  
+  // IMPORTANT: Explicitly handle the homepage to ensure it's protected
+  if (pathname === '/' || pathname === '') {
+    console.log('Middleware checking auth for homepage:', pathname);
+    // Always return a Promise with authInstance.protect() instead of manual auth check
+    authInstance.protect(); 
+    // The protect() method will automatically handle redirecting if not authenticated
+    // This logs a message to help troubleshoot middleware execution
+    console.log('User is authenticated, allowing access to homepage');
   }
 
   // For any route that is not public, enforce authentication.
