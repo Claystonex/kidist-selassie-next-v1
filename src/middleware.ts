@@ -1,50 +1,54 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// Define public routes using createRouteMatcher for clarity and precision
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)', // Matches /sign-in and /sign-in/*
-  '/sign-up(.*)', // Matches /sign-up and /sign-up/*
-  // API routes like /api/jokes are NOT listed here, so they will be protected.
+// Define public routes that don't require authentication
+const PUBLIC_PATHS = [
+  '/sign-in',
+  '/sign-up',
   '/favicon.ico',
-  '/images/(.*)',
-  '/fonts/(.*)',
-  '/assets/(.*)',
-  '/admin(.*)', // Admin pages might have their own auth, but can be public from Clerk's POV if needed
-]);
+  '/_next/static',
+  '/_next/image',
+  '/images',
+  '/fonts',
+  '/assets'
+];
 
-export default clerkMiddleware((authInstance, req) => {
-  // Get pathname to handle homepage explicitly
-  const { pathname } = req.nextUrl;
+// Function to check if a path is public
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATHS.some((publicPath) => pathname.startsWith(publicPath));
+}
+
+// Export the middleware with clerkMiddleware
+export default clerkMiddleware(async (auth, request) => {
+  const { pathname } = request.nextUrl;
   
-  // If the route is public, allow access without authentication.
-  if (isPublicRoute(req)) {
+  // Check if the request is for a public path
+  if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
   
-  // IMPORTANT: Explicitly handle the homepage to ensure it's protected
-  if (pathname === '/' || pathname === '') {
-    console.log('Middleware checking auth for homepage:', pathname);
-    // Always return a Promise with authInstance.protect() instead of manual auth check
-    authInstance.protect(); 
-    // The protect() method will automatically handle redirecting if not authenticated
-    // This logs a message to help troubleshoot middleware execution
-    console.log('User is authenticated, allowing access to homepage');
-  }
-
-  // For any route that is not public, enforce authentication.
-  // authInstance.protect() will:
-  // - Redirect unauthenticated users to the sign-in page for page requests.
-  // - Return a 401/403 error for API requests if unauthenticated.
-  // - Do nothing and allow the request to proceed if the user is authenticated.
-  authInstance.protect();
+  // For all other paths, check authentication
+  const { userId } = await auth();
   
-  // If authInstance.protect() does not throw or redirect, it means the user is authenticated.
-  // Clerk's middleware will automatically call NextResponse.next() if no other response is returned.
+  // If user is not authenticated, redirect to sign-in
+  if (!userId) {
+    const signInUrl = new URL('/sign-in', request.url);
+    signInUrl.searchParams.set('redirect_url', pathname);
+    return NextResponse.redirect(signInUrl);
+  }
+  
+  // User is authenticated, allow access
+  return NextResponse.next();
 });
 
+// Configure which routes middleware will run on
 export const config = {
-  // Apply middleware to all routes except static files and Next.js internals
-  // This ensures Clerk is active on API routes as well.
-  matcher: ['/((?!.+\.[\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: [
+    // Match the root path explicitly (homepage)
+    '/',
+    // Match all paths except Next.js static assets
+    '/((?!_next/static|_next/image|favicon\\.ico).*)',
+    // Make sure API routes are included
+    '/api/(.*)'
+  ],
 };
