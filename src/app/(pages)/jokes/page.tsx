@@ -108,7 +108,16 @@ const JokesPage = () => {
           body: formData,
         });
         
-        if (!response.ok) throw new Error('Failed to submit joke with audio');
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to submit joke with audio');
+        }
+        
+        // Show warning if there was one
+        if (result.warning) {
+          setSuccess(`Your joke has been shared, but ${result.warning}`);
+        }
         
         // Reset audio state
         setAudioBlob(null);

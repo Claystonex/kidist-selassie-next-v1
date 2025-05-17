@@ -47,28 +47,27 @@ export async function POST(request: NextRequest) {
     // Check if request is multipart form data (has audio) or JSON
     const contentType = request.headers.get('content-type') || '';
     
-    // Get user information from Clerk
+    // Get user information from Clerk (if available)
     const { userId } = await auth();
+    let userName = 'Anonymous';
     
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // If user is authenticated, get their info for attribution
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          firstName: true,
+          lastName: true,
+          nickname: true,
+        }
+      });
+      
+      userName = user?.nickname || 
+                [user?.firstName, user?.lastName]
+                  .filter(Boolean)
+                  .join(' ') || 
+                'Anonymous';
     }
-    
-    // Get user info for attribution
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        firstName: true,
-        lastName: true,
-        nickname: true,
-      }
-    });
-    
-    const userName = user?.nickname || 
-                    [user?.firstName, user?.lastName]
-                      .filter(Boolean)
-                      .join(' ') || 
-                    'Anonymous';
     
     // Handle multipart form data (with audio)
     if (contentType.includes('multipart/form-data')) {

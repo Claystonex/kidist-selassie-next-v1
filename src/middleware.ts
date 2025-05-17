@@ -1,37 +1,37 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// Only allow unauthenticated access to these routes and static assets
-const PUBLIC_PATHS = [
-  '/sign-in',
-  '/sign-up',
+// Define public routes using createRouteMatcher for clarity and precision
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)', // Matches /sign-in and /sign-in/*
+  '/sign-up(.*)', // Matches /sign-up and /sign-up/*
+  // Note: API routes like /api/jokes are NOT listed here, so they will be protected.
   '/favicon.ico',
-  '/_next/static',
-  '/_next/image',
-  '/images',
-  '/fonts',
-  '/assets', // Allow static assets like the logo
-  '/admin', // Admin pages have their own password protection
-];
+  '/images/(.*)',
+  '/fonts/(.*)',
+  '/assets/(.*)',
+  '/admin(.*)', // Admin pages might have their own auth, but can be public from Clerk's POV if needed
+]);
 
-function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((publicPath) => pathname.startsWith(publicPath));
-}
-
-export default clerkMiddleware(async (auth, request) => {
-  const { pathname } = request.nextUrl;
-  if (isPublicPath(pathname)) {
+export default clerkMiddleware((authInstance, req) => {
+  // If the route is public, allow access without authentication.
+  if (isPublicRoute(req)) {
     return NextResponse.next();
   }
-  const { userId } = await auth();
-  if (!userId) {
-    const signInUrl = new URL('/sign-in', request.url);
-    signInUrl.searchParams.set('redirect_url', '/');
-    return NextResponse.redirect(signInUrl);
-  }
-  return NextResponse.next();
+
+  // For any route that is not public, enforce authentication.
+  // authInstance.protect() will:
+  // - Redirect unauthenticated users to the sign-in page for page requests.
+  // - Return a 401/403 error for API requests if unauthenticated.
+  // - Do nothing and allow the request to proceed if the user is authenticated.
+  authInstance.protect();
+  
+  // If authInstance.protect() does not throw or redirect, it means the user is authenticated.
+  // Clerk's middleware will automatically call NextResponse.next() if no other response is returned.
 });
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images|fonts|assets).*)'],
+  // Apply middleware to all routes except static files and Next.js internals
+  // This ensures Clerk is active on API routes as well.
+  matcher: ['/((?!.+\.[\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };
