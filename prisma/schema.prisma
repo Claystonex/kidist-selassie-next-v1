@@ -24,6 +24,9 @@ model Chapter {
   bookId    Int
   book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   verses    Verse[]
+  
+  // Add unique constraint to ensure chapter numbers are unique within a book
+  @@unique([bookId, number])
 }
 
 model Verse {

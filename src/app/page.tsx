@@ -5,6 +5,7 @@ import { faXTwitter, faFacebook, faInstagram, faTiktok } from '@fortawesome/free
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TranslatableText from './_components/TranslatableText';
 import VerseOfTheDay from './_components/VerseOfTheDay';
+import Image from 'next/image';
 
 
 // export default async function Home() {
@@ -27,18 +28,33 @@ const blinkingStyle = `
 
 export default function Home() {
   return (
-    <div className="min-h-[calc(100vh-16rem)] flex flex-col items-center justify-center text-[#ffb43c]">
+    <div className="min-h-[calc(100vh-16rem)] flex flex-col lg:flex-row items-start justify-center text-[#ffb43c] p-4 md:p-6 lg:pl-0 lg:pr-10 gap-8 mx-auto">
       <style>{blinkingStyle}</style>
+
+      {/* Image Section - Added for the flyer */}
+      <div className="w-full lg:w-auto lg:max-w-xs xl:max-w-sm flex-shrink-0 mb-8 lg:mb-0 order-first lg:order-none lg:ml-0 xl:ml-0">
+        <Image
+          src="/assets/SelassieQRCODEApril.png"
+          alt="Kidist Selassie Youth Network Flyer"
+          width={300} 
+          height={424} 
+          className="rounded-lg shadow-lg mx-auto w-full h-auto"
+          priority
+        />
+      </div>
+
+      {/* Original Content Wrapper - to maintain its column flow and centering */}
+      <div className="w-full flex flex-col items-center mx-auto max-w-4xl">
       
       {/* Main Title Section - with improved responsive font size and spacing */}
-      <div className="w-full text-center mb-8 sm:mb-10 px-4">
+      <div className="w-full text-center mb-8 sm:mb-10">
         <h1 className="font-montserrat font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl break-words hyphens-auto">
-          <TranslatableText>Kidist Selassie Youth International Network</TranslatableText>
+          <TranslatableText>Kidist Selassie Youth Orthodox International Network Tewahedo </TranslatableText>
         </h1>
       </div>
       
       {/* Social Media Section - repositioned to the side */}
-      <div className="hidden lg:block fixed top-1/3 right-6 xl:right-12 z-10">
+      <div className="hidden lg:block fixed top-1/3 right-14 xl:right-16 z-10">
         <div className="flex flex-col space-y-4 items-center bg-[#006241]/50 p-3 rounded-lg backdrop-blur-sm">
           <h2 className="text-sm font-semibold"><TranslatableText>Follow Us</TranslatableText></h2>
           <a 
@@ -88,7 +104,7 @@ export default function Home() {
             <FontAwesomeIcon icon={faFacebook} size="lg" />
           </a>
           <a 
-            href="https://instagram.com/selassieyouth/" 
+            href="https://www.instagram.com/kidistselassieyouth/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
@@ -115,7 +131,7 @@ export default function Home() {
       </div>
       
       {/* Verse of the Day Section - improved for mobile */}
-      <div className="w-full max-w-4xl px-4 mb-8 text-center">
+      <div className="w-full mb-8 text-center">
         <div className="mb-3 flex flex-col sm:flex-row justify-center items-center gap-1">
           <h2 className="text-base sm:text-lg font-semibold sm:mr-1">
             <TranslatableText>Verse of the Day:</TranslatableText>
@@ -124,13 +140,13 @@ export default function Home() {
             <TranslatableText>A Verse a day keeps the devil away.</TranslatableText>
           </p>
         </div>
-        <div className="bg-white/10 p-3 sm:p-4 rounded-lg border border-yellow-400/30">
+        <div className="bg-white/10 p-3 sm:p-4 rounded-lg border border-yellow-400/30 w-full">
           <VerseOfTheDay />
         </div>
       </div>
 
       {/* Mission Statement Box */}
-      <div className="bg-white/10 p-4 sm:p-6 rounded-lg mb-6 max-w-4xl w-full mx-auto hover:bg-white/20 transition-colors flex-row">
+      <div className="bg-white/10 p-4 sm:p-6 rounded-lg mb-6 w-full hover:bg-white/20 transition-colors">
         <h2 className="font-montserrat font-bold text-xl sm:text-2xl mb-2 text-center">
           <TranslatableText>Our Mission and Goals</TranslatableText>
         </h2>
@@ -155,15 +171,15 @@ export default function Home() {
       </div>
 
       {/* Tagline Box - fixed text wrapping for mobile */}
-      <div className="bg-white/10 p-3 sm:p-4 rounded-lg mb-6 max-w-4xl w-full mx-auto text-center border border-[#ffb43c]/30">
-        <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium break-words hyphens-auto">
+      <div className="bg-white/10 p-3 sm:p-4 rounded-lg mb-6 w-full text-center border border-[#ffb43c]/30">
+        <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-medium italic break-words hyphens-auto">
           <TranslatableText>
             Christ-centered and Youth-Focused International Network to Grow Love, Faith, Unity, Education, Prosperity, and Entertainment.
           </TranslatableText>
         </p>
       </div>
 
-      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl w-full px-4">
+      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
         {/* Feature Cards */}
         <FeatureCard 
           title="Mentorship" 
@@ -181,7 +197,7 @@ export default function Home() {
           link="/miracles"
         />
       </div>
-      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl w-full px-4 mt-6 sm:mt-8">
+      <div className="font-montserrat grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full mt-6 sm:mt-8">
         {/* Feature Cards */}
         <FeatureCard 
           title="Jokes" 
@@ -200,9 +216,10 @@ export default function Home() {
         />
       </div>
       {/* Themed border lines that match our color scheme */}
-      <div className="border-t-4 w-[80%] pb-4 border-[#ffb43c]"></div>
-      <div className="border-t-4 w-[50%] border-[#006241]"></div>
+      {/* <div className="border-t-4 w-[80%] pb-4 border-[#ffb43c]"></div> */}
+      {/* <div className="border-t-4 w-[50%] border-[#006241]"></div> */}
 
+      </div> {/* Closing tag for Original Content Wrapper */}
     </div>
   );
 }

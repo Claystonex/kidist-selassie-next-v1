@@ -1,0 +1,82 @@
+{
+  "books": [
+    {
+      "name": "Genesis",
+      "slug": "genesis",
+      "chapters": [
+        {
+          "number": 1,
+          "verses": [
+            {
+              "number": 1,
+              "text": "በመጀመሪያ እግዚአብሔር ሰማይንና ምድርን ፈጠረ። (In the beginning God created the heaven and the earth.)"
+            },
+            {
+              "number": 2,
+              "text": "ምድርም ባዶና ጨለማ ነበረች፥ በጨለማም ላይ ጸሎት ነበረ፤ የእግዚአብሔርም መንፈስ በውኃ ላይ ሰፈፈ። (And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.)"
+            },
+            {
+              "number": 3,
+              "text": "እግዚአብሔርም፦ ብርሃን ይሁን አለ፥ ብርሃንም ሆነ። (And God said, Let there be light: and there was light.)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Joshua",
+      "slug": "joshua",
+      "chapters": [
+        {
+          "number": 4,
+          "verses": [
+            {
+              "number": 1,
+              "text": "ሕዝቡም ሁሉ ዮርዳኖስን ከተሻገሩ በኋላ፥ እግዚአብሔር ኢያሱን አለው። (And it came to pass, when all the people were clean passed over Jordan, that the LORD spake unto Joshua, saying,)"
+            },
+            {
+              "number": 2,
+              "text": "ከሕዝቡ አሥራ ሁለት ሰዎች ከየነገዱ አንድ አንድ ሰው ምረጥ፤ (Take you twelve men out of the people, out of every tribe a man,)"
+            },
+            {
+              "number": 3,
+              "text": "እነርሱንም እንዲህ ብለህ እዘዛቸው፦ ከዚህ ከዮርዳኖስ መካከል ከካህናቱ እግር ከቆመበት ስፍራ አሥራ ሁለት ድንጋዮች ውሰዱ፥ ከእናንተም ጋር አድርጉ፥ ዛሬም ማታ በምታድሩበት ቤት አኑሯቸው። (And command ye them, saying, Take you hence out of the midst of Jordan, out of the place where the priests' feet stood firm, twelve stones, and ye shall carry them over with you, and leave them in the lodging place, where ye shall lodge this night.)"
+            },
+            {
+              "number": 4,
+              "text": "ኢያሱም ከእስራኤል ልጆች ከየነገድ አንድ አንድ ሰው ያዘጋጃቸውን አሥራ ሁለት ሰዎች ጠራ። (Then Joshua called the twelve men, whom he had prepared of the children of Israel, out of every tribe a man:)"
+            },
+            {
+              "number": 5,
+              "text": "ኢያሱም አላቸው፦ ወደ አምላካችሁ ወደ እግዚአብሔር ታቦት ፊት ወደ ዮርዳኖስ መካከል እለፉ፥ እያንዳንዱም ከእናንተ እንደ እስራኤል ልጆች ነገድ ቍጥር በትከሻው አንድ አንድ ድንጋይ ያንሣ፤ (And Joshua said unto them, Pass over before the ark of the LORD your God into the midst of Jordan, and take ye up every man of you a stone upon his shoulder, according unto the number of the tribes of the children of Israel:)"
+            },
+            {
+              "number": 6,
+              "text": "ይህም በእናንተ መካከል ምልክት ይሁን፥ ልጆቻችሁም ወደ ፊት፦ እነዚህ ድንጋዮች ምንድር ናቸው? ብለው ቢጠይቁ፥ (That this may be a sign among you, that when your children ask their fathers in time to come, saying, What mean ye by these stones?)"
+            },
+            {
+              "number": 7,
+              "text": "እናንተ። የእግዚአብሔር ቃል ኪዳን ታቦት ዮርዳኖስን ሲሻገር የዮርዳኖስ ውኃ ተቆረጠ፤ እነዚህም ድንጋዮች ለእስራኤል ልጆች ለዘላለም መታሰቢያ ናቸው ትሉአቸዋላችሁ። (Then ye shall answer them, That the waters of Jordan were cut off before the ark of the covenant of the LORD; when it passed over Jordan, the waters of Jordan were cut off: and these stones shall be for a memorial unto the children of Israel for ever.)"
+            },
+            {
+              "number": 8,
+              "text": "የእስራኤልም ልጆች እንደ ኢያሱ ትእዛዝ አደረጉ፥ እግዚአብሔርም ለኢያሱ እንዳለው፥ እንደ እስራኤል ልጆች ነገድ ቍጥር አሥራ ሁለት ድንጋዮች ከዮርዳኖስ መካከል አነሡ፥ እንደ እግዚአብሔርም ለኢያሱ ያለው ቃል ከእነርሱ ጋር አድርገው ወደሚያድሩበት አመጡ፥ በዚያም አኖሩአቸው። (And the children of Israel did so as Joshua commanded, and took up twelve stones out of the midst of Jordan, as the LORD spake unto Joshua, according to the number of the tribes of the children of Israel, and carried them over with them unto the place where they lodged, and laid them down there.)"
+            },
+            {
+              "number": 9,
+              "text": "ኢያሱም የኪዳኑ ታቦት ተሸካሚዎች የካህናት እግር ቆመበት ከዮርዳኖስ መካከል አሥራ ሁለት ድንጋዮች መሠረተ፤ እስከ ዛሬም ድረስ በዚያ አሉ። (And Joshua set up twelve stones in the midst of Jordan, in the place where the feet of the priests which bare the ark of the covenant stood: and they are there unto this day.)"
+            },
+            {
+              "number": 10,
+              "text": "ታቦቱን የሚሸከሙ ካህናት ደግሞ እግዚአብሔር ኢያሱ ሕዝቡን ነገር ዘንድ ያዘዘውን ሁሉ እስኪወግድ ድረስ፥ እንደ ሙሴ ለኢያሱ ያዘዘው ሁሉ፥ በዮርዳኖስ መካከል ቆመው ነበር፤ ሕዝቡም ፈጥነው ተሻገሩ። (For the priests which bare the ark stood in the midst of Jordan, until everything was finished that the LORD commanded Joshua to speak unto the people, according to all that Moses commanded Joshua: and the people hasted and passed over.)"
+            },
+            {
+              "number": 11,
+              "text": "ሕዝቡም ሁሉ ከተሻገረ በኋላ የእግዚአብሔር ታቦትና ካህናቱ በሕዝቡ ፊት ተሻገሩ። (And it came to pass, when all the people were clean passed over, that the ark of the LORD passed over, and the priests, in the presence of the people.)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
