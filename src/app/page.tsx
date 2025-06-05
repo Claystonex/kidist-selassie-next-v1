@@ -1,7 +1,7 @@
 // import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
-import { faXTwitter, faFacebook, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
+import { faXTwitter, faYoutube, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TranslatableText from './_components/TranslatableText';
 import VerseOfTheDay from './_components/VerseOfTheDay';
@@ -48,9 +48,17 @@ export default function Home() {
       
       {/* Main Title Section - with improved responsive font size and spacing */}
       <div className="w-full text-center mb-8 sm:mb-10">
-        <h1 className="font-montserrat font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl break-words hyphens-auto">
-          <TranslatableText>Kidist Selassie Youth Orthodox International Network Tewahedo </TranslatableText>
-        </h1>
+        <div className="font-montserrat font-bold break-words hyphens-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
+            <TranslatableText>Kidist Selassie Youth</TranslatableText>
+          </h1>
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mt-1">
+            <TranslatableText>Orthodox Tewahedo Network</TranslatableText>
+          </h2>
+          <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mt-1">
+            <TranslatableText>International</TranslatableText>
+          </h3>
+        </div>
       </div>
       
       {/* Social Media Section - repositioned to the side */}
@@ -58,12 +66,12 @@ export default function Home() {
         <div className="flex flex-col space-y-4 items-center bg-[#006241]/50 p-3 rounded-lg backdrop-blur-sm">
           <h2 className="text-sm font-semibold"><TranslatableText>Follow Us</TranslatableText></h2>
           <a 
-            href="https://facebook.com/selassieyouth" 
+            href="https://www.youtube.com/@kidistselassieyouth" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faFacebook} size="lg" />
+            <FontAwesomeIcon icon={faYoutube} size="lg" />
           </a>
           <a 
             href="https://instagram.com/selassieyouth/" 
@@ -96,12 +104,12 @@ export default function Home() {
       <div className="lg:hidden w-full flex justify-center mb-6">
         <div className="flex space-x-6 items-center">
           <a 
-            href="https://facebook.com/selassieyouth" 
+            href="https://www.youtube.com/@kidistselassieyouth" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-white hover:text-yellow-400 transition-colors"
           >
-            <FontAwesomeIcon icon={faFacebook} size="lg" />
+            <FontAwesomeIcon icon={faYoutube} size="lg" />
           </a>
           <a 
             href="https://www.instagram.com/kidistselassieyouth/" 
