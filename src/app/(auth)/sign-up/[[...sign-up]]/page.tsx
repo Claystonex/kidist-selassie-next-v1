@@ -6,11 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from "@clerk/nextjs";
 import dynamic from 'next/dynamic';
 
-// Dynamically import the banner to avoid SSR issues with animations
-const GrandOpeningBanner = dynamic(
-  () => import('@/app/_components/GrandOpeningBanner'),
-  { ssr: false }
-);
+
 const GrandOpeningTwoBanner = dynamic(
   () => import('@/app/_components/GrandOpeningTwoBanner'),
   { ssr: false }
@@ -42,10 +38,7 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#086c47]">
-      {/* Banner at the top (non-sticky) */}
-      <div className="w-full mb-16">
-        <GrandOpeningBanner />
-      </div>
+
       
       {/* Sign up form */}
       <div className="mt-6 w-full max-w-md flex flex-col items-center mb-2">

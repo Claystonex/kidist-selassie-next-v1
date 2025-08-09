@@ -464,8 +464,11 @@ export default function Header() {
             {/* Games dropdown menu */}
             <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg overflow-hidden transform opacity-0 -translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto z-50 transition-all duration-300 origin-top-left">
               <div className="py-2">
-                <DropdownNavLink href="/chess"><TranslatableText>Play Friends</TranslatableText></DropdownNavLink>
-                <DropdownNavLink href="/games/chess"><TranslatableText>Play Computer</TranslatableText></DropdownNavLink>
+                <DropdownNavLink href="/chess"><TranslatableText>Chess - Play Friends</TranslatableText></DropdownNavLink>
+                <DropdownNavLink href="/games/chess"><TranslatableText>Chess - Play Computer</TranslatableText></DropdownNavLink>
+                <div className="border-t border-gray-200 my-2"></div>
+                <DropdownNavLink href="/games/dice/multiplayer"><TranslatableText>Dice - Play Friends</TranslatableText></DropdownNavLink>
+                <DropdownNavLink href="/games/dice/computer"><TranslatableText>Dice - Play Computer</TranslatableText></DropdownNavLink>
               </div>
             </div>
           </div>

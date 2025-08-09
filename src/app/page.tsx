@@ -1,4 +1,4 @@
-// import { Button } from "@/components/ui/button";
+"use client";
 
 import Link from "next/link";
 import { faXTwitter, faYoutube, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons';
@@ -6,6 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TranslatableText from './_components/TranslatableText';
 import VerseOfTheDay from './_components/VerseOfTheDay';
 import Image from 'next/image';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 
 // export default async function Home() {
@@ -27,6 +30,26 @@ const blinkingStyle = `
 
 
 export default function Home() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in');
+    }
+  }, [isSignedIn, isLoaded, router]);
+
+  // Show loading or redirect while checking auth
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#086c47]">
+        <div className="text-[#ffb43c] text-xl font-montserrat">
+          <TranslatableText>Loading...</TranslatableText>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-[calc(100vh-16rem)] flex flex-col lg:flex-row items-start justify-center text-[#ffb43c] p-4 md:p-6 lg:pl-0 lg:pr-10 gap-8 mx-auto">
       <style>{blinkingStyle}</style>
@@ -53,7 +76,7 @@ export default function Home() {
             <TranslatableText>Kidist Selassie Youth</TranslatableText>
           </h1>
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mt-1">
-            <TranslatableText>Orthodox Tewahedo Network</TranslatableText>
+            <TranslatableText>Collegiate Orthodox Tewahedo Network</TranslatableText>
           </h2>
           <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mt-1">
             <TranslatableText>International</TranslatableText>
