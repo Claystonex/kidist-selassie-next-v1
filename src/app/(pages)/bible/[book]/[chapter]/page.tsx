@@ -1,10 +1,10 @@
 // @ts-nocheck
-/* The above directive disables TypeScript checking for this file */
-// @ts-nocheck - Adding this to bypass TypeScript errors during build
-import { PrismaClient } from '@prisma/client';
+// Bypass TS here while Prisma client types catch up after generation
+import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
+ 
+import BibleVersesToggle from '@/app/_components/BibleVersesToggle';
 
 // Metadata generation with simplified type handling
 export async function generateMetadata({ params }) {
@@ -49,7 +49,6 @@ export async function generateStaticParams() {
 
 // Fetch chapter details including verses and book info
 async function getChapter(bookSlug: string, chapterNumber: number) {
-  const prisma = new PrismaClient();
   try {
     const chapter = await prisma.chapter.findFirst({
       where: {
@@ -59,6 +58,14 @@ async function getChapter(bookSlug: string, chapterNumber: number) {
       include: {
         verses: {
           orderBy: { number: 'asc' },
+          select: {
+            id: true,
+            number: true,
+            text: true,
+            textAm: true,
+            textEn: true,
+            chapterId: true,
+          },
         },
         book: true,
       },
@@ -68,14 +75,11 @@ async function getChapter(bookSlug: string, chapterNumber: number) {
   } catch (error) {
     console.error(`Error fetching chapter ${bookSlug} ${chapterNumber}:`, error);
     return null;
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
 // Find the next and previous chapters
 async function getNavigation(bookSlug: string, chapterNumber: number) {
-  const prisma = new PrismaClient();
   try {
     // Get current book
     const currentBook = await prisma.book.findUnique({
@@ -162,8 +166,6 @@ async function getNavigation(bookSlug: string, chapterNumber: number) {
   } catch (error) {
     console.error('Error finding navigation:', error);
     return { prev: null, next: null };
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -198,14 +200,7 @@ export default async function Page({ params }) {
         </div>
 
         <div className="bg-[#043a26] rounded-lg shadow-xl p-6 mb-8">
-          <div className="space-y-4 text-white">
-            {chapter.verses && chapter.verses.map((verse) => (
-              <p key={verse.id} className="leading-relaxed">
-                <span className="font-bold text-yellow-400 mr-2">{verse.number}</span>
-                {verse.text}
-              </p>
-            ))}
-          </div>
+          <BibleVersesToggle verses={chapter.verses || []} />
         </div>
 
         {/* Navigation */}

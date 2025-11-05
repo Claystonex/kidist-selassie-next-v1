@@ -5,6 +5,7 @@
  * It includes actual verses from the Ethiopian Bible for Genesis, Exodus,
  * Psalms, and other key books.
  */
+// @ts-nocheck
 
 import { PrismaClient } from '@prisma/client';
 
@@ -65,6 +66,16 @@ const ETHIOPIAN_BIBLE_VERSES = {
     }
   }
 };
+
+// Split combined bilingual verse text: "<Amharic> (<English>)"
+function splitBilingualText(combined) {
+  if (typeof combined !== 'string') return { amharic: null, english: null };
+  const m = combined.match(/^(.*?)\s*\((.+?)\)\s*$/);
+  if (m && m[1] != null && m[2] != null) {
+    return { amharic: m[1].trim(), english: m[2].trim() };
+  }
+  return { amharic: combined.trim(), english: null };
+}
 
 // Function to get a real verse if available
 /**
@@ -136,11 +147,13 @@ async function updateAllPlaceholders() {
         
         // Get the real verse text
         const realVerseText = getRealVerse(book, chapter, verseNum);
+        const { amharic, english } = splitBilingualText(realVerseText);
         
         // Update the verse
         await prisma.verse.update({
           where: { id: verse.id },
-          data: { text: realVerseText }
+          // Include bilingual fields if available
+          data: { text: realVerseText, textAm: amharic, textEn: english }
         });
         
         updatedCount++;

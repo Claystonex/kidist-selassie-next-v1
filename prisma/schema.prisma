@@ -33,6 +33,8 @@ model Verse {
   id        Int      @id @default(autoincrement())
   number    Int      // e.g., 1 for Verse 1
   text      String   // e.g., "In the beginning..."
+  textAm    String?  // Amharic verse text (optional)
+  textEn    String?  // English verse text (optional)
   chapterId Int
   chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }

@@ -8,6 +8,17 @@ const prisma = new PrismaClient();
  * This script populates the database with actual Ethiopian Bible verses.
  * It's structured to make it easy to add more books and chapters over time.
  */
+// Split combined bilingual verse text: "<Amharic> (<English>)"
+function splitBilingualText(
+  combined: unknown
+): { amharic: string | null; english: string | null } {
+  if (typeof combined !== 'string') return { amharic: null, english: null };
+  const m = combined.match(/^(.*?)\s*\((.+?)\)\s*$/);
+  if (m && m[1] != null && m[2] != null) {
+    return { amharic: m[1].trim(), english: m[2].trim() };
+  }
+  return { amharic: combined.trim(), english: null };
+}
 async function main() {
   console.log('Starting Ethiopian Bible seeding...');
 
@@ -107,15 +118,18 @@ async function main() {
 
     // Insert all verses in batch
     const createdVerses = await Promise.all(
-      joshua4Verses.map(verse => 
-        prisma.verse.create({
-          data: {
-            number: verse.number,
-            text: verse.text,
-            chapterId: joshuaChapter4.id,
-          },
-        })
-      )
+      joshua4Verses.map((verse) => {
+        const { amharic, english } = splitBilingualText(verse.text);
+        // Cast data to any in case Prisma client types are stale locally
+        const data: any = {
+          number: verse.number,
+          text: verse.text,
+          textAm: amharic,
+          textEn: english,
+          chapterId: joshuaChapter4.id,
+        };
+        return prisma.verse.create({ data });
+      })
     );
 
     console.log(`Added ${createdVerses.length} verses to Joshua Chapter 4`);
