@@ -33,9 +33,19 @@
 
 //       <footer className="bg-gray-800 text-white p-4">
 //         <div className="container mx-auto text-center">
-//           © {new Date().getFullYear()} 2025
+//           {new Date().getFullYear()} 2025
 //         </div>
 //       </footer>
 //     </div>
 //   );
 // }
+
+import { ReactNode } from 'react';
+
+interface ProtectedLayoutProps {
+  children: ReactNode;
+}
+
+export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
+  return <>{children}</>;
+}
